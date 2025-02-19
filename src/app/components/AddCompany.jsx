@@ -2,9 +2,9 @@ import React, { useState, useEffect } from "react";
 // import { useNavigate } from "react-router-dom";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 
-const AddCompanyMill = ({setShowForm }) => {
+const AddCompany = ({setShowForm, setCompanies, companies }) => {
 //   const navigate = useNavigate();
-  const [companies, setCompanies] = useState([]);
+  // const [companies, setCompanies] = useState([]);
 
   const [companyDetails, setCompanyDetails] = useState({
     companyName: "",
@@ -12,11 +12,6 @@ const AddCompanyMill = ({setShowForm }) => {
     contact: "",
     address: "",
   });
-
-  useEffect(() => {
-    const storedCompanies = JSON.parse(localStorage.getItem("companies")) || [];
-    setCompanies(storedCompanies);
-  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -33,7 +28,6 @@ const AddCompanyMill = ({setShowForm }) => {
 
     const updatedCompanies = [...companies, newCompany];
     setCompanies(updatedCompanies);
-    localStorage.setItem("companies", JSON.stringify(updatedCompanies));
 
     setCompanyDetails({ companyName: "", owner: "", contact: "", address: "" });
     setShowForm(false);
@@ -120,4 +114,4 @@ const AddCompanyMill = ({setShowForm }) => {
   );
 };
 
-export default AddCompanyMill;
+export default AddCompany;

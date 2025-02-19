@@ -1,24 +1,38 @@
 'use client'
 import React from 'react'
-import AddCompany from '../components/AddCompany';
-import { useState,useEffect } from 'react';
+import AddCompany from '@/app/components/AddCompany';
+import { useState, useEffect } from 'react';
 import { Link } from 'next/link';
+import { useRouter } from 'next/navigation';
 
 
 
 function SupplierManagement() {
   const [companies, setCompanies] = useState([]);
   const [showForm, setShowForm] = useState(false);
-
+  const router = useRouter();
 
 
   useEffect(() => {
-    const storedCompanies = JSON.parse(localStorage.getItem("companies")) || [];
-    setCompanies(storedCompanies);
-  }, [showForm]);
-  // Store added companies
+    // Dummy data of companies, replace it with api call
+    setCompanies([
+      {
+        id: 1,
+        companyName: "Company 1",
+        owner: "Owner 1",
+        contact: "1234567890",
+        address: "Address 1",
+      },
+      {
+        id: 2,
+        companyName: "Company 2",
+        owner: "Owner 2",
+        contact: "1234567890",
+        address: "Address 2",
+      },
+    ]);
 
-  // Function to add a new company
+  }, [setCompanies]);
 
 
   return (
@@ -39,11 +53,14 @@ function SupplierManagement() {
         </div>
       </div>
 
-      {/* Supplier Table */}
+      {/* Supplier Grid */}
       <div className="overflow-hidden grid grid-cols-4 gap-5">
-        {companies && companies.map((s,)=>{
-          return (<div key={s.id} className=' border-2 font-semibold gap-5  bg-white shadow-md p-4 rounded-md flex flex-col items-center cursor-pointer w-full'>
-  
+        {companies && companies.map((s,) => {
+          return (<div
+            key={s.id}
+            onClick={() => router.push(`/pages/suppliers/supplierDetailPage/${s.id}`)}
+            className=' border-2 font-semibold gap-5  bg-white shadow-md p-4 rounded-md flex flex-col items-center cursor-pointer w-full'>
+
             <p>{s.companyName}</p>
             <p>{s.owner}</p>
           </div>)
@@ -51,7 +68,11 @@ function SupplierManagement() {
       </div>
 
       {showForm && (
-        <AddCompany showForm={showForm} setShowForm={setShowForm}/>
+        <AddCompany 
+        showForm={showForm} 
+        setShowForm={setShowForm}
+        setCompanies={setCompanies}
+        companies={companies} />
       )}
 
     </div>
