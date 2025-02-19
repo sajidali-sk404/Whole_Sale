@@ -4,36 +4,16 @@ import AddCompany from '@/app/components/AddCompany';
 import { useState, useEffect } from 'react';
 import { Link } from 'next/link';
 import { useRouter } from 'next/navigation';
+import { CompanyContext } from '@/app/ContextApi/companiesDataApi';
+import { useContext } from 'react';
 
 
 
 function SupplierManagement() {
-  const [companies, setCompanies] = useState([]);
+  const { companies, setCompanies } = useContext(CompanyContext);
+
   const [showForm, setShowForm] = useState(false);
   const router = useRouter();
-
-
-  useEffect(() => {
-    // Dummy data of companies, replace it with api call
-    setCompanies([
-      {
-        id: 1,
-        companyName: "Company 1",
-        owner: "Owner 1",
-        contact: "1234567890",
-        address: "Address 1",
-      },
-      {
-        id: 2,
-        companyName: "Company 2",
-        owner: "Owner 2",
-        contact: "1234567890",
-        address: "Address 2",
-      },
-    ]);
-
-  }, [setCompanies]);
-
 
   return (
     <div className="min-h-screen bg-gray-100 p-6 ">

@@ -4,12 +4,14 @@ import { FaPeopleRoof } from "react-icons/fa6";
 import { FaMoneyCheckAlt } from "react-icons/fa";
 import { MdEmojiTransportation } from "react-icons/md";
 import { BiSolidReport } from "react-icons/bi";
+import Navbar from "./components/Navbar";
 
 
 export default function Home() {
 
   return (
     <>
+    <Navbar />
 
       <div className="grid grid-cols-3 m-10 gap-8">
         <div className=" border-2 font-semibold  bg-white shadow-md p-4 rounded-md flex flex-col items-center cursor-pointer w-full ">
