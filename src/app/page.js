@@ -5,11 +5,12 @@ import { FaMoneyCheckAlt } from "react-icons/fa";
 import { MdEmojiTransportation } from "react-icons/md";
 import { BiSolidReport } from "react-icons/bi";
 
+
 export default function Home() {
  
   return (
     <>
-
+   
     <div className="grid grid-cols-3 m-10 gap-8"> 
    <div className=" border-2 font-semibold  bg-white shadow-md p-4 rounded-md flex flex-col items-center cursor-pointer w-full ">
    <Link href="/suppliers">

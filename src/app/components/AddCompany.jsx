@@ -13,10 +13,10 @@ const AddCompanyMill = ({setShowForm }) => {
     address: "",
   });
 
-//   useEffect(() => {
-//     const storedCompanies = JSON.parse(localStorage.getItem("companies")) || [];
-//     setCompanies(storedCompanies);
-//   }, []);
+  useEffect(() => {
+    const storedCompanies = JSON.parse(localStorage.getItem("companies")) || [];
+    setCompanies(storedCompanies);
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -39,6 +39,10 @@ const AddCompanyMill = ({setShowForm }) => {
     setShowForm(false);
   };
 
+  const handleAddCompany = (company) => {
+    setCompanies([...companies, company]); // Update state
+    setShowAddCompany(false); // Close modal
+  };
 //   const handleCompanyClick = (company) => {
 //     navigate("/account", { state: { company } });
 //   };
@@ -102,7 +106,7 @@ const AddCompanyMill = ({setShowForm }) => {
               </div>
 
               <div className="flex justify-between mt-6">
-                <button type="button" onClick={() => setShowForm(false)} className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition">
+                <button type="button" onClick={() => {handleAddCompany(); setShowForm(false);}} className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition">
                   Cancel
                 </button>
                 <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
