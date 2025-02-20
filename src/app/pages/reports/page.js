@@ -36,10 +36,10 @@ export default function Analytics() {
 
   return (
     <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-4">Analytics Dashboard</h1>
+      <h1 className="text-3xl text-center font-bold mb-4">Analytics Dashboard</h1>
 
       {/* Daily Sales Chart */}
-      <div className="bg-white p-4 shadow-md rounded-lg mb-6">
+      <div className="bg-white  p-4 shadow-md rounded-lg mb-6">
         <h2 className="text-xl font-bold mb-2">Daily Sales Overview</h2>
         <BarChart width={600} height={300} data={dailySales}>
           <CartesianGrid strokeDasharray="3 3" />
@@ -64,7 +64,7 @@ export default function Analytics() {
 
       {/* Top Suppliers */}
       <div className="bg-white p-4 shadow-md rounded-lg mb-6">
-        <h2 className="text-xl font-bold mb-2">Top Suppliers</h2>
+        <h2 className="text-xl  font-bold mb-2">Top Suppliers</h2>
         <table className="min-w-full bg-white border border-gray-300">
           <thead>
             <tr className="bg-gray-200">

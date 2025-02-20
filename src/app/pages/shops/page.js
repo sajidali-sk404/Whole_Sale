@@ -4,6 +4,7 @@ import AddShop from '@/app/components/AddShop';
 import { useState, useContext } from 'react';
 import { useRouter } from 'next/navigation';
 import { ShopContext } from '@/app/ContextApi/shopkeepersDataApi';
+import { motion } from 'framer-motion';
 
 
 
@@ -24,38 +25,39 @@ function ShopKeeperManagement() {
 
       {/* Add shop Button */}
       <div className="mb-6 flex justify-start">
-        <div
+        <button
           onClick={() => setShowForm(true)}
-          className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-300 w-52 text-center"
+          className="bg-blue-500 cursor-pointer text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-300 w-52 text-center"
         >
           Add New shop
-        </div>
+        </button>
       </div>
 
       {/* shop Grid */}
       <div className="overflow-hidden grid grid-cols-4 gap-5">
-      {shops && shops.length > 0 ? (
-    shops.map((shopItem) => (
-      <div
-        key={shopItem.id}
-        onClick={() => router.push(`/pages/shops/shopDetailPage/${shopItem.id}`)}
-        className="border-2 font-semibold gap-5 bg-white shadow-md p-4 rounded-md flex flex-col items-center cursor-pointer w-full"
-      >
-        <p>{shopItem.shopName}</p>
-        <p>{shopItem.shopKeeperName}</p>
-      </div>
-    ))
-  ) : (
-    <p>No shops available.</p>
-  )}
+        {shops && shops.length > 0 ? (
+          shops.map((shopItem) => (
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              key={shopItem.id}
+              onClick={() => router.push(`/pages/shops/shopDetailPage/${shopItem.id}`)}
+              className="border-2 font-semibold gap-5 bg-white shadow-md p-4 rounded-md flex flex-col items-center cursor-pointer w-full"
+            >
+              <p>{shopItem.shopName}</p>
+              <p>{shopItem.shopKeeperName}</p>
+            </motion.div>
+          ))
+        ) : (
+          <p>No shops available.</p>
+        )}
       </div>
 
       {showForm && (
-        <AddShop 
-        showForm={showForm} 
-        setShowForm={setShowForm}
-        setShops={setShops}
-        shops={shops} />
+        <AddShop
+          showForm={showForm}
+          setShowForm={setShowForm}
+          setShops={setShops}
+          shops={shops} />
       )}
 
     </div>

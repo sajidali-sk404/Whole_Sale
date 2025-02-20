@@ -2,7 +2,7 @@
 import React, { useState, useContext, useMemo, use, useEffect } from "react";
 import { CompanyContext } from '@/app/ContextApi/companiesDataApi';
 import { XMarkIcon, PencilIcon, TrashIcon, TruckIcon, CheckBadgeIcon, Bars3Icon } from "@heroicons/react/24/outline";
-
+import Link from "next/link";
 const Page = ({ params }) => {
 
   const param = use(params);
@@ -87,7 +87,7 @@ const Page = ({ params }) => {
   };
 
   return (
-    <div className="flex h-screen">
+    <div className="flex h-auto">
       {/* Sidebar */}
       {isSidebarOpen ?
         <div className={`bg-gray-100 p-4 w-64`}>
@@ -98,27 +98,52 @@ const Page = ({ params }) => {
             <XMarkIcon className="w-6 h-6" />
           </button>
 
+          <div className="flex flex-col gap-2 text-lg">
+          <h2 className="text-lg font-semibold">Company Details</h2>
+          <h2>{currentCompany?.companyName}</h2>
+          <h2> {currentCompany?.owner}</h2>
+          <h2> {currentCompany?.contact}</h2>
+          <h2> {currentCompany?.address}</h2>
+          </div>
 
-          <h2 className="text-lg font-semibold">Order Management</h2>
-          <h2>Company Name: {currentCompany?.companyName}</h2>
-          <h2>Owner: {currentCompany?.owner}</h2>
-          <h2>Contact: {currentCompany?.contact}</h2>
-          <h2>Address: {currentCompany?.address}</h2>
-
+          <div className="flex overflow-y-auto flex-col mt-10 gap-3 text-blue-800 ">
+            <h1 className="text-lg text-black font-semibold">Pages</h1>
+          <Link href="/">
+            <h1 className="hover:text-blue-500 hover:underline">Home</h1>
+          </Link>
+          <Link href="/pages/suppliers">
+            <h1 className="hover:text-blue-500 hover:underline">Suppliers management</h1>
+          </Link>
+          <Link href="/pages/shops">
+            <h1 className="hover:text-blue-600 hover:underline">Shopkeeper management</h1>
+          </Link>
+          <Link href="/pages/products">
+            <h1 className="hover:text-blue-600 hover:underline">Inventory and stock</h1>
+          </Link>
+          <Link href="/pages/transactions">
+            <h1 className="hover:text-blue-600 hover:underline">Transaction and Ledger</h1>
+          </Link>
+          <Link href="/pages/reports">
+            <h1 className="hover:text-blue-600 hover:underline">Analytics and Reports</h1>
+          </Link>
+          <Link href="/pages/transports">
+            <h1 className="hover:text-blue-600 hover:underline">Transportation</h1>
+          </Link>
+          </div>
         </div>
         :
 
         <button
           onClick={() => setIsSidebarOpen(true)}
-          className="text-blue-500 text-sm mb-4 absolute top-3 left-4"
+          className="text-blue-500 text-sm m-2 -mt-4 "
         >
-          <Bars3Icon className="w-6 h-6" />
+          <Bars3Icon className="w-6 h-6 " />
         </button>
 
       }
 
       {/* Main Content */}
-      <div className="flex-1 p-6 mt-5">
+      <div className="flex-1 px-6 py-2">
         <button
           onClick={() => setShowForm(true)}
           className="bg-blue-500 text-white px-4 py-2 rounded-md mb-4"
