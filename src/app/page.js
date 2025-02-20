@@ -22,7 +22,7 @@ export default function Home() {
         </div>
 
         <div className=" border-2 font-semibold  bg-white shadow-md p-4 rounded-md flex flex-col items-center cursor-pointer w-full ">
-          <Link href="/pages/shopkeepers">
+          <Link href="/pages/shops">
             <div className="text-5xl mb-4 hover:scale- pl-12  text-blue-700 "><FaPeopleRoof /></div>
             <h1>Shopkeeper management</h1>
           </Link>

@@ -11,7 +11,7 @@ import { useContext } from 'react';
 
 function SupplierManagement() {
   const { companies, setCompanies } = useContext(CompanyContext);
-
+  
   const [showForm, setShowForm] = useState(false);
   const router = useRouter();
 
