@@ -35,14 +35,14 @@ function SupplierManagement() {
 
       {/* Supplier Grid */}
       <div className="overflow-hidden grid grid-cols-4 gap-5">
-        {companies && companies.map((s,) => {
+        {companies && companies.map((company) => {
           return (<div
-            key={s.id}
-            onClick={() => router.push(`/pages/suppliers/supplierDetailPage/${s.id}`)}
+            key={company.id}
+            onClick={() => router.push(`/pages/suppliers/supplierDetailPage/${company.id}`)}
             className=' border-2 font-semibold gap-5  bg-white shadow-md p-4 rounded-md flex flex-col items-center cursor-pointer w-full'>
 
-            <p>{s.companyName}</p>
-            <p>{s.owner}</p>
+            <p>{company.companyName}</p>
+            <p>{company.owner}</p>
           </div>)
         })}
       </div>

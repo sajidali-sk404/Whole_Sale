@@ -3,41 +3,41 @@ import { createContext, useState, useCallback, useEffect } from 'react'
 
 export const ShopContext = createContext()
 
-export const shopProvider = ({ children }) => {
-  const [shop, setShop] = useState([])
+export const ShopProvider = ({ children }) => {
+  const [shops, setShops] = useState([])
   
   useEffect(() => {
     // Dummy data of shop, replace it with api call
-    setShop([
+    setShops([
       {
         id: 1,
-        ShopName: "Company 1",
-        ShopKeeperName: "ShopKeeperName 1",
+        shopName: "Company 1",
+        shopKeeperName: "shopKeeperName 1",
         contact: "1234567890",
         address: "Address 1",
       },
       {
         id: 2,
-        ShopName: "Company 2",
-        ShopKeeperName: "ShopKeeperName 2",
+        shopName: "Company 2",
+        shopKeeperName: "shopKeeperName 2",
         contact: "1234567890",
         address: "Address 2",
       },
       {
         id: 3,
-        ShopName: "Company 3",
-        ShopKeeperName: "ShopKeeperName 3",
+        shopName: "Company 3",
+        shopKeeperName: "shopKeeperName 3",
         contact: "1234567890",
         address: "Address 3",
       },
     ]);
 
-  }, [setShop]);
+  }, [setShops]);
   
 
   const AddShop = useCallback((shopId) => {
     if (!shopId) return
-    setShop(prev => {
+    setShops(prev => {
       if (prev.includes(shopId)) return prev
       return [...prev, shopId]
     })
@@ -45,17 +45,17 @@ export const shopProvider = ({ children }) => {
 
   const removeShop = useCallback((shopId) => {
     if (!shopId) return
-    setShop(prev => prev.filter(id => id !== shopId))
+    setShops(prev => prev.filter(id => id !== shopId))
   }, [])
 
   const isShop = useCallback((shopId) => {
     if (!shopId) return false
-    return shop.includes(shopId)
-  }, [shop])
+    return shops.includes(shopId)
+  }, [shops])
 
   const value = {
-    shop,
-    setShop,
+    shops,
+    setShops,
     AddShop,
     removeShop,
     isShop

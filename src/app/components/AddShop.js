@@ -2,13 +2,13 @@ import React, { useState, useEffect } from "react";
 // import { useNavigate } from "react-router-dom";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 
-const Addshop = ({setShowForm, setshop, shop }) => {
+const AddShop = ({setShowForm, setShops, shops }) => {
 //   const navigate = useNavigate();
-  // const [shop, setshop] = useState([]);
+  // const [shops, setShops] = useState([]);
 
-  const [ShopDetails, setShopDetails] = useState({
-    ShopName: "",
-    ShopKeeperName: "",
+  const [ShopDetails, setShopsDetails] = useState({
+    shopName: "",
+    shopKeeperName: "",
     contact: "",
     address: "",
   });
@@ -16,7 +16,7 @@ const Addshop = ({setShowForm, setshop, shop }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (!ShopDetails.ShopName || !ShopDetails.ShopKeeperName) {
+    if (!ShopDetails.shopName || !ShopDetails.shopKeeperName) {
       alert("Please fill in required shop details!");
       return;
     }
@@ -26,15 +26,15 @@ const Addshop = ({setShowForm, setshop, shop }) => {
       ...ShopDetails,
     };
 
-    const updatedShop = [...shop, newShop];
-    setshop(updatedShop);
+    const updatedShop = [...shops, newShop];
+    setShops(updatedShop);
 
-    setShopDetails({ ShopName: "", ShopKeeperName: "", contact: "", address: "" });
+    setShopsDetails({ shopName: "", shopKeeperName: "", contact: "", address: "" });
     setShowForm(false);
   };
 
   const handleAddShop = (shop) => {
-    setshop([...shop, shop]); // Update state
+    setShops([...shop, shop]); // Update state
     setShowAddShop(false); // Close modal
   };
 //   const handleCompanyClick = (shop) => {
@@ -43,7 +43,7 @@ const Addshop = ({setShowForm, setshop, shop }) => {
 
 //   const handleDelete = (id) => {
 //     const updatedShop = shop.filter((shop) => shop.id !== id);
-//     setshop(updatedShop);
+//     setShops(updatedShop);
 //     localStorage.setItem("shop", JSON.stringify(updatedShop));
 //   };
 
@@ -65,8 +65,8 @@ const Addshop = ({setShowForm, setshop, shop }) => {
                 <input
                   type="text"
                   className="mt-1 block w-full p-2 border rounded-md"
-                  value={ShopDetails.ShopName}
-                  onChange={(e) => setShopDetails({ ...ShopDetails, ShopName: e.target.value })}
+                  value={ShopDetails.shopName}
+                  onChange={(e) => setShopsDetails({ ...ShopDetails, shopName: e.target.value })}
                   required
                 />
               </div>
@@ -75,8 +75,8 @@ const Addshop = ({setShowForm, setshop, shop }) => {
                 <input
                   type="text"
                   className="mt-1 block w-full p-2 border rounded-md"
-                  value={ShopDetails.ShopKeeperName}
-                  onChange={(e) => setShopDetails({ ...ShopDetails, ShopKeeperName: e.target.value })}
+                  value={ShopDetails.shopKeeperName}
+                  onChange={(e) => setShopsDetails({ ...ShopDetails, shopKeeperName: e.target.value })}
                   required
                 />
               </div>
@@ -86,7 +86,7 @@ const Addshop = ({setShowForm, setshop, shop }) => {
                   type="tel"
                   className="mt-1 block w-full p-2 border rounded-md"
                   value={ShopDetails.contact}
-                  onChange={(e) => setShopDetails({ ...ShopDetails, contact: e.target.value })}
+                  onChange={(e) => setShopsDetails({ ...ShopDetails, contact: e.target.value })}
                 />
               </div>
               <div>
@@ -95,7 +95,7 @@ const Addshop = ({setShowForm, setshop, shop }) => {
                   type="text"
                   className="mt-1 block w-full p-2 border rounded-md"
                   value={ShopDetails.address}
-                  onChange={(e) => setShopDetails({ ...ShopDetails, address: e.target.value })}
+                  onChange={(e) => setShopsDetails({ ...ShopDetails, address: e.target.value })}
                 />
               </div>
 
@@ -114,4 +114,4 @@ const Addshop = ({setShowForm, setshop, shop }) => {
   );
 };
 
-export default Addshop;
+export default AddShop;

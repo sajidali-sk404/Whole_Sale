@@ -1,16 +1,16 @@
 'use client'
 import React from 'react'
 import AddShop from '@/app/components/AddShop';
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import { useRouter } from 'next/navigation';
 import { ShopContext } from '@/app/ContextApi/shopkeepersDataApi';
-import { useContext } from 'react';
 
 
 
 function ShopKeeperManagement() {
-  const { shop, setshop } = useContext(ShopContext) || {};
-  console.log(shop)
+
+  const { shops, setShops } = useContext(ShopContext);
+
   const [showForm, setShowForm] = useState(false);
   const router = useRouter();
 
@@ -34,15 +34,15 @@ function ShopKeeperManagement() {
 
       {/* shop Grid */}
       <div className="overflow-hidden grid grid-cols-4 gap-5">
-      {shop && shop.length > 0 ? (
-    shop.map((shopItem) => (
+      {shops && shops.length > 0 ? (
+    shops.map((shopItem) => (
       <div
         key={shopItem.id}
         onClick={() => router.push(`/pages/shops/shopDetailPage/${shopItem.id}`)}
         className="border-2 font-semibold gap-5 bg-white shadow-md p-4 rounded-md flex flex-col items-center cursor-pointer w-full"
       >
-        <p>{shopItem.ShopName}</p>
-        <p>{shopItem.ShopKeeperName}</p>
+        <p>{shopItem.shopName}</p>
+        <p>{shopItem.shopKeeperName}</p>
       </div>
     ))
   ) : (
@@ -54,8 +54,8 @@ function ShopKeeperManagement() {
         <AddShop 
         showForm={showForm} 
         setShowForm={setShowForm}
-        setshop={setshop}
-        shop={shop} />
+        setShop={setShops}
+        shop={shops} />
       )}
 
     </div>

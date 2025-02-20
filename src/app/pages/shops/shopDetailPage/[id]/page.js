@@ -1,28 +1,13 @@
 'use client'
-import React, { useState, useContext, useMemo, use, useEffect } from "react";
+import React, { useState, useContext, use, useEffect } from "react";
 import { ShopContext } from '@/app/ContextApi/shopkeepersDataApi';
-import { XMarkIcon, PencilIcon, TrashIcon, TruckIcon, CheckBadgeIcon, Bars3Icon } from "@heroicons/react/24/outline";
+import { XMarkIcon, PencilIcon, TrashIcon, TruckIcon, Bars3Icon } from "@heroicons/react/24/outline";
 
 const ShopDetailPage = ({ params }) => {
 
   const param = use(params);
 
-  const { shop, setshop } = useContext(ShopContext);
-
-  if (!shop) {
-    return <div>Loading...</div>;
-  }
-
-  const [currentshop, setCurrentshop] = useState(null)
-
-  useEffect(() => {
-    if (shop.length > 0) {
-      const foundshop = shop.find((shop) => shop.id == param.id);
-      setCurrentshop(foundshop || null);
-    }
-  }, [param.id, shop]);
-
-  console.log(currentshop?.shopName);
+  const { shops } = useContext(ShopContext);
 
   const [showForm, setShowForm] = useState(false);
   const [dataList, setDataList] = useState([]);
@@ -32,6 +17,16 @@ const ShopDetailPage = ({ params }) => {
     status: "pending",
     transportDetails: { name: "", driver: "", deliveryDate: "" }
   });
+
+  const [currentShop, setCurrentShop] = useState(null)
+
+  useEffect(() => {
+    if (shops.length > 0) {
+      const foundShop = shops.find((shop) => shop.id == param.id);
+      setCurrentShop(foundShop || null);
+    }
+  }, [param.id, shops]);
+
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
@@ -104,10 +99,10 @@ const ShopDetailPage = ({ params }) => {
 
 
           <h2 className="text-lg font-semibold">Order Management</h2>
-          <h2>shop Name: {currentshop?.shopName}</h2>
-          <h2>shopkeeper Name: {currentshop?.shopKeeperName}</h2>
-          <h2>Contact: {currentshop?.contact}</h2>
-          <h2>Address: {currentshop?.address}</h2>
+          <h2>shop Name: {currentShop?.shopName}</h2>
+          <h2>shopkeeper Name: {currentShop?.shopKeeperName}</h2>
+          <h2>Contact: {currentShop?.contact}</h2>
+          <h2>Address: {currentShop?.address}</h2>
 
         </div>
         :
