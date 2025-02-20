@@ -34,8 +34,8 @@ const AddShop = ({setShowForm, setShops, shops }) => {
   };
 
   const handleAddShop = (shop) => {
-    setShops([...shop, shop]); // Update state
-    setShowAddShop(false); // Close modal
+    setShops([...shops, shop]); // Update state
+    setShowForm(false); // Close modal
   };
 //   const handleCompanyClick = (shop) => {
 //     navigate("/account", { state: { shop } });
@@ -100,7 +100,7 @@ const AddShop = ({setShowForm, setShops, shops }) => {
               </div>
 
               <div className="flex justify-between mt-6">
-                <button type="button" onClick={() => {handleAddShop(); setShowForm(false);}} className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition">
+                <button type="button" onClick={() => setShowForm(false)} className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition">
                   Cancel
                 </button>
                 <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">

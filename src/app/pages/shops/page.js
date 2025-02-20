@@ -54,8 +54,8 @@ function ShopKeeperManagement() {
         <AddShop 
         showForm={showForm} 
         setShowForm={setShowForm}
-        setShop={setShops}
-        shop={shops} />
+        setShops={setShops}
+        shops={shops} />
       )}
 
     </div>
