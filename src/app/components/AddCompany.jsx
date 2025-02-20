@@ -52,7 +52,7 @@ const AddCompany = ({setShowForm, setCompanies, companies }) => {
         
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4">
            
-          <div className="relative max-w-3xl w-full bg-white shadow-lg rounded-lg p-6">
+          <div className="relative max-w-3xl w-full bg-white shadow-lg rounded-lg p-6 ">
             <button onClick={() => setShowForm(false)} className="absolute top-4 right-4 text-gray-500 hover:text-gray-700">
               <XMarkIcon className="w-6 h-6" />
             </button>

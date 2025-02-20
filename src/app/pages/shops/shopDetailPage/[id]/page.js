@@ -137,7 +137,7 @@ const ShopDetailPage = ({ params }) => {
 
               <h2 className="text-2xl font-semibold mb-4 text-center">Create New Order</h2>
 
-              <form onSubmit={handleAddData} className="space-y-6">
+              <form onSubmit={handleAddData} className="space-y-6 overflow-y-auto max-h-96">
                 {/* Items Section */}
                 <div className="border-b pb-4">
                   <h3 className="text-lg font-medium mb-4">Items Details</h3>
