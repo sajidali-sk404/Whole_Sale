@@ -56,6 +56,13 @@ export default function Home() {
             <h1> Transportation</h1>
           </Link>
         </div>
+
+        <div className="hover:scale-105 transition-all duration-300 border-2 font-semibold  bg-white shadow-md p-4 rounded-md flex flex-col items-center cursor-pointer w-full ">
+          <Link href="/pages/customer">
+            <div className="text-5xl mb-4 hover:scale- flex justify-center  text-blue-700 "><MdEmojiTransportation /></div>
+            <h1> Customer Management</h1>
+          </Link>
+        </div>
         
       </div>
     </>

@@ -5,31 +5,45 @@ import { XMarkIcon, PencilIcon, TrashIcon, TruckIcon, CheckBadgeIcon, Bars3Icon 
 import Link from "next/link";
 const Page = ({ params }) => {
 
+  const [isEditing, setIsEditing] = useState(false);
+  const [editId, setEditId] = useState(null);
+
   const param = use(params);
 
   const { companies, setCompanies } = useContext(CompanyContext);
 
   const [currentCompany, setCurrentCompany] = useState(null)
 
-  useEffect(() => {
-    if (companies.length > 0) {
-      const foundCompany = companies.find((company) => company.id == param.id);
-      setCurrentCompany(foundCompany || null);
-    }
-  }, [param.id, companies]);
-
-  console.log(currentCompany?.companyName);
-
   const [showForm, setShowForm] = useState(false);
   const [dataList, setDataList] = useState([]);
 
   const [newData, setNewData] = useState({
-    items: [{ itemName: "", quantity: "", price: "", date: "" }],
+    items: [{ itemName: "", quantity: "", price: "", date: new Date().toISOString().split('T')[0] }],
     status: "pending",
-    transportDetails: { name: "", driver: "", deliveryDate: "" }
+    transportDetails: { name: "", driver: "", deliveryDate: new Date().toISOString().split('T')[0] }
   });
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+  useEffect(() => {
+
+    setDataList([
+      {
+        id: 1,
+        items: [{ itemName: "sugar", quantity: "25", price: "50", date: "25/06/2025" }],
+        status: "delivered",
+        transportDetails: { name: "Khan", driver: "dfdf", deliveryDate: "25/06/2025" }
+      }
+    ])
+
+    if (companies.length > 0) {
+      const foundCompany = companies.find((company) => company.id == param.id);
+      setCurrentCompany(foundCompany || null);
+    }
+  }, [param.id, companies, setDataList]);
+
+  console.log(currentCompany?.companyName);
+
 
   const handleAddData = (e) => {
     e.preventDefault();
@@ -39,16 +53,26 @@ const Page = ({ params }) => {
       return;
     }
 
-    const dataWithId = {
-      ...newData,
-      id: Date.now(),
-      date: new Date().toISOString()
-    };
+    if (isEditing) {
+      const updatedDataList = dataList.map((data) =>
+        data.id === editId ? { ...newData, id: editId } : data
+      );
+      setDataList(updatedDataList);
+      setIsEditing(false);
+      setEditId(null);
+    } else {
+      const dataWithId = {
+        ...newData,
+        id: Date.now(),
+        date: new Date().toISOString().split('T')[0], // Automatically set the current date
+      };
+      setDataList([...dataList, dataWithId]);
+    }
 
-    setDataList([...dataList, dataWithId]);
     resetForm();
     setShowForm(false);
   };
+
 
   const resetForm = () => {
     setNewData({
@@ -56,14 +80,17 @@ const Page = ({ params }) => {
       status: "pending",
       transportDetails: { name: "", driver: "", deliveryDate: "" }
     });
+    setIsEditing(false);  // Reset editing state
+    setEditId(null);      // Reset edit ID
   };
 
   const addNewItem = () => {
     setNewData(prev => ({
       ...prev,
-      items: [...prev.items, { itemName: "", quantity: "", price: "", date: "" }]
+      items: [...prev.items, { itemName: "", quantity: "", price: "", date: new Date().toISOString().split('T')[0] }]
     }));
   };
+
 
   const handleItemChange = (index, field, value) => {
     const updatedItems = [...newData.items];
@@ -72,8 +99,16 @@ const Page = ({ params }) => {
   };
 
   const handleStatusChange = (status) => {
-    setNewData(prev => ({ ...prev, status }));
+    setNewData(prev => ({
+      ...prev,
+      status,
+      transportDetails: {
+        ...prev.transportDetails,
+        deliveryDate: status === 'delivered' ? new Date().toISOString().split('T')[0] : prev.transportDetails.deliveryDate
+      }
+    }));
   };
+
 
   const handleTransportChange = (field, value) => {
     setNewData(prev => ({
@@ -85,6 +120,14 @@ const Page = ({ params }) => {
   const handleDelete = (id) => {
     setDataList(dataList.filter(item => item.id !== id));
   };
+
+  const handleEdit = (id) => {
+    const orderToEdit = dataList.find((order) => order.id === id);
+    setNewData(orderToEdit);  // Prefill form with the selected order
+    setIsEditing(true);
+    setEditId(id);
+    setShowForm(true);
+  }
 
   return (
     <div className="flex h-auto">
@@ -99,36 +142,36 @@ const Page = ({ params }) => {
           </button>
 
           <div className="flex flex-col gap-2 text-lg">
-          <h2 className="text-lg font-semibold">Company Details</h2>
-          <h2>{currentCompany?.companyName}</h2>
-          <h2> {currentCompany?.owner}</h2>
-          <h2> {currentCompany?.contact}</h2>
-          <h2> {currentCompany?.address}</h2>
+            <h2 className="text-lg font-semibold">Company Details</h2>
+            <h2>{currentCompany?.companyName}</h2>
+            <h2> {currentCompany?.owner}</h2>
+            <h2> {currentCompany?.contact}</h2>
+            <h2> {currentCompany?.address}</h2>
           </div>
 
           <div className="flex overflow-y-auto flex-col mt-10 gap-3 text-blue-800 ">
             <h1 className="text-lg text-black font-semibold">Pages</h1>
-          <Link href="/">
-            <h1 className="hover:text-blue-500 hover:underline">Home</h1>
-          </Link>
-          <Link href="/pages/suppliers">
-            <h1 className="hover:text-blue-500 hover:underline">Suppliers management</h1>
-          </Link>
-          <Link href="/pages/shops">
-            <h1 className="hover:text-blue-600 hover:underline">Shopkeeper management</h1>
-          </Link>
-          <Link href="/pages/products">
-            <h1 className="hover:text-blue-600 hover:underline">Inventory and stock</h1>
-          </Link>
-          <Link href="/pages/transactions">
-            <h1 className="hover:text-blue-600 hover:underline">Transaction and Ledger</h1>
-          </Link>
-          <Link href="/pages/reports">
-            <h1 className="hover:text-blue-600 hover:underline">Analytics and Reports</h1>
-          </Link>
-          <Link href="/pages/transports">
-            <h1 className="hover:text-blue-600 hover:underline">Transportation</h1>
-          </Link>
+            <Link href="/">
+              <h1 className="hover:text-blue-500 hover:underline">Home</h1>
+            </Link>
+            <Link href="/pages/suppliers">
+              <h1 className="hover:text-blue-500 hover:underline">Suppliers management</h1>
+            </Link>
+            <Link href="/pages/shops">
+              <h1 className="hover:text-blue-600 hover:underline">Shopkeeper management</h1>
+            </Link>
+            <Link href="/pages/products">
+              <h1 className="hover:text-blue-600 hover:underline">Inventory and stock</h1>
+            </Link>
+            <Link href="/pages/transactions">
+              <h1 className="hover:text-blue-600 hover:underline">Transaction and Ledger</h1>
+            </Link>
+            <Link href="/pages/reports">
+              <h1 className="hover:text-blue-600 hover:underline">Analytics and Reports</h1>
+            </Link>
+            <Link href="/pages/transports">
+              <h1 className="hover:text-blue-600 hover:underline">Transportation</h1>
+            </Link>
           </div>
         </div>
         :
@@ -198,15 +241,7 @@ const Page = ({ params }) => {
                           className="w-full p-2 border rounded-md"
                         />
                       </div>
-                      <div>
-                        <label className="block text-sm font-medium">Date</label>
-                        <input
-                          type="date"
-                          value={item.date}
-                          onChange={(e) => handleItemChange(index, 'date', e.target.value)}
-                          className="w-full p-2 border rounded-md"
-                        />
-                      </div>
+
                     </div>
                   ))}
                   <button
@@ -307,7 +342,7 @@ const Page = ({ params }) => {
 
         {/* Data List */}
         <div className="space-y-4">
-          {dataList.map((data) => (
+          {dataList.slice().reverse().map((data) => (
             <div key={data.id} className="bg-white p-4 rounded-lg shadow">
               <div className="flex justify-between items-start mb-4">
                 <div>
@@ -322,7 +357,9 @@ const Page = ({ params }) => {
                   </span>
                 </div>
                 <div className="flex gap-2">
-                  <button className="text-yellow-500 hover:text-yellow-600">
+                  <button
+                    className="text-yellow-500 hover:text-yellow-600"
+                    onClick={() => handleEdit(data.id)}>
                     <PencilIcon className="w-5 h-5" />
                   </button>
                   <button
