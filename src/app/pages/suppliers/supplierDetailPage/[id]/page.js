@@ -30,7 +30,7 @@ const Page = ({ params }) => {
     debit: 0,
     credit: 0,
   });
-  
+
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
@@ -56,15 +56,15 @@ const Page = ({ params }) => {
 
   const handleAddData = (e) => {
     e.preventDefault();
-  
+
     if (!newData.items[0].itemName || !newData.items[0].quantity) {
       alert("Please fill in required fields!");
       return;
     }
-  
+
     const totalAmount = newData.items.reduce((acc, item) => acc + Number(item.price || 0), 0);
     const remainingDebit = totalAmount - newData.partialPayment;
-  
+
     const dataWithId = {
       ...newData,
       id: Date.now(),
@@ -72,12 +72,12 @@ const Page = ({ params }) => {
       debit: remainingDebit,
       credit: newData.partialPayment,
     };
-  
+
     setDataList([...dataList, dataWithId]);
     resetForm();
     setShowForm(false);
   };
-  
+
 
 
   const resetForm = () => {
@@ -161,15 +161,16 @@ const Page = ({ params }) => {
         </button>
 
         {showForm && (
-  
-          <AddOrderForm 
-          setShowForm={setShowForm} 
-          handleAddData={handleAddData}
-          newData={newData}
-          setNewData={setNewData}
-          handleItemChange={handleItemChange}
-          addNewItem={addNewItem}
-          handleStatusChange={handleStatusChange} />
+
+          <AddOrderForm
+            setShowForm={setShowForm}
+            handleAddData={handleAddData}
+            newData={newData}
+            setNewData={setNewData}
+            handleItemChange={handleItemChange}
+            addNewItem={addNewItem}
+            handleStatusChange={handleStatusChange}
+            handleTransportChange={handleTransportChange} />
 
         )}
 
@@ -177,12 +178,12 @@ const Page = ({ params }) => {
         <div className="space-y-4">
 
           {dataList.slice().reverse().map((data) => (
-            <DataList 
-            key={data.id} 
-            data={data}
-            handleEdit={handleEdit}
-            handleDelete={handleDelete}
-            setNewData={setNewData} />
+            <DataList
+              key={data.id}
+              data={data}
+              handleEdit={handleEdit}
+              handleDelete={handleDelete}
+              setNewData={setNewData} />
 
           ))}
 
