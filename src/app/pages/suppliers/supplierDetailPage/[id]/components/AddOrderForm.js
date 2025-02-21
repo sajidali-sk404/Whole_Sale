@@ -1,7 +1,7 @@
 import React from 'react'
 import { XMarkIcon } from "@heroicons/react/24/outline";
 
-const AddOrderForm = ({setShowForm, handleAddData, newData, handleItemChange, addNewItem, handleStatusChange}) => {
+const AddOrderForm = ({setShowForm, handleAddData, setNewData, newData, handleItemChange, addNewItem, handleStatusChange}) => {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4">
             <div className="relative max-w-4xl w-full bg-white shadow-lg rounded-lg p-6">
@@ -60,6 +60,67 @@ const AddOrderForm = ({setShowForm, handleAddData, newData, handleItemChange, ad
                     <span className="mr-1">+ Add Another Item</span>
                   </button>
                 </div>
+
+                {/* Partial Payment */}
+<div className="border-b pb-4">
+  <h3 className="text-lg font-medium mb-4">Payment Details</h3>
+  <div className="grid grid-cols-3 gap-4">
+    <div>
+      <label className="block text-sm font-medium">Partial Payment*</label>
+      <input
+        type="number"
+        value={newData.partialPayment}
+        onChange={(e) => setNewData(prev => ({ ...prev, partialPayment: e.target.value }))}
+        className="w-full p-2 border rounded-md"
+        required
+      />
+    </div>
+    <div>
+      <label className="block text-sm font-medium">Upload Invoice*</label>
+      <input
+        type="file"
+        onChange={(e) => setNewData(prev => ({ ...prev, invoice: e.target.files[0] }))}
+        className="w-full p-2 border rounded-md"
+        required
+      />
+    </div>
+    <div>
+      <label className="block text-sm font-medium">Total Price</label>
+      <input
+        type="number"
+        value={newData.items.reduce((acc, item) => acc + Number(item.price || 0), 0)}
+        disabled
+        className="w-full p-2 border rounded-md bg-gray-200"
+      />
+    </div>
+  </div>
+</div>
+
+{/* Debit and Credit Section */}
+<div className="border-b pb-4">
+  <h3 className="text-lg font-medium mb-4">Debit & Credit</h3>
+  <div className="grid grid-cols-2 gap-4">
+    <div>
+      <label className="block text-sm font-medium">Debit (Total Price - Paid Amount)</label>
+      <input
+        type="number"
+        value={newData.items.reduce((acc, item) => acc + Number(item.price || 0), 0) - newData.partialPayment}
+        disabled
+        className="w-full p-2 border rounded-md bg-gray-200"
+      />
+    </div>
+    <div>
+      <label className="block text-sm font-medium">Credit (Amount Paid)</label>
+      <input
+        type="number"
+        value={newData.partialPayment}
+        disabled
+        className="w-full p-2 border rounded-md bg-gray-200"
+      />
+    </div>
+  </div>
+</div>
+
 
                 {/* Status Section */}
                 <div className="border-b pb-4">

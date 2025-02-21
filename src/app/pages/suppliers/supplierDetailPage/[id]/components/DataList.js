@@ -49,6 +49,16 @@ const DataList = ({data, handleEdit, handleDelete}) => {
                 ))}
             </div>
 
+            {/* Payment Details */}
+<div className="bg-gray-100 p-4 rounded-md">
+  <h4 className="font-medium mb-2">Payment Details</h4>
+  <p className="text-sm">Partial Payment: ₹{data.partialPayment}</p>
+  <p className="text-sm">Debit (Remaining Balance): ₹{data.debit}</p>
+  <p className="text-sm">Credit (Paid Amount): ₹{data.credit}</p>
+  {data.invoice && <p className="text-sm">Invoice: <a href={URL.createObjectURL(data.invoice)} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">View</a></p>}
+</div>
+
+
             {/* Transport Details */}
             {data.status === 'delivered' && (
                 <div className="bg-blue-50 p-4 rounded-md">

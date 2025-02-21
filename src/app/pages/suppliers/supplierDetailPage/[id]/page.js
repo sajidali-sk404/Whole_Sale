@@ -22,10 +22,15 @@ const Page = ({ params }) => {
   const [dataList, setDataList] = useState([]);
 
   const [newData, setNewData] = useState({
-    items: [{ itemName: "", quantity: "", price: "", date: new Date().toISOString().split('T')[0] }],
+    items: [{ itemName: "", quantity: "", price: "", date: new Date().toISOString().split('T')[0] }], // Auto-set date
     status: "pending",
-    transportDetails: { name: "", driver: "", deliveryDate: new Date().toISOString().split('T')[0] }
+    transportDetails: { name: "", driver: "", deliveryDate: "" },
+    partialPayment: 0,
+    invoice: null,
+    debit: 0,
+    credit: 0,
   });
+  
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
@@ -51,31 +56,28 @@ const Page = ({ params }) => {
 
   const handleAddData = (e) => {
     e.preventDefault();
-
+  
     if (!newData.items[0].itemName || !newData.items[0].quantity) {
       alert("Please fill in required fields!");
       return;
     }
-
-    if (isEditing) {
-      const updatedDataList = dataList.map((data) =>
-        data.id === editId ? { ...newData, id: editId } : data
-      );
-      setDataList(updatedDataList);
-      setIsEditing(false);
-      setEditId(null);
-    } else {
-      const dataWithId = {
-        ...newData,
-        id: Date.now(),
-        date: new Date().toISOString().split('T')[0], // Automatically set the current date
-      };
-      setDataList([...dataList, dataWithId]);
-    }
-
+  
+    const totalAmount = newData.items.reduce((acc, item) => acc + Number(item.price || 0), 0);
+    const remainingDebit = totalAmount - newData.partialPayment;
+  
+    const dataWithId = {
+      ...newData,
+      id: Date.now(),
+      date: new Date().toISOString(),
+      debit: remainingDebit,
+      credit: newData.partialPayment,
+    };
+  
+    setDataList([...dataList, dataWithId]);
     resetForm();
     setShowForm(false);
   };
+  
 
 
   const resetForm = () => {
@@ -164,6 +166,7 @@ const Page = ({ params }) => {
           setShowForm={setShowForm} 
           handleAddData={handleAddData}
           newData={newData}
+          setNewData={setNewData}
           handleItemChange={handleItemChange}
           addNewItem={addNewItem}
           handleStatusChange={handleStatusChange} />
@@ -178,7 +181,8 @@ const Page = ({ params }) => {
             key={data.id} 
             data={data}
             handleEdit={handleEdit}
-            handleDelete={handleDelete} />
+            handleDelete={handleDelete}
+            setNewData={setNewData} />
 
           ))}
 
