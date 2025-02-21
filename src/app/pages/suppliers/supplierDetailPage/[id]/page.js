@@ -36,15 +36,6 @@ const Page = ({ params }) => {
 
   useEffect(() => {
 
-    setDataList([
-      {
-        id: 1,
-        items: [{ itemName: "sugar", quantity: "25", price: "50", date: "25/06/2025" }],
-        status: "delivered",
-        transportDetails: { name: "Khan", driver: "dfdf", deliveryDate: "25/06/2025" }
-      }
-    ])
-
     if (companies.length > 0) {
       const foundCompany = companies.find((company) => company.id == param.id);
       setCurrentCompany(foundCompany || null);
