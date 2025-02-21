@@ -14,7 +14,7 @@ const Page = ({ params }) => {
 
   const param = use(params);
 
-  const { companies, setCompanies } = useContext(CompanyContext);
+  const { companies } = useContext(CompanyContext);
 
   const [currentCompany, setCurrentCompany] = useState(null)
 
@@ -22,14 +22,16 @@ const Page = ({ params }) => {
   const [dataList, setDataList] = useState([]);
 
   const [newData, setNewData] = useState({
-    items: [{ itemName: "", quantity: "", price: "", date: new Date().toISOString().split('T')[0] }], // Auto-set date
+    items: [{ itemName: "", quantity: "", price: "", date: new Date().toISOString().split('T')[0] }],
     status: "pending",
     transportDetails: { name: "", driver: "", deliveryDate: "" },
     partialPayment: 0,
     invoice: null,
     debit: 0,
     credit: 0,
-  });
+    payments: [],  // Ensure payments exists
+    newPayment: { amount: "", invoice: null }, // Ensure newPayment exists
+  });  
 
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -53,20 +55,52 @@ const Page = ({ params }) => {
       return;
     }
 
-    const totalAmount = newData.items.reduce((acc, item) => acc + Number(item.price || 0), 0);
-    const remainingDebit = totalAmount - newData.partialPayment;
+    const totalAmount = newData.items.reduce((acc, item) => acc + Number((item.price*item.quantity) || 0), 0);
+    const totalPaid = newData.payments?.reduce((acc, payment) => acc + Number(payment.amount), 0) || 0;
+    const newTotalPaid = totalPaid + Number(newData.partialPayment || 0);
+    const remainingDebit = totalAmount - newTotalPaid;
 
-    const dataWithId = {
+    const updatedOrder = {
       ...newData,
-      id: Date.now(),
+      id: editId || Date.now(),
       date: new Date().toISOString(),
       debit: remainingDebit,
-      credit: newData.partialPayment,
+      credit: newTotalPaid,
+      payments: [
+        ...(newData.payments || []),
+        {
+          amount: Number(newData.partialPayment || 0),
+          invoice: newData.invoice,
+          date: new Date().toISOString(),
+          debit: remainingDebit,
+          credit: newTotalPaid
+        },
+      ],
     };
 
-    setDataList([...dataList, dataWithId]);
+    if (isEditing) {
+      setDataList((prev) => prev.map((order) => (order.id === editId ? updatedOrder : order)));
+    } else {
+      setDataList([...dataList, updatedOrder]);
+    }
+
     resetForm();
     setShowForm(false);
+  };
+
+
+
+  const handleAddPayment = () => {
+    if (!newData.newPayment?.amount || !newData.newPayment?.invoice) {
+      alert("Please enter an amount and upload an invoice!");
+      return;
+    }
+
+    setNewData((prev) => ({
+      ...prev,
+      payments: [...(prev.payments || []), { ...prev.newPayment, date: new Date().toISOString() }],
+      newPayment: { amount: "", invoice: null } // Reset input fields
+    }));
   };
 
 
@@ -120,11 +154,19 @@ const Page = ({ params }) => {
 
   const handleEdit = (id) => {
     const orderToEdit = dataList.find((order) => order.id === id);
-    setNewData(orderToEdit);  // Prefill form with the selected order
+
+    setNewData({
+      ...orderToEdit,
+      partialPayment: "", // Reset new payment input
+      invoice: null, // Reset invoice input
+    });
+
     setIsEditing(true);
     setEditId(id);
     setShowForm(true);
-  }
+  };
+
+
 
   return (
     <div className="flex h-auto">
@@ -161,7 +203,8 @@ const Page = ({ params }) => {
             handleItemChange={handleItemChange}
             addNewItem={addNewItem}
             handleStatusChange={handleStatusChange}
-            handleTransportChange={handleTransportChange} />
+            handleTransportChange={handleTransportChange}
+            handleAddPayment={handleAddPayment} />
 
         )}
 
