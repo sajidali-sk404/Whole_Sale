@@ -17,7 +17,7 @@ const Page = ({ params }) => {
   const { shops } = useContext(ShopContext);
 
   const [currentShop, setCurrentShop] = useState(null)
-
+console.log(currentShop)
   const [showForm, setShowForm] = useState(false);
   const [dataList, setDataList] = useState([]);
 

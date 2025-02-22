@@ -78,7 +78,7 @@ const DataList = ({ data, handleEdit, handleDelete }) => {
                         <TruckIcon className="w-5 h-5 text-blue-600" />
                         <h4 className="font-medium">Transport Details</h4>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
                         <div>
                             <p className="text-sm">Transport: {data.transportDetails.name}</p>
                         </div>

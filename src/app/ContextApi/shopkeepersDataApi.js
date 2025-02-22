@@ -5,7 +5,7 @@ export const ShopContext = createContext()
 
 export const ShopProvider = ({ children }) => {
   const [shops, setShops] = useState([])
-  
+
   useEffect(() => {
     // Dummy data of shop, replace it with api call
     setShops([
