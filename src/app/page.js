@@ -14,7 +14,7 @@ export default function Home() {
     <>
     <Navbar />
 
-      <div className="grid grid-cols-3 m-10 gap-8">
+      <div className="grid grid-cols-1  md:grid-cols-2 lg:grid-cols-3 m-10 gap-8">
         <div className="hover:scale-105 transition-all duration-300 border-2 font-semibold  bg-white shadow-md p-4 rounded-md flex flex-col items-center cursor-pointer w-full ">
           <Link href="/pages/suppliers">
             <div className="text-5xl mb-4 hover:scale- flex justify-center  text-blue-700 "><FaPeopleGroup /></div>

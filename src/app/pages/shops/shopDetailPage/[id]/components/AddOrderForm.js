@@ -4,7 +4,7 @@ import { XMarkIcon } from "@heroicons/react/24/outline";
 const AddOrderForm = ({ setShowForm, handleAddData, setNewData, newData, handleItemChange, addNewItem, handleStatusChange, handleTransportChange }) => {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4">
-      <div className="relative max-w-4xl w-full bg-white shadow-lg rounded-lg p-6">
+      <div className="relative max-w-4xl w-full bg-white shadow-lg rounded-lg p-2 md:p-6">
         <button
           onClick={() => setShowForm(false)}
           className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
@@ -19,7 +19,7 @@ const AddOrderForm = ({ setShowForm, handleAddData, setNewData, newData, handleI
           <div className="border-b pb-4">
             <h3 className="text-lg font-medium mb-4">Items Details</h3>
             {newData.items.map((item, index) => (
-              <div key={index} className="grid grid-cols-4 gap-4 mb-4">
+              <div key={index} className="grid grid-cols-3 md:grid-cols-4 gap-4 mb-4">
                 <div>
                   <label className="block text-sm font-medium">Item Name*</label>
                   <input
@@ -90,7 +90,7 @@ const AddOrderForm = ({ setShowForm, handleAddData, setNewData, newData, handleI
             )}
 
             {/* New Payment Input */}
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-2  gap-4">
               <div>
                 <label className="block text-sm font-medium">Partial Payment*</label>
                 <input
@@ -117,7 +117,7 @@ const AddOrderForm = ({ setShowForm, handleAddData, setNewData, newData, handleI
           {/* Debit and Credit Section */}
           <div className="border-b pb-4">
             <h3 className="text-lg font-medium mb-4">Debit & Credit</h3>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium">Debit (Remaining Balance)</label>
                 <input
@@ -178,7 +178,7 @@ const AddOrderForm = ({ setShowForm, handleAddData, setNewData, newData, handleI
           {newData.status === 'delivered' && (
             <div className="border-b pb-4">
               <h3 className="text-lg font-medium mb-4">Transport Details</h3>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium">Transport Name*</label>
                   <input

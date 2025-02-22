@@ -4,7 +4,7 @@ import { XMarkIcon } from "@heroicons/react/24/outline";
 
 const SideBar = ({ setIsSidebarOpen, currentCompany }) => {
   return (
-    <div className={`bg-gray-100 p-4 w-64`}>
+    <div className={`bg-gray-100 p-4 max-sm:absolute  md:w-64`}>
       <button
         onClick={() => setIsSidebarOpen(false)}
         className="text-blue-500 text-sm mb-4"

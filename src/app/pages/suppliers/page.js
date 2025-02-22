@@ -35,7 +35,7 @@ function SupplierManagement() {
       </div>
 
       {/* Supplier Grid */}
-      <div className="overflow-hidden grid grid-cols-4 gap-5">
+      <div className="overflow-hidden grid grid-cols-1  md:grid-cols-2 lg:grid-cols-3 gap-5">
         {companies && companies.map((company) => {
           return (<motion.div
             whileHover={{ scale: 1.05 }}

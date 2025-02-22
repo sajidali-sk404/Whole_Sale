@@ -36,7 +36,7 @@ const DataList = ({ data, handleEdit, handleDelete }) => {
             </div>
 
             {/* Items Display */}
-            <div className="grid grid-cols-4 gap-4 mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-4">
                 {data.items.map((item, index) => (
                     <div key={index} className="border p-3 rounded-md">
                         <h4 className="font-medium">{item.itemName}</h4>
@@ -58,7 +58,7 @@ const DataList = ({ data, handleEdit, handleDelete }) => {
                 {data.invoice && <p className="text-sm">Invoice: <a href={URL.createObjectURL(data.invoice)} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">View</a></p>}
             </div> */}
             
-            <div className="grid grid-cols-4 gap-4 mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-4">
                 {data.payments.map((payments, index) => (
                     <div key={index} className="border p-3 rounded-md">
                         <h4 className="font-medium mb-2">Payment Details</h4>
@@ -78,7 +78,7 @@ const DataList = ({ data, handleEdit, handleDelete }) => {
                         <TruckIcon className="w-5 h-5 text-blue-600" />
                         <h4 className="font-medium">Transport Details</h4>
                     </div>
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                             <p className="text-sm">Transport: {data.transportDetails.name}</p>
                         </div>

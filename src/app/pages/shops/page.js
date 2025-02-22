@@ -34,7 +34,7 @@ function ShopKeeperManagement() {
       </div>
 
       {/* shop Grid */}
-      <div className="overflow-hidden grid grid-cols-4 gap-5">
+      <div className="overflow-hidden grid sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-5">
         {shops && shops.length > 0 ? (
           shops.map((shopItem) => (
             <motion.div

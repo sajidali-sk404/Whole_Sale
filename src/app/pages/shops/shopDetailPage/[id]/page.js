@@ -34,7 +34,7 @@ const Page = ({ params }) => {
   });  
 
 
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
 
@@ -174,7 +174,7 @@ const Page = ({ params }) => {
         :
         <button
           onClick={() => setIsSidebarOpen(true)}
-          className="text-blue-500 text-sm m-2 -mt-4 "
+          className="text-blue-500 text-sm  top-8 left-3 fixed -mt-4 "
         >
           <Bars3Icon className="w-6 h-6 " />
         </button>
@@ -182,7 +182,7 @@ const Page = ({ params }) => {
       }
 
       {/* Main Content */}
-      <div className="flex-1 px-6 py-2">
+      <div className="flex-1 px-12 py-2">
         <button
           onClick={() => setShowForm(true)}
           className="bg-blue-500 text-white px-4 py-2 rounded-md mb-4"
