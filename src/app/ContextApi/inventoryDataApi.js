@@ -8,18 +8,18 @@ export const InventoryProvider = ({ children }) => {
 
     const [inventoryData, setInventoryData] = useState([]);
 
-    const fetchInventoryData = async () => {
+    const fetchInventoryData = useCallback(async () => {
         try {
             const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/inventory`);
             setInventoryData(response.data);
         } catch (error) {
             console.error(error);
         }
-    };
+    }, []);
 
     useEffect(() => {
         fetchInventoryData();
-    }, []);
+    }, [fetchInventoryData]);
 
     return (
         <InventoryContext.Provider value={{inventoryData}}>

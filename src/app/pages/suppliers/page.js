@@ -8,12 +8,12 @@ import { CompanyContext } from '@/app/ContextApi/companiesDataApi';
 import { useContext } from 'react';
 import { motion } from 'framer-motion';
 
-
-
 function SupplierManagement() {
+
   const { companies, setCompanies } = useContext(CompanyContext);
 
   const [showForm, setShowForm] = useState(false);
+
   const router = useRouter();
 
   return (
@@ -39,8 +39,8 @@ function SupplierManagement() {
         {companies && companies.map((company) => {
           return (<motion.div
             whileHover={{ scale: 1.05 }}
-            key={company.id}
-            onClick={() => router.push(`/pages/suppliers/supplierDetailPage/${company.id}`)}
+            key={company._id}
+            onClick={() => router.push(`/pages/suppliers/supplierDetailPage/${company._id}`)}
             className=' border-2 font-semibold gap-5  bg-white shadow-md p-4 rounded-md flex flex-col items-center cursor-pointer w-full'>
 
             <p>{company.companyName}</p>
