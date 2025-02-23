@@ -1,25 +1,31 @@
 'use client'
 import React, { useState, useContext, use, useEffect } from "react";
 import { Bars3Icon } from "@heroicons/react/24/outline";
-
 import { SupplierContext } from '@/app/ContextApi/SupplierDataApi';
 import SideBar from "./components/SideBar";
 import AddOrderForm from "./components/AddOrderForm";
 import DataList from "./components/DataList";
+import axios from "axios";
 
 const Page = ({ params }) => {
-
-  const [isEditing, setIsEditing] = useState(false);
-  const [editId, setEditId] = useState(null);
-
+  
   const param = use(params);
 
   const { suppliers } = useContext(SupplierContext);
 
+  const [isEditing, setIsEditing] = useState(false);
+
+  const [editId, setEditId] = useState(null);
+
   const [currentSupplier, setCurrentSupplier] = useState(null)
 
   const [showForm, setShowForm] = useState(false);
+  
   const [dataList, setDataList] = useState([]);
+  
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+  const [loading, setLoading] = useState(true);
 
   const [newData, setNewData] = useState({
     items: [{ itemName: "", quantity: "", price: "", date: new Date().toISOString().split('T')[0] }],
@@ -32,17 +38,34 @@ const Page = ({ params }) => {
     payments: [],  // Ensure payments exists
     newPayment: { amount: "", invoice: null }, // Ensure newPayment exists
   });  
-
-
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  
 
   useEffect(() => {
 
+    if(suppliers){
+      setLoading(false);
+    }
+
     if (suppliers.length > 0) {
-      const foundSupplier = suppliers.find((supplier) => supplier.id == param.id);
+      const foundSupplier = suppliers.find((supplier) => supplier._id == param.id);
       setCurrentSupplier(foundSupplier || null);
     }
-  }, [param.id, suppliers, setDataList]);
+
+    const fetchSupplierData = async () => {
+      try {
+          const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/supplier/${id}`);
+          setDataList(response.data);
+          console.log(response.data)
+          
+        } catch (err) {
+          console.log(err.message);
+        } finally {
+          setLoading(false);
+        }}
+          fetchSupplierData();
+
+
+  }, [param.id, suppliers]);
 
   console.log(currentSupplier?.companyName);
 
@@ -87,23 +110,6 @@ const Page = ({ params }) => {
     resetForm();
     setShowForm(false);
   };
-
-
-
-  const handleAddPayment = () => {
-    if (!newData.newPayment?.amount || !newData.newPayment?.invoice) {
-      alert("Please enter an amount and upload an invoice!");
-      return;
-    }
-
-    setNewData((prev) => ({
-      ...prev,
-      payments: [...(prev.payments || []), { ...prev.newPayment, date: new Date().toISOString() }],
-      newPayment: { amount: "", invoice: null } // Reset input fields
-    }));
-  };
-
-
 
   const resetForm = () => {
     setNewData({
@@ -166,8 +172,6 @@ const Page = ({ params }) => {
     setShowForm(true);
   };
 
-
-
   return (
     <div className="flex h-auto">
 
@@ -203,8 +207,7 @@ const Page = ({ params }) => {
             handleItemChange={handleItemChange}
             addNewItem={addNewItem}
             handleStatusChange={handleStatusChange}
-            handleTransportChange={handleTransportChange}
-            handleAddPayment={handleAddPayment} />
+            handleTransportChange={handleTransportChange} />
 
         )}
 
