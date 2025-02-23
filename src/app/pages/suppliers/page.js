@@ -1,16 +1,30 @@
 'use client'
 import React from 'react'
-import AddCompany from '@/app/components/AddCompany';
-import { useState, useEffect } from 'react';
-import { Link } from 'next/link';
+import AddSupplier from '@/app/components/AddSupplier';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { CompanyContext } from '@/app/ContextApi/companiesDataApi';
+// import { SupplierContext } from '@/app/ContextApi/SupplierDataApi';
 import { useContext } from 'react';
 import { motion } from 'framer-motion';
+import axios from 'axios';
 
 function SupplierManagement() {
 
-  const { companies, setCompanies } = useContext(CompanyContext);
+  // const { suppliers, setSuppliers } = useContext(SupplierContext);
+  const [suppliers, setSuppliers] = useState();
+
+  const fetchSuppliers = useCallback(async () => {
+    try {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/supplier`)
+      setSuppliers(response.data)
+    } catch (error) {
+      console.error(error)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchSuppliers();
+  }, [fetchSuppliers, setSuppliers, suppliers])
 
   const [showForm, setShowForm] = useState(false);
 
@@ -36,25 +50,23 @@ function SupplierManagement() {
 
       {/* Supplier Grid */}
       <div className="overflow-hidden grid grid-cols-1  md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {companies && companies.map((company) => {
+        {suppliers && suppliers.map((supplier) => {
           return (<motion.div
             whileHover={{ scale: 1.05 }}
-            key={company._id}
-            onClick={() => router.push(`/pages/suppliers/supplierDetailPage/${company._id}`)}
-            className=' border-2 font-semibold gap-5  bg-white shadow-md p-4 rounded-md flex flex-col items-center cursor-pointer w-full'>
+            key={supplier._id}
+            onClick={() => router.push(`/pages/suppliers/supplierDetailPage/${supplier._id}`)}
+            className=' border-2 font-semibold gap-3  bg-white shadow-md p-4 rounded-md flex flex-col items-center cursor-pointer w-full'>
 
-            <p>{company.companyName}</p>
-            <p>{company.owner}</p>
+            <p>Company: {supplier.companyName}</p>
+            <p className='text-sm text-gray-400'>Owner: {supplier.owner}</p>
           </motion.div>)
         })}
       </div>
 
       {showForm && (
-        <AddCompany
+        <AddSupplier
           showForm={showForm}
-          setShowForm={setShowForm}
-          setCompanies={setCompanies}
-          companies={companies} />
+          setShowForm={setShowForm} />
       )}
 
     </div>

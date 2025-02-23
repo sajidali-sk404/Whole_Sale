@@ -1,6 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { CompaniesProvider } from "./ContextApi/companiesDataApi";
+import { SupplierProvider } from "./ContextApi/SupplierDataApi";
 import { ShopProvider } from "./ContextApi/shopkeepersDataApi";
 import { InventoryProvider } from "./ContextApi/inventoryDataApi";
 
@@ -26,11 +26,11 @@ export default function RootLayout({ children }) {
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ShopProvider>
-          <CompaniesProvider>
+          <SupplierProvider>
             <InventoryProvider>
               {children}
             </InventoryProvider>
-          </CompaniesProvider>
+          </SupplierProvider>
         </ShopProvider>
       </body>
     </html>

@@ -1,9 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useContext } from "react";
 import axios from "axios";
 import { XMarkIcon } from "@heroicons/react/24/outline";
+import { SupplierContext } from '@/app/ContextApi/SupplierDataApi';
 
-const AddCompany = ({ setShowForm, setCompanies, companies }) => {
-  const [companyDetails, setCompanyDetails] = useState({
+const AddSupplier = ({ setShowForm }) => {
+
+  const { suppliers, setSuppliers } = useContext(SupplierContext);
+
+  const [supplierDetails, setSupplierDetails] = useState({
     companyName: "",
     owner: "",
     contact: "",
@@ -17,17 +21,17 @@ const AddCompany = ({ setShowForm, setCompanies, companies }) => {
     try {
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/supplier`,
-        companyDetails
+        supplierDetails
       );
-      setCompanies((prevCompanies) => [...prevCompanies, response.data]);
+      setSuppliers((prevSuppliers) => [...prevSuppliers, response.data]);
       setShowForm(false);
-      setCompanyDetails({
+      setSupplierDetails({
         companyName: "",
         owner: "",
         contact: "",
         address: "",
       });
-      console.log("Company added successfully");
+      console.log("Company added successfully", suppliers);
     } catch (err) {
       console.error("Error adding company:", err.message);
     }
@@ -56,10 +60,10 @@ const AddCompany = ({ setShowForm, setCompanies, companies }) => {
               <input
                 type="text"
                 className="mt-1 block w-full p-2 border rounded-md"
-                value={companyDetails.companyName}
+                value={supplierDetails.companyName}
                 onChange={(e) =>
-                  setCompanyDetails({
-                    ...companyDetails,
+                  setSupplierDetails({
+                    ...supplierDetails,
                     companyName: e.target.value,
                   })
                 }
@@ -73,10 +77,10 @@ const AddCompany = ({ setShowForm, setCompanies, companies }) => {
               <input
                 type="text"
                 className="mt-1 block w-full p-2 border rounded-md"
-                value={companyDetails.owner}
+                value={supplierDetails.owner}
                 onChange={(e) =>
-                  setCompanyDetails({
-                    ...companyDetails,
+                  setSupplierDetails({
+                    ...supplierDetails,
                     owner: e.target.value,
                   })
                 }
@@ -90,10 +94,10 @@ const AddCompany = ({ setShowForm, setCompanies, companies }) => {
               <input
                 type="text"
                 className="mt-1 block w-full p-2 border rounded-md"
-                value={companyDetails.contact}
+                value={supplierDetails.contact}
                 onChange={(e) =>
-                  setCompanyDetails({
-                    ...companyDetails,
+                  setSupplierDetails({
+                    ...supplierDetails,
                     contact: e.target.value,
                   })
                 }
@@ -106,10 +110,10 @@ const AddCompany = ({ setShowForm, setCompanies, companies }) => {
               <input
                 type="email"
                 className="mt-1 block w-full p-2 border rounded-md"
-                value={companyDetails.email}
+                value={supplierDetails.email}
                 onChange={(e) =>
-                  setCompanyDetails({
-                    ...companyDetails,
+                  setSupplierDetails({
+                    ...supplierDetails,
                     email: e.target.value,
                   })
                 }
@@ -123,10 +127,10 @@ const AddCompany = ({ setShowForm, setCompanies, companies }) => {
               <input
                 type="text"
                 className="mt-1 block w-full p-2 border rounded-md"
-                value={companyDetails.address}
+                value={supplierDetails.address}
                 onChange={(e) =>
-                  setCompanyDetails({
-                    ...companyDetails,
+                  setSupplierDetails({
+                    ...supplierDetails,
                     address: e.target.value,
                   })
                 }
@@ -155,4 +159,4 @@ const AddCompany = ({ setShowForm, setCompanies, companies }) => {
   );
 };
 
-export default AddCompany;
+export default AddSupplier;

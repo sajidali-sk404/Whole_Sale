@@ -2,7 +2,7 @@
 import React, { useState, useContext, use, useEffect } from "react";
 import { Bars3Icon } from "@heroicons/react/24/outline";
 
-import { CompanyContext } from '@/app/ContextApi/companiesDataApi';
+import { SupplierContext } from '@/app/ContextApi/SupplierDataApi';
 import SideBar from "./components/SideBar";
 import AddOrderForm from "./components/AddOrderForm";
 import DataList from "./components/DataList";
@@ -14,9 +14,9 @@ const Page = ({ params }) => {
 
   const param = use(params);
 
-  const { companies } = useContext(CompanyContext);
+  const { suppliers } = useContext(SupplierContext);
 
-  const [currentCompany, setCurrentCompany] = useState(null)
+  const [currentSupplier, setCurrentSupplier] = useState(null)
 
   const [showForm, setShowForm] = useState(false);
   const [dataList, setDataList] = useState([]);
@@ -38,13 +38,13 @@ const Page = ({ params }) => {
 
   useEffect(() => {
 
-    if (companies.length > 0) {
-      const foundCompany = companies.find((company) => company.id == param.id);
-      setCurrentCompany(foundCompany || null);
+    if (suppliers.length > 0) {
+      const foundSupplier = suppliers.find((supplier) => supplier.id == param.id);
+      setCurrentSupplier(foundSupplier || null);
     }
-  }, [param.id, companies, setDataList]);
+  }, [param.id, suppliers, setDataList]);
 
-  console.log(currentCompany?.companyName);
+  console.log(currentSupplier?.companyName);
 
 
   const handleAddData = (e) => {
@@ -173,7 +173,7 @@ const Page = ({ params }) => {
 
       {/* Sidebar */}
       {isSidebarOpen ?
-        <SideBar setIsSidebarOpen={setIsSidebarOpen} currentCompany={currentCompany} />
+        <SideBar setIsSidebarOpen={setIsSidebarOpen} currentSupplier={currentSupplier} />
         :
         <button
           onClick={() => setIsSidebarOpen(true)}

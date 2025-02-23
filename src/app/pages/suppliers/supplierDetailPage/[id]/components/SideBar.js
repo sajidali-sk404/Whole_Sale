@@ -2,7 +2,7 @@ import React from 'react'
 import Link from 'next/link'
 import { XMarkIcon } from "@heroicons/react/24/outline";
 
-const SideBar = ({ setIsSidebarOpen, currentCompany }) => {
+const SideBar = ({ setIsSidebarOpen, currentSupplier }) => {
   return (
     <div className={`bg-gray-100 p-4 max-sm:absolute  md:w-64`}>
       <button
@@ -14,10 +14,10 @@ const SideBar = ({ setIsSidebarOpen, currentCompany }) => {
 
       <div className="flex flex-col gap-2 text-lg">
         <h2 className="text-lg font-semibold">Company Details</h2>
-        <h2>{currentCompany?.companyName}</h2>
-        <h2> {currentCompany?.owner}</h2>
-        <h2> {currentCompany?.contact}</h2>
-        <h2> {currentCompany?.address}</h2>
+        <h2>{currentSupplier?.companyName}</h2>
+        <h2> {currentSupplier?.owner}</h2>
+        <h2> {currentSupplier?.contact}</h2>
+        <h2> {currentSupplier?.address}</h2>
       </div>
 
       <div className="flex overflow-y-auto flex-col mt-10 gap-3 text-blue-800 ">
