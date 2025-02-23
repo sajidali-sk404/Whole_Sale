@@ -49,19 +49,23 @@ function SupplierManagement() {
       </div>
 
       {/* Supplier Grid */}
-      <div className="overflow-hidden grid grid-cols-1  md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {suppliers && suppliers.map((supplier) => {
-          return (<motion.div
-            whileHover={{ scale: 1.05 }}
+      <div className="overflow-hidden grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 p-4">
+        {suppliers?.map((supplier) => (
+          <motion.div
             key={supplier._id}
+            whileHover={{ scale: 1.02 }}
             onClick={() => router.push(`/pages/suppliers/supplierDetailPage/${supplier._id}`)}
-            className=' border-2 font-semibold gap-3  bg-white shadow-md p-4 rounded-md flex flex-col items-center cursor-pointer w-full'>
-
-            <p>Company: {supplier.companyName}</p>
-            <p className='text-sm text-gray-400'>Owner: {supplier.owner}</p>
-          </motion.div>)
-        })}
+            className="w-full p-6 bg-white border border-gray-200 shadow-lg rounded-2xl flex flex-col items-center text-center cursor-pointer transition-all hover:shadow-xl"
+          >
+            <div className="w-16 h-16 bg-blue-100 text-blue-500 flex items-center justify-center rounded-full text-xl font-bold">
+              {supplier.companyName.charAt(0)}
+            </div>
+            <h3 className="mt-4 text-lg font-semibold text-gray-800">{supplier.companyName}</h3>
+            <p className="mt-1 text-sm text-gray-500">Owner: {supplier.owner}</p>
+          </motion.div>
+        ))}
       </div>
+
 
       {showForm && (
         <AddSupplier
