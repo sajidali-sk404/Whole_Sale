@@ -6,11 +6,14 @@ import {
 } from "@heroicons/react/24/outline";
 
 const DataList = ({ data, handleEdit, handleDelete }) => {
+
+    console.log("from datalist shipments", data);
+
     return (
         <div className="bg-white p-4 rounded-lg shadow">
             <div className="flex justify-between items-start mb-4">
                 <div>
-                    <span className={`inline-block px-3 py-1 rounded-full text-sm ${data.status === 'delivered'
+                    <span className={`inline-block px-3 py-1 rounded-full text-sm ${data.status === 'Delivered'
                         ? 'bg-green-100 text-green-800'
                         : 'bg-yellow-100 text-yellow-800'
                         }`}>
@@ -23,11 +26,11 @@ const DataList = ({ data, handleEdit, handleDelete }) => {
                 <div className="flex gap-2">
                     <button
                         className="text-yellow-500 hover:text-yellow-600"
-                        onClick={() => handleEdit(data.id)}>
+                        onClick={() => handleEdit(data._id)}>
                         <PencilIcon className="w-5 h-5" />
                     </button>
                     <button
-                        onClick={() => handleDelete(data.id)}
+                        onClick={() => handleDelete(data._id)}
                         className="text-red-500 hover:text-red-600"
                     >
                         <TrashIcon className="w-5 h-5" />
@@ -37,11 +40,12 @@ const DataList = ({ data, handleEdit, handleDelete }) => {
 
             {/* Items Display */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-                {data.items.map((item, index) => (
+                {data?.items?.map((item, index) => (
                     <div key={index} className="border p-3 rounded-md">
                         <h4 className="font-medium">{item.itemName}</h4>
                         <p>Qty: {item.quantity}</p>
-                        {item.price && <p>Price: ₹{item.price}</p>}
+                        {item.price && <p>Per Price: Rs.{item.price}</p>}
+                        {item.price && <p>Total Price: Rs.{(item.price * item.quantity)}</p>}
                         {item.date && <p className="text-sm text-gray-500">
                             {new Date(item.date).toLocaleDateString()}
                         </p>}
@@ -49,22 +53,13 @@ const DataList = ({ data, handleEdit, handleDelete }) => {
                 ))}
             </div>
 
-            {/* Payment Details */}
-            {/* <div className="bg-gray-100 p-4 rounded-md">
-                <h4 className="font-medium mb-2">Payment Details</h4>
-                <p className="text-sm">Partial Payment: ₹{data.partialPayment}</p>
-                <p className="text-sm">Debit (Remaining Balance): ₹{data.debit}</p>
-                <p className="text-sm">Credit (Paid Amount): ₹{data.credit}</p>
-                {data.invoice && <p className="text-sm">Invoice: <a href={URL.createObjectURL(data.invoice)} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">View</a></p>}
-            </div> */}
-            
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-                {data.payments.map((payments, index) => (
+                {data?.transactions?.payments?.map((payments, index) => (
                     <div key={index} className="border p-3 rounded-md">
                         <h4 className="font-medium mb-2">Payment Details</h4>
-                        <p className="text-sm">Partial Payment: ₹{payments.amount}</p>
-                        <p className="text-sm">Debit (Remaining Balance): ₹{payments.debit}</p>
-                        <p className="text-sm">Credit (Paid Amount): ₹{payments.credit}</p>
+                        <p className="text-sm">Partial Payment: Rs.{payments.amount}</p>
+                        <p className="text-sm">Debit (Remaining Balance): Rs.{payments.debit}</p>
+                        <p className="text-sm">Credit (Paid Amount): Rs.{payments.credit}</p>
                         {payments.invoice && <p className="text-sm">Invoice: <a href={URL.createObjectURL(payments.invoice)} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">View</a></p>}
                     </div>
                 ))}
@@ -72,7 +67,7 @@ const DataList = ({ data, handleEdit, handleDelete }) => {
 
 
             {/* Transport Details */}
-            {data.status === 'delivered' && (
+            {data.status === 'Delivered' && (
                 <div className="bg-blue-50 p-4 rounded-md">
                     <div className="flex items-center gap-2 mb-2">
                         <TruckIcon className="w-5 h-5 text-blue-600" />
@@ -80,13 +75,13 @@ const DataList = ({ data, handleEdit, handleDelete }) => {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
-                            <p className="text-sm">Transport: {data.transportDetails.name}</p>
+                            <p className="text-sm">Name: {data.driver.name}</p>
                         </div>
                         <div>
-                            <p className="text-sm">Driver: {data.transportDetails.driver}</p>
+                            <p className="text-sm">Vehicle: {data.driver.vehicle}</p>
                         </div>
                         <div>
-                            <p className="text-sm">Delivered: {new Date(data.transportDetails.deliveryDate).toLocaleDateString()}</p>
+                            <p className="text-sm">Delivered: {new Date(data.date).toLocaleDateString()}</p>
                         </div>
                     </div>
                 </div>

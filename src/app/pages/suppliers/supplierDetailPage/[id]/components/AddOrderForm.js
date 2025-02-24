@@ -1,7 +1,47 @@
-import React from 'react'
+'use client'
+import {React, useState} from 'react'
 import { XMarkIcon } from "@heroicons/react/24/outline";
 
-const AddOrderForm = ({ setShowForm, handleAddData, setNewData, newData, handleItemChange, addNewItem, handleStatusChange, handleTransportChange }) => {
+const AddOrderForm = ({ setShowForm, currentSupplier, setCurrentSupplier }) => {
+
+  const [newData, setNewData] = useState({
+    date: new Date().toISOString().split('T')[0],
+    items: [{
+      itemName: "",
+      quantity: 0,
+      price: 0
+    }],
+    driver: {
+      name: "",
+      vehicle: ""
+    },
+    status: "Pending",
+    transactions: {
+      paymentDate: new Date().toISOString().split('T')[0],
+      partialPayment: 0,
+      invoice: "",
+      totalAmount: 0,
+      totalDebit: 0,
+      totalCredit: 0,
+      payments: [{
+        paymentDate: new Date().toISOString().split('T')[0],
+        amount: 0,
+        invoice: "",
+        debit: 0,
+        credit: 0,
+      }]
+    }
+
+  });
+
+  // When click on add new item
+  const addNewItem = () => {
+    setNewData(prev => ({
+      ...prev,
+      items: [...prev.items, { itemName: "", quantity: "", price: "", date: new Date().toISOString().split('T')[0] }]
+    }));
+  };
+
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4">
       <div className="relative max-w-4xl w-full bg-white shadow-lg rounded-lg max-sm:p-2 p-6">
@@ -123,7 +163,7 @@ const AddOrderForm = ({ setShowForm, handleAddData, setNewData, newData, handleI
                 <input
                   type="number"
                   value={
-                    newData.items.reduce((acc, item) => acc + Number((item.price*item.quantity) || 0), 0) -
+                    newData.items.reduce((acc, item) => acc + Number((item.price * item.quantity) || 0), 0) -
                     (newData.payments?.reduce((acc, payment) => acc + Number(payment.amount), 0) || 0) -
                     Number(newData.partialPayment || 0)
                   }
