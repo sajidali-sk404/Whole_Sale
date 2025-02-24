@@ -1,6 +1,6 @@
 'use client'
 import { useState, useRef, useEffect } from "react";
-import { MdKeyboardDoubleArrowDown,MdKeyboardDoubleArrowUp } from "react-icons/md";
+import { MdKeyboardDoubleArrowDown, MdKeyboardDoubleArrowUp } from "react-icons/md";
 
 const CustomerBilling = () => {
   const [bills, setBills] = useState([]);
@@ -77,73 +77,150 @@ const CustomerBilling = () => {
 
   const handlePrint = (bill) => {
     const printContent = `
-      <html>
-        <head>
-          <title>Invoice</title>
-          <style>
-            body { font-family: Arial, sans-serif; padding: 20px; }
-            table { width: 100%; border-collapse: collapse; }
-            th, td { border: 1px solid black; padding: 8px; text-align: left; }
-            div {
-            margin-left: 40%;
-             border: 2px solid black;
-             padding:2px;
-            }
-             strong {
-             border: 2px solid black;
-             }
-          </style>
-        </head>
-        <body>
-          <h2>GK Traders</h2>
-          <p><span>Invoice No</span>${bill.invoiceNo}</p>
-          <p>Date: ${bill.date}</p>
-          <p>Customer: ${bill.customerName}</p>
-          <p>Address: ${bill.address}</p>
-          <table>
+  
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sale Invoice</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .invoice-container {
+            width: 700px;
+            margin: 0 auto;
+            border: 1px solid #000;
+            padding: 10px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .header h1 {
+            margin: 0;
+        }
+        .details {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        .details td {
+            padding: 5px;
+        }
+        .table-container {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .table-container th, .table-container td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: center;
+        }
+        .summary-table td {           
+            padding: 5px;      
+            text-align: right;
+            margin-left:30%
+        }
+            
+        .footer {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 12px;
+        }
+        .signature {
+            text-align: left;
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice-container">
+        <div class="header">
+            <h1>GK Traders</h1>
+            <p>Distributor Shama Ghee, C.Oil, Sugar & Pvt. Ghee</p>
+            <p>Bypass Chowk, Fizaghat Mingora Swat</p>
+            <p>Ph#: 0946-711500, 813364, 0346-9408399</p>
+        </div>
+
+        <table class="details">
+            <tr>
+                <td><strong>Code:</strong> 1200</td>
+                <td><strong>Invoice No:</strong> ${bill.invoiceNo}</td>
+            </tr>
+            <tr>
+                <td><strong>Name:</strong> ${bill.customerName}</td>
+                <td><strong>Date:</strong> ${bill.date}</td>
+            </tr>
+            <tr>
+                <td><strong>Address:</strong> ${bill.address}</td>
+                <td><strong>Mob#:</strong> </td>
+            </tr>
+            <tr>
+                <td><strong>Ref. Name:</strong> SWAT</td>
+                <td><strong>CNIC#:</strong> </td>
+            </tr>
+        </table>
+
+        <table class="table-container">
             <thead>
-              <tr>
-                <th>Item Name</th>
-                <th>Quantity</th>
-                <th>Price</th>
-                <th>Total</th>
-              </tr>
+                <tr>
+                    <th>Qty</th>
+                    <th>Product Name</th>
+                    <th>Price</th>
+                    <th>Net Amount</th>
+                </tr>
             </thead>
             <tbody>
-              ${bill.cart.map(item => `
+                 ${bill.cart.map(item => `
                 <tr>
+                <td>${item.quantity}</td>
                   <td>${item.name}</td>
-                  <td>${item.quantity}</td>
                   <td>${item.price} PKR</td>
                   <td>${item.total} PKR</td>
                 </tr>
               `).join('')}
             </tbody>
-            <tbody >
-    <tr>
-      <td style="border: 1px solid black; padding: 8px;">Total Amount</td>
-      <td style="border: 1px solid black; padding: 8px;">${bill.totalAmount} PKR</td>
-    </tr>
-    <tr>
-      <td style="border: 1px solid black; padding: 8px;">Old Balance</td>
-      <td style="border: 1px solid black; padding: 8px;">${bill.oldBalance} PKR</td>
-    </tr>
-    <tr>
-      <td style="border: 1px solid black; padding: 8px;">Net Amount</td>
-      <td style="border: 1px solid black; padding: 8px;">${bill.netAmount} PKR</td>
-    </tr>
-    <tr>
-      <td style="border: 1px solid black; padding: 8px;">Given Amount</td>
-      <td style="border: 1px solid black; padding: 8px;">${bill.customerGivenAmount} PKR</td>
-    </tr>
-    <tr>
-      <td style="border: 1px solid black; padding: 8px;">Remaining Amount</td>
-      <td style="border: 1px solid black; padding: 8px;">${bill.debt} PKR</td>
-    </tr>
-  </tbody>
-          </table>
-        </body>
-      </html>`;
+        </table>
+
+        <table class="summary-table" style="width: 100%;">
+            <tr>
+                <td><strong>Total Amount</strong></td>
+                <td>${bill.totalAmount} PKR</td>
+            </tr>
+            <tr>
+                <td><strong>Total Discount:</strong></td>
+                <td>0</td>
+            </tr>
+            <tr>
+                <td><strong>Net Bill Amount:</strong></td>
+                <td>${bill.netAmount} PKR</td>
+            </tr>
+            <tr>
+                <td><strong>Given Amount</strong></td>
+                <td>${bill.customerGivenAmount} PKR</td>
+            </tr>
+            <tr>
+                <td><strong>Remaining Amount</strong></td>
+                <td>${bill.debt} PKR</td>
+            </tr>
+            <tr>
+                <td><strong>Tax % Value:</strong></td>
+                <td>0.00</td>
+            </tr>
+        </table>
+
+        <div class="signature">
+            <p><strong>Generated By:</strong> Store Manager</p>
+        </div>
+
+        <div class="footer">
+            <p>Note: This is a computer-generated invoice and does not require a signature.</p>
+        </div>
+    </div>
+</body>
+</html>
+`;
 
     const printWindow = window.open('', '', 'width=800,height=600');
     printWindow.document.open();
@@ -261,7 +338,7 @@ const CustomerBilling = () => {
       </h3>
 
       <div className="mb-4">
-      <span>Old Amount</span>
+        <span>Old Amount</span>
         <input
           type="number"
           placeholder="Old Amount"
@@ -276,7 +353,7 @@ const CustomerBilling = () => {
       </h3>
 
       <div className="mb-4">
-      <span>Given Amount:</span>
+        <span>Given Amount:</span>
         <input
           type="number"
           placeholder="Given Amount"
@@ -293,27 +370,27 @@ const CustomerBilling = () => {
       {bills.map((bill, index) => (
         <div key={index} className="border p-4  rounded my-2">
           <div className="flex justify-between items-center">
-          <p><strong>Invoice No:</strong> {bill.invoiceNo}</p>
-          <p><strong>Customer:</strong> {bill.customerName}</p>
-          <p><strong>Date:</strong> {bill.date}</p>
+            <p><strong>Invoice No:</strong> {bill.invoiceNo}</p>
+            <p><strong>Customer:</strong> {bill.customerName}</p>
+            <p><strong>Date:</strong> {bill.date}</p>
 
 
-         
-         
 
-          <button onClick={() => handlePrint(bill)} className="bg-blue-500 text-white px-4 py-2 rounded mt-2">Print Bill</button>
-           {/* Toggle button to show/hide details */}
-           <button
-            onClick={() => toggleDetails(bill.invoiceNo)}
-            className="  px-4 py-2 rounded mt-2"
-          >
-            {showDetails[bill.invoiceNo] ? <MdKeyboardDoubleArrowUp className="h-6 w-6 text-gray-500"/>
-: <MdKeyboardDoubleArrowDown className="h-6 w-6 text-gray-500" />}
-          </button>
+
+
+            <button onClick={() => handlePrint(bill)} className="bg-blue-500 text-white px-4 py-2 rounded mt-2">Print Bill</button>
+            {/* Toggle button to show/hide details */}
+            <button
+              onClick={() => toggleDetails(bill.invoiceNo)}
+              className="  px-4 py-2 rounded mt-2"
+            >
+              {showDetails[bill.invoiceNo] ? <MdKeyboardDoubleArrowUp className="h-6 w-6 text-gray-500" />
+                : <MdKeyboardDoubleArrowDown className="h-6 w-6 text-gray-500" />}
+            </button>
           </div>
 
-           {/* Conditionally show details based on toggle */}
-           {showDetails[bill.invoiceNo] && (
+          {/* Conditionally show details based on toggle */}
+          {showDetails[bill.invoiceNo] && (
             <div className="flex flex-col">
 
               <p><strong>Total Amount:</strong> {bill.totalAmount} PKR</p>
