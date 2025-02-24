@@ -1,12 +1,30 @@
 'use client'
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { MdKeyboardDoubleArrowDown,MdKeyboardDoubleArrowUp } from "react-icons/md";
 
 const CustomerBilling = () => {
   const [bills, setBills] = useState([]);
+  const [invoiceNo, setInvoiceNo] = useState(1); // Start at invoice number 1
+  const [date, setDate] = useState(new Date().toISOString().split('T')[0]); // Set default to today's date
   const [customerName, setCustomerName] = useState("");
+  const [address, setAddress] = useState("");
   const [cart, setCart] = useState([]);
   const [newItem, setNewItem] = useState({ name: "", quantity: "", price: "" });
+  const [oldBalance, setOldBalance] = useState(0);
+  const [customerGivenAmount, setCustomerGivenAmount] = useState(0); // New field for customer's given amount
+  const [debt, setDebt] = useState(0); // To store customer's debt
+  const [showDetails, setShowDetails] = useState({}); // Track visibility of each bill's details
   const printRef = useRef();
+
+  // Example items for the dropdown
+  const availableItems = ["Sugar", "Milk", "Ghee", "lubya", "foot"];
+
+  // Increment invoice number after each bill generation
+  useEffect(() => {
+    if (bills.length > 0) {
+      setInvoiceNo(bills[bills.length - 1].invoiceNo + 1); // Increment by 1
+    }
+  }, [bills]);
 
   const handleAddToCart = () => {
     if (newItem.name && newItem.quantity && newItem.price) {
@@ -15,11 +33,45 @@ const CustomerBilling = () => {
     }
   };
 
+  // Calculate the debt and generate the bill
   const handleGenerateBill = () => {
     if (customerName && cart.length > 0) {
-      setBills([...bills, { customerName, cart, total: cart.reduce((acc, item) => acc + item.total, 0) }]);
+      const totalAmount = cart.reduce((acc, item) => acc + item.total, 0);
+      const netAmount = totalAmount + parseFloat(oldBalance);
+      const calculatedDebt = netAmount - parseFloat(customerGivenAmount);
+
+      setDebt(calculatedDebt); // Store debt
+
+      const newBill = {
+        invoiceNo,
+        date,
+        customerName,
+        address,
+        cart,
+        totalAmount,
+        oldBalance,
+        netAmount,
+        customerGivenAmount,
+        debt: calculatedDebt
+      };
+
+      setBills([...bills, newBill]);
+
+      // Toggle details visibility for the new bill (default hidden)
+      setShowDetails({ ...showDetails, [invoiceNo]: false });
+
+      // Reset form fields except invoiceNo and date
       setCustomerName("");
+      setAddress("");
       setCart([]);
+      setOldBalance(0);
+      setCustomerGivenAmount(0);
+
+      // Auto increment invoice number for the next bill
+      setInvoiceNo(invoiceNo + 1);
+
+      // Set current date for the next bill
+      setDate(new Date().toISOString().split('T')[0]);
     }
   };
 
@@ -27,15 +79,27 @@ const CustomerBilling = () => {
     const printContent = `
       <html>
         <head>
-          <title>Bill</title>
+          <title>Invoice</title>
           <style>
             body { font-family: Arial, sans-serif; padding: 20px; }
             table { width: 100%; border-collapse: collapse; }
             th, td { border: 1px solid black; padding: 8px; text-align: left; }
+            div {
+            margin-left: 40%;
+             border: 2px solid black;
+             padding:2px;
+            }
+             strong {
+             border: 2px solid black;
+             }
           </style>
         </head>
         <body>
-          <h2>Customer: ${bill.customerName}</h2>
+          <h2>GK Traders</h2>
+          <p><span>Invoice No</span>${bill.invoiceNo}</p>
+          <p>Date: ${bill.date}</p>
+          <p>Customer: ${bill.customerName}</p>
+          <p>Address: ${bill.address}</p>
           <table>
             <thead>
               <tr>
@@ -55,11 +119,32 @@ const CustomerBilling = () => {
                 </tr>
               `).join('')}
             </tbody>
+            <tbody >
+    <tr>
+      <td style="border: 1px solid black; padding: 8px;">Total Amount</td>
+      <td style="border: 1px solid black; padding: 8px;">${bill.totalAmount} PKR</td>
+    </tr>
+    <tr>
+      <td style="border: 1px solid black; padding: 8px;">Old Balance</td>
+      <td style="border: 1px solid black; padding: 8px;">${bill.oldBalance} PKR</td>
+    </tr>
+    <tr>
+      <td style="border: 1px solid black; padding: 8px;">Net Amount</td>
+      <td style="border: 1px solid black; padding: 8px;">${bill.netAmount} PKR</td>
+    </tr>
+    <tr>
+      <td style="border: 1px solid black; padding: 8px;">Given Amount</td>
+      <td style="border: 1px solid black; padding: 8px;">${bill.customerGivenAmount} PKR</td>
+    </tr>
+    <tr>
+      <td style="border: 1px solid black; padding: 8px;">Remaining Amount</td>
+      <td style="border: 1px solid black; padding: 8px;">${bill.debt} PKR</td>
+    </tr>
+  </tbody>
           </table>
-          <h3>Total: ${bill.total} PKR</h3>
         </body>
       </html>`;
-    
+
     const printWindow = window.open('', '', 'width=800,height=600');
     printWindow.document.open();
     printWindow.document.write(printContent);
@@ -67,10 +152,38 @@ const CustomerBilling = () => {
     printWindow.print();
   };
 
+  // Toggle the visibility of the bill details (Customer Name, Date)
+  const toggleDetails = (invoiceNo) => {
+    setShowDetails(prevState => ({
+      ...prevState,
+      [invoiceNo]: !prevState[invoiceNo]
+    }));
+  };
+
   return (
     <div className="p-6 max-w-4xl mx-auto bg-white shadow-md rounded-md">
       <h2 className="text-2xl font-bold mb-4">Customer Billing</h2>
-      
+
+      <div className="mb-4">
+        <input
+          type="text"
+          placeholder="Invoice No"
+          value={invoiceNo}
+          onChange={(e) => setInvoiceNo(e.target.value)}
+          className="border p-2 mr-2 rounded w-full"
+          readOnly // Make invoice number read-only
+        />
+      </div>
+
+      <div className="mb-4">
+        <input
+          type="date"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+          className="border p-2 mr-2 rounded w-full"
+        />
+      </div>
+
       <div className="mb-4">
         <input
           type="text"
@@ -80,15 +193,30 @@ const CustomerBilling = () => {
           className="border p-2 mr-2 rounded w-full"
         />
       </div>
-      
-      <div className="mb-4 flex space-x-2">
+
+      <div className="mb-4">
         <input
           type="text"
-          placeholder="Item Name"
+          placeholder="Address"
+          value={address}
+          onChange={(e) => setAddress(e.target.value)}
+          className="border p-2 mr-2 rounded w-full"
+        />
+      </div>
+
+      <div className="mb-4 flex space-x-2">
+        {/* Dropdown for Item Names */}
+        <select
           value={newItem.name}
           onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
           className="border p-2 rounded w-1/3"
-        />
+        >
+          <option value="">Select Item</option>
+          {availableItems.map((item, index) => (
+            <option key={index} value={item}>{item}</option>
+          ))}
+        </select>
+
         <input
           type="number"
           placeholder="Quantity"
@@ -128,15 +256,73 @@ const CustomerBilling = () => {
         </tbody>
       </table>
 
-      <h3 className="text-lg font-bold mt-4">Total: {cart.reduce((acc, item) => acc + item.total, 0)} PKR</h3>
-      
+      <h3 className=" font-bold mt-4">
+        Total Amount: {cart.reduce((acc, item) => acc + item.total, 0)} PKR
+      </h3>
+
+      <div className="mb-4">
+      <span>Old Amount</span>
+        <input
+          type="number"
+          placeholder="Old Amount"
+          value={oldBalance}
+          onChange={(e) => setOldBalance(e.target.value)}
+          className="border p-2 rounded w-full"
+        />
+      </div>
+
+      <h3 className=" font-bold mt-4">
+        Net Amount: {cart.reduce((acc, item) => acc + item.total, 0) + parseFloat(oldBalance)} PKR
+      </h3>
+
+      <div className="mb-4">
+      <span>Given Amount:</span>
+        <input
+          type="number"
+          placeholder="Given Amount"
+          value={customerGivenAmount}
+          onChange={(e) => setCustomerGivenAmount(e.target.value)}
+          className="border p-2 rounded w-full"
+        />
+      </div>
+
       <button onClick={handleGenerateBill} className="bg-green-500 text-white px-4 py-2 rounded mt-4">Generate Bill</button>
-      
-      <h2 className="text-2xl font-bold mt-6">Generated Bills</h2>
-      {bills.slice().reverse().map((bill, index) => (
-        <div key={index} className="border p-4 mt-4 shadow-md rounded">
-          <h3 className="text-lg font-bold">Customer: {bill.customerName}</h3>
-          <button onClick={() => handlePrint(bill)} className="bg-red-500 text-white px-4 py-2 rounded mt-2">Print Bill</button>
+
+      {/* Bills List */}
+      <h3 className="text-xl font-bold mt-6">Generated Bills</h3>
+      {bills.map((bill, index) => (
+        <div key={index} className="border p-4  rounded my-2">
+          <div className="flex justify-between items-center">
+          <p><strong>Invoice No:</strong> {bill.invoiceNo}</p>
+          <p><strong>Customer:</strong> {bill.customerName}</p>
+          <p><strong>Date:</strong> {bill.date}</p>
+
+
+         
+         
+
+          <button onClick={() => handlePrint(bill)} className="bg-blue-500 text-white px-4 py-2 rounded mt-2">Print Bill</button>
+           {/* Toggle button to show/hide details */}
+           <button
+            onClick={() => toggleDetails(bill.invoiceNo)}
+            className="  px-4 py-2 rounded mt-2"
+          >
+            {showDetails[bill.invoiceNo] ? <MdKeyboardDoubleArrowUp className="h-6 w-6 text-gray-500"/>
+: <MdKeyboardDoubleArrowDown className="h-6 w-6 text-gray-500" />}
+          </button>
+          </div>
+
+           {/* Conditionally show details based on toggle */}
+           {showDetails[bill.invoiceNo] && (
+            <div className="flex flex-col">
+
+              <p><strong>Total Amount:</strong> {bill.totalAmount} PKR</p>
+              <p><strong>Old Amount:</strong> {bill.oldBalance} PKR</p>
+              <p><strong>Net Amount:</strong> {bill.netAmount} PKR</p>
+              <p><strong>Given Amount:</strong> {bill.customerGivenAmount} PKR</p>
+              <p><strong>Remaining Amount:</strong> {bill.debt} PKR</p>
+            </div>
+          )}
         </div>
       ))}
     </div>
