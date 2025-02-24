@@ -264,7 +264,8 @@ const Page = ({ params }) => {
               data={data}
               // handleEdit={handleEdit}
               // handleDelete={handleDelete}
-              setNewData={setNewData} />
+              // setNewData={setNewData}
+               />
           ))}
 
         </div>
