@@ -18,7 +18,7 @@ const Page = ({ params }) => {
 
   const [showForm, setShowForm] = useState(false);
 
-  const [dataList, setDataList] = useState([]);
+  const [shipmentsData, setShipmentsData] = useState([]);
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
@@ -31,8 +31,8 @@ const Page = ({ params }) => {
       try {
         const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/supplier/${param.id}`);
         setCurrentSupplier(response.data);
-        setDataList((prev) => [...prev, response.data]);
-        console.log(response.data)
+        setShipmentsData(response.data.shipments);
+        console.log(response.data);
 
       } catch (err) {
         console.log(err.message);
@@ -45,16 +45,11 @@ const Page = ({ params }) => {
 
   }, [param.id]);
 
-  console.log("datalist", dataList)
+  console.log("shipmentsData", shipmentsData)
   console.log(loading)
 
   // const handleAddData = (e) => {
   //   e.preventDefault();
-
-  //   if (!newData.items[0].itemName || !newData.items[0].quantity) {
-  //     alert("Please fill in required fields!");
-  //     return;
-  //   }
 
   //   const totalAmount = newData.items.reduce((acc, item) => acc + Number((item.price * item.quantity) || 0), 0);
   //   const totalPaid = newData.payments?.reduce((acc, payment) => acc + Number(payment.amount), 0) || 0;
@@ -80,14 +75,14 @@ const Page = ({ params }) => {
   //   };
 
   //   if (isEditing) {
-  //     setDataList((prev) => prev.map((order) => (order.id === editId ? updatedOrder : order)));
+  //     setShipmentsData((prev) => prev.map((order) => (order.id === editId ? updatedOrder : order)));
   //   } else {
-  //     setDataList([...dataList, updatedOrder]);
+  //     setShipmentsData([...shipmentsData, updatedOrder]);
   //   }
 
   //   resetForm();
   //   setShowForm(false);
-  //   console.log(dataList)
+  //   console.log(shipmentsData)
   // };
 
   // const handleAddData = async (e) => {
@@ -140,7 +135,7 @@ const Page = ({ params }) => {
 
   //     if (response.status === 201) {
   //       // Update local state with new data
-  //       setDataList([...dataList, response.data]);
+  //       setShipmentsData([...shipmentsData, response.data]);
   //       alert("Order added successfully!");
   //       resetForm();
   //       setShowForm(false);
@@ -196,11 +191,11 @@ const Page = ({ params }) => {
   // };
 
   // const handleDelete = (id) => {
-  //   setDataList(dataList.filter(item => item.id !== id));
+  //   setShipmentsData(shipmentsData.filter(item => item.id !== id));
   // };
 
   // const handleEdit = (id) => {
-  //   const orderToEdit = dataList.find((order) => order.id === id);
+  //   const orderToEdit = shipmentsData.find((order) => order.id === id);
 
   //   setNewData({
   //     ...orderToEdit,
@@ -242,8 +237,9 @@ const Page = ({ params }) => {
 
           <AddOrderForm
             setShowForm={setShowForm}
-            currentSupplier={currentSupplier}
-            setCurrentSupplier={setCurrentSupplier}
+            shipmentsData={shipmentsData}
+            setShipmentsData={setShipmentsData}
+            id={param.id}
           // handleAddData={handleAddData}
           // newData={newData}
           // setNewData={setNewData}
@@ -258,7 +254,7 @@ const Page = ({ params }) => {
         {/* Data List */}
         <div className="space-y-4">
 
-          {loading && currentSupplier.shipments.slice().reverse().map((data, index) => (
+          {loading && shipmentsData.slice().reverse().map((data, index) => (
             <DataList
               key={index}
               data={data}

@@ -29,7 +29,7 @@ const DataList = ({ data, handleEdit, handleDelete }) => {
                     <span className="text-sm text-gray-500 ml-2">
                         {new Date(data.date).toLocaleDateString()}
                     </span>
-                    
+
                 </div>
                 <div className="flex gap-2 justify-center items-center">
                     <button
@@ -44,11 +44,11 @@ const DataList = ({ data, handleEdit, handleDelete }) => {
                         <TrashIcon className="w-5 h-5" />
                     </button>
                     <button
-                    onClick={toggleDetails}
-                    className="px-4 py-2 rounded mt-2">
-                    {showDetails ? <MdKeyboardDoubleArrowUp className="h-6 w-6 text-gray-500 hover:text-gray-600" />
-                        : <MdKeyboardDoubleArrowDown className="h-6 w-6 text-gray-500 hover:text-gray-600" />}
-                </button>
+                        onClick={toggleDetails}
+                        className="px-4 py-2 rounded mt-2">
+                        {showDetails ? <MdKeyboardDoubleArrowUp className="h-6 w-6 text-gray-500 hover:text-gray-600" />
+                            : <MdKeyboardDoubleArrowDown className="h-6 w-6 text-gray-500 hover:text-gray-600" />}
+                    </button>
                 </div>
             </div>
 
@@ -70,13 +70,25 @@ const DataList = ({ data, handleEdit, handleDelete }) => {
             )}
             {showDetails && (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-                    {data?.transactions?.payments?.map((payments, index) => (
+                    {data?.transactions?.payments?.map((payment, index) => (
                         <div key={index} className="border p-3 rounded-md">
                             <h4 className="font-medium mb-2">Payment Details</h4>
-                            <p className="text-sm">Partial Payment: Rs.{payments.amount}</p>
-                            <p className="text-sm">Debit (Remaining Balance): Rs.{payments.debit}</p>
-                            <p className="text-sm">Credit (Paid Amount): Rs.{payments.credit}</p>
-                            {payments.invoice && <p className="text-sm">Invoice: <a href={URL.createObjectURL(payments.invoice)} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">View</a></p>}
+                            <p className="text-sm">Partial Payment: Rs.{payment.amount}</p>
+                            <p className="text-sm">Debit (Remaining Balance): Rs.{payment.debit}</p>
+                            <p className="text-sm">Credit (Paid Amount): Rs.{payment.credit}</p>
+                            {payment.invoice && payment.invoice !== "N/A" && (
+                                <p className="text-sm">
+                                    Invoice:{" "}
+                                    <a
+                                        href={`${process.env.NEXT_PUBLIC_API_URL}/supplier/invoices/${payment.invoice}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-blue-500 underline"
+                                    >
+                                        View
+                                    </a>
+                                </p>
+                            )}
                         </div>
                     ))}
                 </div>

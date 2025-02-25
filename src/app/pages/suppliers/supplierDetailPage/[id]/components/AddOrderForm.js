@@ -1,8 +1,9 @@
 'use client'
-import {React, useState} from 'react'
+import React, { useState } from 'react'
 import { XMarkIcon } from "@heroicons/react/24/outline";
+import axios from 'axios';
 
-const AddOrderForm = ({ setShowForm, currentSupplier, setCurrentSupplier }) => {
+const AddOrderForm = ({ setShowForm, shipmentsData, setShipmentsData, id }) => {
 
   const [newData, setNewData] = useState({
     date: new Date().toISOString().split('T')[0],
@@ -16,6 +17,8 @@ const AddOrderForm = ({ setShowForm, currentSupplier, setCurrentSupplier }) => {
       vehicle: ""
     },
     status: "Pending",
+    partialPayment: 0,
+    invoice: "N/A",
     transactions: {
       paymentDate: new Date().toISOString().split('T')[0],
       partialPayment: 0,
@@ -23,23 +26,127 @@ const AddOrderForm = ({ setShowForm, currentSupplier, setCurrentSupplier }) => {
       totalAmount: 0,
       totalDebit: 0,
       totalCredit: 0,
-      payments: [{
-        paymentDate: new Date().toISOString().split('T')[0],
-        amount: 0,
-        invoice: "",
-        debit: 0,
-        credit: 0,
-      }]
+      payments: []
     }
-
   });
 
-  // When click on add new item
+  const handleItemChange = (index, field, value) => {
+    const updatedItems = [...newData.items];
+    updatedItems[index][field] = field === 'quantity' || field === 'price' ? Number(value) : value;
+    setNewData(prev => ({
+      ...prev,
+      items: updatedItems
+    }));
+  };
+
   const addNewItem = () => {
     setNewData(prev => ({
       ...prev,
-      items: [...prev.items, { itemName: "", quantity: "", price: "", date: new Date().toISOString().split('T')[0] }]
+      items: [...prev.items, { itemName: "", quantity: 0, price: 0 }]
     }));
+  };
+
+  const handleStatusChange = (status) => {
+    setNewData(prev => ({
+      ...prev,
+      status: status
+    }));
+  };
+
+  const handleTransportChange = (field, value) => {
+    if (field === 'name' || field === 'vehicle') {
+      setNewData(prev => ({
+        ...prev,
+        driver: {
+          ...prev.driver,
+          [field]: value
+        }
+      }));
+    } 
+    else if (field === 'deliveryDate') {
+      setNewData(prev => ({
+        ...prev,
+        date: value
+      }));
+    }
+  };
+
+  const resetForm = () => {
+    setNewData({
+     date: new Date().toISOString().split('T')[0],
+     items: [{ itemName: "", quantity: 0, price: 0 }],
+     driver: { name: "", vehicle: "" },
+     status: "Pending",
+     transactions: {
+       paymentDate: new Date().toISOString().split('T')[0],
+       partialPayment: 0,
+       invoice: "N/A",
+       totalAmount: 0,
+       totalDebit: 0,
+       totalCredit: 0,
+       payments: []
+     }
+   });
+ };
+
+  const handleAddData = async (e) => {
+    e.preventDefault();
+
+    // Calculate total amount and payments
+    const totalAmount = newData.items.reduce((acc, item) => acc + Number((item.price * item.quantity) || 0), 0);
+    const totalPaid = newData.transactions.payments?.reduce((acc, payment) => acc + Number(payment.amount), 0) || 0;
+    const newTotalPaid = totalPaid + Number(newData.transactions.partialPayment || 0);
+    const remainingDebit = totalAmount - newTotalPaid;
+
+    console.log(newData.transactions.invoice)
+    // Create the order object matching the backend schema
+    const orderData = {
+      date: new Date().toISOString(),
+      items: newData.items,
+      driver: {
+        name: newData.driver.name,
+        vehicle: newData.driver.vehicle
+      },
+      status: newData.status || "Pending",
+      transactions: {
+        paymentDate: new Date().toISOString(),
+        partialPayment: Number(newData.transactions.partialPayment),
+        invoice: newData.transactions.invoice || "N/A",
+        totalAmount: totalAmount,
+        totalDebit: remainingDebit,
+        totalCredit: newTotalPaid,
+        payments: [
+          ...newData.transactions.payments,
+          {
+            amount: Number(newData.transactions.partialPayment),
+            invoice: newData.transactions.invoice || "N/A",
+            paymentDate: new Date().toISOString(),
+            debit: remainingDebit,
+            credit: newTotalPaid
+          }]
+      }
+    };
+
+    try {
+      // Fixed API endpoint to match backend route: /api/supplier/:id/shipment
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/supplier/${id}/shipment`, orderData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      if (response.status === 201) {
+        // Update local state with new data
+        setShipmentsData(response.data.supplier.shipments);
+        resetForm();
+        setShowForm(false);
+      } else {
+        throw new Error("Failed to add order");
+      }
+    } catch (error) {
+      console.error("Error adding order:", error);
+      alert(`Error adding order: ${error.response?.data?.message || 'Please try again.'}`);
+    }
   };
 
   return (
@@ -54,7 +161,7 @@ const AddOrderForm = ({ setShowForm, currentSupplier, setCurrentSupplier }) => {
 
         <h2 className="text-2xl font-semibold mb-4 text-center">Create New Order</h2>
 
-        <form onSubmit={handleAddData} className="space-y-6 overflow-y-auto max-h-96">
+        <form encType="multipart/form-data" onSubmit={handleAddData} className="space-y-6 overflow-y-auto max-h-96">
           {/* Items Section */}
           <div className="border-b pb-4">
             <h3 className="text-lg font-medium mb-4">Items Details</h3>
@@ -94,11 +201,10 @@ const AddOrderForm = ({ setShowForm, currentSupplier, setCurrentSupplier }) => {
                   <input
                     type="number"
                     value={item.price * item.quantity}
-                    className="w-[90%] p-2 border rounded-md bg-gray-200"
+                    className="w-full p-2 border rounded-md bg-gray-200"
                     disabled
                   />
                 </div>
-
               </div>
             ))}
             <button
@@ -115,14 +221,14 @@ const AddOrderForm = ({ setShowForm, currentSupplier, setCurrentSupplier }) => {
             <h3 className="text-lg font-medium mb-4">Payment Details</h3>
 
             {/* Show Previous Payments */}
-            {newData.payments?.length > 0 && (
+            {newData.transactions.payments?.length > 0 && (
               <div className="mb-4">
                 <h4 className="text-md font-semibold">Previous Payments</h4>
                 <ul className="space-y-2">
-                  {newData.payments.map((payment, index) => (
+                  {newData.transactions.payments.map((payment, index) => (
                     <li key={index} className="bg-gray-100 p-2 rounded-md flex justify-between">
                       <span>Amount: {payment.amount}</span>
-                      <span className="text-sm text-gray-600">Date: {new Date(payment.date).toLocaleDateString()}</span>
+                      <span className="text-sm text-gray-600">Date: {new Date(payment.paymentDate).toLocaleDateString()}</span>
                     </li>
                   ))}
                 </ul>
@@ -135,8 +241,14 @@ const AddOrderForm = ({ setShowForm, currentSupplier, setCurrentSupplier }) => {
                 <label className="block text-sm font-medium">Partial Payment*</label>
                 <input
                   type="number"
-                  value={newData.partialPayment || ''}
-                  onChange={(e) => setNewData(prev => ({ ...prev, partialPayment: e.target.value }))}
+                  value={newData.transactions.partialPayment || ''}
+                  onChange={(e) => setNewData(prev => ({ 
+                    ...prev, 
+                    transactions: { 
+                      ...prev.transactions, 
+                      partialPayment: e.target.value 
+                    } 
+                  }))}
                   className="w-full p-2 border rounded-md"
                 />
               </div>
@@ -145,14 +257,23 @@ const AddOrderForm = ({ setShowForm, currentSupplier, setCurrentSupplier }) => {
                 <label className="block text-sm font-medium">Upload Invoice*</label>
                 <input
                   type="file"
-                  onChange={(e) => setNewData(prev => ({ ...prev, invoice: e.target.files[0] }))}
+                  name="invoice"
+                  onChange={(e) => {
+                    const file = e.target.files[0]; // Get the file object
+                    setNewData(prev => ({
+                      ...prev,
+                      transactions: {
+                        ...prev.transactions,
+                        invoice: file ? file.name : "N/A" // Use file.name ONLY if file exists
+                      }
+                    }));
+                  }}
                   className="w-full p-2 border rounded-md"
                   required
                 />
               </div>
             </div>
           </div>
-
 
           {/* Debit and Credit Section */}
           <div className="border-b pb-4">
@@ -164,8 +285,8 @@ const AddOrderForm = ({ setShowForm, currentSupplier, setCurrentSupplier }) => {
                   type="number"
                   value={
                     newData.items.reduce((acc, item) => acc + Number((item.price * item.quantity) || 0), 0) -
-                    (newData.payments?.reduce((acc, payment) => acc + Number(payment.amount), 0) || 0) -
-                    Number(newData.partialPayment || 0)
+                    (newData.transactions.payments?.reduce((acc, payment) => acc + Number(payment.amount), 0) || 0) -
+                    Number(newData.transactions.partialPayment || 0)
                   }
                   disabled
                   className="w-full p-2 border rounded-md bg-gray-200"
@@ -176,8 +297,8 @@ const AddOrderForm = ({ setShowForm, currentSupplier, setCurrentSupplier }) => {
                 <input
                   type="number"
                   value={
-                    (newData.payments?.reduce((acc, payment) => acc + Number(payment.amount), 0) || 0) +
-                    Number(newData.partialPayment || 0)
+                    (newData.transactions.payments?.reduce((acc, payment) => acc + Number(payment.amount), 0) || 0) +
+                    Number(newData.transactions.partialPayment || 0)
                   }
                   disabled
                   className="w-full p-2 border rounded-md bg-gray-200"
@@ -186,15 +307,14 @@ const AddOrderForm = ({ setShowForm, currentSupplier, setCurrentSupplier }) => {
             </div>
           </div>
 
-
           {/* Status Section */}
           <div className="border-b pb-4">
             <h3 className="text-lg font-medium mb-4">Order Status</h3>
             <div className="flex gap-4">
               <button
                 type="button"
-                onClick={() => handleStatusChange('pending')}
-                className={`px-4 py-2 rounded-md ${newData.status === 'pending'
+                onClick={() => handleStatusChange('Pending')}
+                className={`px-4 py-2 rounded-md ${newData.status === 'Pending'
                   ? 'bg-yellow-500 text-white'
                   : 'bg-gray-200'
                   }`}
@@ -203,8 +323,8 @@ const AddOrderForm = ({ setShowForm, currentSupplier, setCurrentSupplier }) => {
               </button>
               <button
                 type="button"
-                onClick={() => handleStatusChange('delivered')}
-                className={`px-4 py-2 rounded-md ${newData.status === 'delivered'
+                onClick={() => handleStatusChange('Delivered')}
+                className={`px-4 py-2 rounded-md ${newData.status === 'Delivered'
                   ? 'bg-green-500 text-white'
                   : 'bg-gray-200'
                   }`}
@@ -215,26 +335,26 @@ const AddOrderForm = ({ setShowForm, currentSupplier, setCurrentSupplier }) => {
           </div>
 
           {/* Transport Form */}
-          {newData.status === 'delivered' && (
+          {newData.status === 'Delivered' && (
             <div className="border-b pb-4">
               <h3 className="text-lg font-medium mb-4">Transport Details</h3>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium">Transport Name*</label>
+                  <label className="block text-sm font-medium">Driver Name*</label>
                   <input
                     type="text"
-                    value={newData.transportDetails.name}
+                    value={newData.driver.name}
                     onChange={(e) => handleTransportChange('name', e.target.value)}
                     className="w-full p-2 border rounded-md"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium">Driver Name*</label>
+                  <label className="block text-sm font-medium">Vehicle*</label>
                   <input
                     type="text"
-                    value={newData.transportDetails.driver}
-                    onChange={(e) => handleTransportChange('driver', e.target.value)}
+                    value={newData.driver.vehicle}
+                    onChange={(e) => handleTransportChange('vehicle', e.target.value)}
                     className="w-full p-2 border rounded-md"
                     required
                   />
@@ -243,7 +363,7 @@ const AddOrderForm = ({ setShowForm, currentSupplier, setCurrentSupplier }) => {
                   <label className="block text-sm font-medium">Delivery Date*</label>
                   <input
                     type="date"
-                    value={newData.transportDetails.deliveryDate}
+                    value={newData.date}
                     onChange={(e) => handleTransportChange('deliveryDate', e.target.value)}
                     className="w-full p-2 border rounded-md"
                     required
@@ -275,4 +395,4 @@ const AddOrderForm = ({ setShowForm, currentSupplier, setCurrentSupplier }) => {
   )
 }
 
-export default AddOrderForm
+export default AddOrderForm;
