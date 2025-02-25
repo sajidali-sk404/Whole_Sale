@@ -14,6 +14,7 @@ const CustomerBilling = () => {
   const [customerGivenAmount, setCustomerGivenAmount] = useState(0); // New field for customer's given amount
   const [debt, setDebt] = useState(0); // To store customer's debt
   const [showDetails, setShowDetails] = useState({}); // Track visibility of each bill's details
+  const [discountPercentage, setDiscountPercentage] = useState(0); // New state for percentage
   const printRef = useRef();
 
   // Example items for the dropdown
@@ -37,6 +38,10 @@ const CustomerBilling = () => {
   const handleGenerateBill = () => {
     if (customerName && cart.length > 0) {
       const totalAmount = cart.reduce((acc, item) => acc + item.total, 0);
+      // Apply discount
+      const discountAmount = (discountPercentage / 100) * totalAmount; // Calculate discount
+      const totalAfterDiscount = totalAmount - discountAmount; // Subtract discount from total
+
       const netAmount = totalAmount + parseFloat(oldBalance);
       const calculatedDebt = netAmount - parseFloat(customerGivenAmount);
 
@@ -49,6 +54,9 @@ const CustomerBilling = () => {
         address,
         cart,
         totalAmount,
+        discountPercentage, // Store the discount percentage
+        discountAmount, // Store the discount amount
+        totalAfterDiscount, // Store the total after applying the discount
         oldBalance,
         netAmount,
         customerGivenAmount,
@@ -64,6 +72,7 @@ const CustomerBilling = () => {
       setCustomerName("");
       setAddress("");
       setCart([]);
+      setDiscountPercentage(0); // Reset discount percentage
       setOldBalance(0);
       setCustomerGivenAmount(0);
 
@@ -74,6 +83,9 @@ const CustomerBilling = () => {
       setDate(new Date().toISOString().split('T')[0]);
     }
   };
+
+
+
 
   const handlePrint = (bill) => {
     const printContent = `
@@ -332,6 +344,17 @@ const CustomerBilling = () => {
           ))}
         </tbody>
       </table>
+
+      {/* <div className="mb-4">
+        <span>Discount percentage</span>
+        <input
+          type="number"
+          placeholder="Discount percentage"
+          value={discountPercentage} // Use discountPercentage instead of discountAmount
+          onChange={(e) => setDiscountPercentage(e.target.value)} // Set percentage
+          className="border p-2 rounded w-full"
+        />
+      </div> */}
 
       <h3 className=" font-bold mt-4">
         Total Amount: {cart.reduce((acc, item) => acc + item.total, 0)} PKR
