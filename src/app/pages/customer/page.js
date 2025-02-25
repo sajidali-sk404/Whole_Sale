@@ -202,7 +202,7 @@ const CustomerBilling = () => {
             </tr>
             <tr>
                 <td><strong>Total Discount:</strong></td>
-                <td>0</td>
+                <td>0 PKR</td>
             </tr>
             <tr>
                 <td><strong>Net Bill Amount:</strong></td>
@@ -261,6 +261,7 @@ const CustomerBilling = () => {
           onChange={(e) => setInvoiceNo(e.target.value)}
           className="border p-2 mr-2 rounded w-full"
           readOnly // Make invoice number read-only
+          disabled
         />
       </div>
 
@@ -345,19 +346,9 @@ const CustomerBilling = () => {
         </tbody>
       </table>
 
-      {/* <div className="mb-4">
-        <span>Discount percentage</span>
-        <input
-          type="number"
-          placeholder="Discount percentage"
-          value={discountPercentage} // Use discountPercentage instead of discountAmount
-          onChange={(e) => setDiscountPercentage(e.target.value)} // Set percentage
-          className="border p-2 rounded w-full"
-        />
-      </div> */}
-
+      
       <h3 className=" font-bold mt-4">
-        Total Amount: {cart.reduce((acc, item) => acc + item.total, 0)} PKR
+        Total Amount: {cart.reduce((acc, item) => acc + item.total, 0) - parseFloat(discountPercentage)} PKR
       </h3>
 
       <div className="mb-4">
@@ -372,7 +363,7 @@ const CustomerBilling = () => {
       </div>
 
       <h3 className=" font-bold mt-4">
-        Net Amount: {cart.reduce((acc, item) => acc + item.total, 0) + parseFloat(oldBalance)} PKR
+        Net Amount: {cart.reduce((acc, item) => acc + item.total, 0) + parseFloat(oldBalance) - parseFloat(discountPercentage)} PKR
       </h3>
 
       <div className="mb-4">

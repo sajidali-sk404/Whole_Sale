@@ -1,6 +1,9 @@
 "use client";
 import React from "react";
 import { motion } from "framer-motion";
+import { useContext } from "react";
+import { InventoryContext } from "../ContextApi/inventoryDataApi";
+import { SupplierContext } from "../ContextApi/SupplierDataApi";
 
 const Card = ({ title, value }) => (
   <motion.div
@@ -13,11 +16,14 @@ const Card = ({ title, value }) => (
 );
 
 const Navbar = () => {
+  const { totalInventory } = useContext(InventoryContext);
+  const { totalSupplier } = useContext(SupplierContext)
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4 bg-gray-100 shadow-md">
-      <Card title="Total Amount of Stock" value="0" />
+      <Card title="Total Amount of Stock" value={totalInventory} />
       <Card title="Daily Profit" value="0" />
-      <Card title="Added Company" value="0" />
+      <Card title="Added Company" value={totalSupplier} />
       <Card title="Added Local Cust." value="0" />
     </div>
   );

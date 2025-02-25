@@ -6,11 +6,13 @@ export const SupplierContext = createContext()
 
 export const SupplierProvider = ({ children }) => {
   const [suppliers, setSuppliers] = useState([]);
+  const [totalSupplier, setTotalSupplier] = useState()
 
   const fetchSuppliers = useCallback(async () => {
     try {
       const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/supplier`)
       setSuppliers(response.data)
+      setTotalSupplier(response.data.length)
     } catch (error) {
       console.error(error)
     }
@@ -39,6 +41,7 @@ export const SupplierProvider = ({ children }) => {
   const value = {
     suppliers,
     setSuppliers,
+    totalSupplier,
   }
 
   return (
