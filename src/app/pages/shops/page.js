@@ -36,15 +36,18 @@ function ShopKeeperManagement() {
       {/* shop Grid */}
       <div className="overflow-hidden grid sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-5">
         {shops && shops.length > 0 ? (
-          shops.map((shopItem) => (
+          shops?.map((shopItem) => (
             <motion.div
-              whileHover={{ scale: 1.05 }}
               key={shopItem.id}
+              whileHover={{ scale: 1.02 }}
               onClick={() => router.push(`/pages/shops/shopDetailPage/${shopItem.id}`)}
-              className="border-2 font-semibold gap-5 bg-white shadow-md p-4 rounded-md flex flex-col items-center cursor-pointer w-full"
+              className="w-full p-6 bg-white border border-gray-200 shadow-lg rounded-2xl flex flex-col items-center text-center cursor-pointer transition-all hover:shadow-xl"
             >
-              <p>{shopItem.shopName}</p>
-              <p>{shopItem.shopKeeperName}</p>
+              <div className="w-16 h-16 bg-blue-100 text-blue-500 flex items-center justify-center rounded-full text-xl font-bold">
+                {shopItem.shopName.charAt(0)}
+              </div>
+              <h3 className="mt-4 text-lg font-semibold text-gray-800">{shopItem.shopName}</h3>
+              <p className="mt-1 text-sm text-gray-500">Owner: {shopItem.shopKeeperName}</p>
             </motion.div>
           ))
         ) : (
