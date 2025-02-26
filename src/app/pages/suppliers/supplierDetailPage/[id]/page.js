@@ -4,19 +4,18 @@ import { Bars3Icon } from "@heroicons/react/24/outline";
 import SideBar from "./components/SideBar";
 import AddOrderForm from "./components/AddOrderForm";
 import DataList from "./components/DataList";
+import EditOrderForm from "./components/EditOrderForm";
 import axios from "axios";
 
 const Page = ({ params }) => {
 
   const param = use(params);
 
-  const [isEditing, setIsEditing] = useState(false);
-
-  const [editId, setEditId] = useState(null);
-
   const [currentSupplier, setCurrentSupplier] = useState(null)
 
   const [showForm, setShowForm] = useState(false);
+  const [showEditForm, setShowEditForm] = useState(false);
+  const [shipmentDataToEdit, setShipmentDataToEdit] = useState(null);
 
   const [shipmentsData, setShipmentsData] = useState([]);
 
@@ -73,22 +72,20 @@ const Page = ({ params }) => {
   console.log("shipmentsData", shipmentsData)
   console.log(loading)
 
-  const handleDelete = (id) => {
+  const handleDeleteShipment = (id) => {
     setShipmentsData(shipmentsData.filter(order => order._id !== id));
+    try {
+      const response = axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/supplier/${param.id}/shipment/${id}`);
+      console.log(response);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
-  const handleEdit = (id) => {
-    const orderToEdit = shipmentsData.find((order) => order._id === id);
-
-    setNewData({
-      ...orderToEdit,
-      partialPayment: "", // Reset new payment input
-      invoice: null, // Reset invoice input
-    });
-
-    setIsEditing(true);
-    setEditId(id);
-    setShowForm(true);
+  const handleEditShipment = (shipment) => { // Function called from DataList
+    setShipmentDataToEdit(shipment); // Set the shipment data to be edited
+    setShowEditForm(true); // Show the Edit Form
+    setShowForm(false); // Hide Add Form if it's currently shown
   };
 
   return (
@@ -129,6 +126,16 @@ const Page = ({ params }) => {
 
         )}
 
+        {showEditForm && shipmentDataToEdit && ( // Conditionally render EditForm and pass shipmentDataToEdit
+          <EditOrderForm
+            setShowEditForm={setShowEditForm}
+            setShipmentsData={setShipmentsData}
+            id={param.id}
+            shipmentData={shipmentDataToEdit} // Pass shipmentDataToEdit as shipmentData prop
+            setShowForm={setShowForm} // Pass setShowForm if needed to also close AddForm
+          />
+        )}
+
         {/* Data List */}
         <div className="space-y-4">
 
@@ -136,9 +143,8 @@ const Page = ({ params }) => {
             <DataList
               key={index}
               data={data}
-              handleEdit={handleEdit}
-              handleDelete={handleDelete}
-              setNewData={setNewData}
+              handleEdit={handleEditShipment}
+              handleDelete={handleDeleteShipment}
             />
           ))}
 
