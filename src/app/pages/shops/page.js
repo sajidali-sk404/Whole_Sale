@@ -15,6 +15,8 @@ function ShopKeeperManagement() {
   const [showForm, setShowForm] = useState(false);
   const router = useRouter();
 
+  console.log(shops)
+
   return (
     <div className="min-h-screen bg-gray-100 p-6 ">
       {/* Page Header */}
@@ -36,18 +38,19 @@ function ShopKeeperManagement() {
       {/* shop Grid */}
       <div className="overflow-hidden grid sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-5">
         {shops && shops.length > 0 ? (
-          shops?.map((shopItem) => (
+          shops?.map((shopItem,index) => (
             <motion.div
-              key={shopItem.id}
+              key={shopItem._id }
+              
               whileHover={{ scale: 1.02 }}
-              onClick={() => router.push(`/pages/shops/shopDetailPage/${shopItem.id}`)}
+              onClick={() => router.push(`/pages/shops/shopDetailPage/${shopItem._id}`)}
               className="w-full p-6 bg-white border border-gray-200 shadow-lg rounded-2xl flex flex-col items-center text-center cursor-pointer transition-all hover:shadow-xl"
             >
               <div className="w-16 h-16 bg-blue-100 text-blue-500 flex items-center justify-center rounded-full text-xl font-bold">
-                {shopItem.shopName.charAt(0)}
+              {shopItem.shopName ? shopItem.shopName.charAt(0) : ''}
               </div>
               <h3 className="mt-4 text-lg font-semibold text-gray-800">{shopItem.shopName}</h3>
-              <p className="mt-1 text-sm text-gray-500">Owner: {shopItem.shopKeeperName}</p>
+              <p className="mt-1 text-sm text-gray-500">Owner: {shopItem.shopkeeperName}</p>
             </motion.div>
           ))
         ) : (

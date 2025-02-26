@@ -18,7 +18,7 @@ const SideBar = ({ setIsSidebarOpen, currentShop }) => {
       {/* Supplier Information */}
       <div className="mt-4 bg-gray-100 p-4 rounded-lg shadow-sm">
         <p className="text-gray-700 font-semibold">{currentShop?.shopName}</p>
-        <p className="text-sm text-gray-500">Shopkeeper: {currentShop?.shopKeeperName}</p>
+        <p className="text-sm text-gray-500">Shopkeeper: {currentShop?.shopkeeperName}</p>
         <p className="text-sm text-gray-500">Contact: {currentShop?.contact}</p>
         <p className="text-sm text-gray-500">Address: {currentShop?.address}</p>
       </div>
