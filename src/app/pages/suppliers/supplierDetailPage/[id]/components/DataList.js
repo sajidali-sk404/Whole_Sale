@@ -7,7 +7,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { MdKeyboardDoubleArrowDown, MdKeyboardDoubleArrowUp } from "react-icons/md";
 
-const DataList = ({ data, handleEdit, handleDelete }) => {
+const DataList = ({ data, handleEdit, handleDelete, handleStatusEdit }) => {
 
     const [showDetails, setShowDetails] = useState(false); // Add a toggle state
     const toggleDetails = () => {
@@ -19,6 +19,12 @@ const DataList = ({ data, handleEdit, handleDelete }) => {
         <div className="bg-white p-4 rounded-lg shadow">
             <div className="flex justify-between items-start ">
                 <div className='flex justify-center items-center mt-2'>
+                    <span className='text-sm mx-3 px-3 py-1 rounded-full bg-blue-500 font-medium hover:bg-blue-600 text-white'>
+                        <button
+                        onClick={() => handleStatusEdit(data)}>
+                            Status
+                        </button>
+                    </span>
                     <span className={`inline-block px-3 py-1 rounded-full text-sm ${data.status === 'Delivered'
                         ? 'bg-green-100 text-green-800'
                         : 'bg-yellow-100 text-yellow-800'

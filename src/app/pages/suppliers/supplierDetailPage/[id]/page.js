@@ -6,6 +6,7 @@ import AddOrderForm from "./components/AddOrderForm";
 import DataList from "./components/DataList";
 import EditOrderForm from "./components/EditOrderForm";
 import axios from "axios";
+import EditStatusForm from "./components/EditStatusForm";
 
 const Page = ({ params }) => {
 
@@ -13,6 +14,7 @@ const Page = ({ params }) => {
 
   const [currentSupplier, setCurrentSupplier] = useState(null)
 
+  const [showStatusForm, setShowStatusForm] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
   const [shipmentDataToEdit, setShipmentDataToEdit] = useState(null);
@@ -88,6 +90,11 @@ const Page = ({ params }) => {
     setShowForm(false); // Hide Add Form if it's currently shown
   };
 
+  const handleStatusEdit = (shipment) => {
+    setShipmentDataToEdit(shipment);
+    setShowStatusForm(true);
+  }
+
   return (
     <div className="flex h-auto">
 
@@ -108,7 +115,7 @@ const Page = ({ params }) => {
       <div className="flex-1 px-12 py-2">
         <button
           onClick={() => setShowForm(true)}
-          className="bg-blue-500 text-white px-4 py-2 rounded-md mb-4"
+          className="bg-blue-500 text-white px-4 py-2 rounded-md mb-4 hover:bg-blue-600"
         >
           Add New Order
         </button>
@@ -136,6 +143,15 @@ const Page = ({ params }) => {
           />
         )}
 
+        {showStatusForm && (
+          <EditStatusForm 
+            setShowStatusForm={setShowStatusForm}
+            setShipmentsData={setShipmentsData}
+            id={param.id}
+            shipmentData={shipmentDataToEdit}
+          />
+        )}
+
         {/* Data List */}
         <div className="space-y-4">
 
@@ -145,6 +161,7 @@ const Page = ({ params }) => {
               data={data}
               handleEdit={handleEditShipment}
               handleDelete={handleDeleteShipment}
+              handleStatusEdit={handleStatusEdit}
             />
           ))}
 

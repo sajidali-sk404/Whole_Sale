@@ -13,11 +13,11 @@ const EditOrderForm = ({ setShowEditForm, setShipmentsData, id, shipmentData, se
             quantity: 0,
             price: 0
         }],
-        driver: {
-            name: "",
-            vehicle: ""
-        },
-        status: "Pending",
+        // driver: {
+        //     name: "",
+        //     vehicle: ""
+        // },
+        // status: "Pending",
         partialPayment: 0,
         invoice: null,
         transactions: {
@@ -35,22 +35,22 @@ const EditOrderForm = ({ setShowEditForm, setShipmentsData, id, shipmentData, se
     useEffect(() => {
         if (shipmentData) {
             setEditData({
-                date: shipmentData.date ? new Date(shipmentData.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0], // Handle potential null date
-                items: shipmentData.items || [{ itemName: "", quantity: 0, price: 0 }], // Handle potential null items
-                driver: shipmentData.driver || { name: "", vehicle: "" }, // Handle potential null driver
-                status: shipmentData.status || "Pending",
+                date: shipmentData.date ? new Date(shipmentData.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+                items: shipmentData.items || [{ itemName: "", quantity: 0, price: 0 }],
+                // driver: shipmentData.driver || { name: "", vehicle: "" },
+                // status: shipmentData.status || "Pending",
                 transactions: {
-                    paymentDate: shipmentData.transactions?.paymentDate ? new Date(shipmentData.transactions.paymentDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0], // Handle potential null paymentDate
+                    paymentDate: shipmentData.transactions?.paymentDate ? new Date(shipmentData.transactions.paymentDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
                     partialPayment: shipmentData.transactions?.partialPayment || 0,
-                    invoice: shipmentData.transactions?.invoice || null, // Keep invoice filename (not file object initially)
+                    invoice: shipmentData.transactions?.invoice || null,
                     totalAmount: shipmentData.transactions?.totalAmount || 0,
                     totalDebit: shipmentData.transactions?.totalDebit || 0,
                     totalCredit: shipmentData.transactions?.totalCredit || 0,
-                    payments: shipmentData.transactions?.payments || [] // Handle potential null payments
+                    payments: shipmentData.transactions?.payments || []
                 }
             });
         }
-    }, [shipmentData]); // Run effect when shipmentData changes
+    }, [shipmentData]);
 
     const handleFileChange = (e) => {
         setEditData(prev => ({
@@ -78,37 +78,37 @@ const EditOrderForm = ({ setShowEditForm, setShipmentsData, id, shipmentData, se
         }));
     };
 
-    const handleStatusChange = (status) => {
-        setEditData(prev => ({
-            ...prev,
-            status: status
-        }));
-    };
+    // const handleStatusChange = (status) => {
+    //     setEditData(prev => ({
+    //         ...prev,
+    //         status: status
+    //     }));
+    // };
 
-    const handleTransportChange = (field, value) => {
-        if (field === 'name' || field === 'vehicle') {
-            setEditData(prev => ({
-                ...prev,
-                driver: {
-                    ...prev.driver,
-                    [field]: value
-                }
-            }));
-        }
-        else if (field === 'deliveryDate') {
-            setEditData(prev => ({
-                ...prev,
-                date: value
-            }));
-        }
-    };
+    // const handleTransportChange = (field, value) => {
+    //     if (field === 'name' || field === 'vehicle') {
+    //         setEditData(prev => ({
+    //             ...prev,
+    //             driver: {
+    //                 ...prev.driver,
+    //                 [field]: value
+    //             }
+    //         }));
+    //     }
+    //     else if (field === 'deliveryDate') {
+    //         setEditData(prev => ({
+    //             ...prev,
+    //             date: value
+    //         }));
+    //     }
+    // };
 
     const resetForm = () => {
         setEditData({
             date: new Date().toISOString().split('T')[0],
             items: [{ itemName: "", quantity: "", price: "" }],
-            driver: { name: "", vehicle: "" },
-            status: "Pending",
+            // driver: { name: "", vehicle: "" },
+            // status: "Pending",
             transactions: {
                 paymentDate: new Date().toISOString().split('T')[0],
                 partialPayment: "",
@@ -136,9 +136,9 @@ const EditOrderForm = ({ setShowEditForm, setShipmentsData, id, shipmentData, se
         // Append items as JSON string (backend needs to parse it if it expects array)
         formData.append('items', JSON.stringify(editData.items)); // Important: Stringify items array
 
-        formData.append('driver[name]', editData.driver.name); // Append nested driver fields
-        formData.append('driver[vehicle]', editData.driver.vehicle);
-        formData.append('status', editData.status);
+        // formData.append('driver[name]', editData.driver.name);
+        // formData.append('driver[vehicle]', editData.driver.vehicle);
+        // formData.append('status', editData.status);
 
         // Append transactions data
         formData.append('transactions[paymentDate]', editData.transactions.paymentDate);
@@ -325,7 +325,7 @@ const EditOrderForm = ({ setShowEditForm, setShipmentsData, id, shipmentData, se
                     </div>
 
                     {/* Status Section */}
-                    <div className="border-b pb-4">
+                    {/* <div className="border-b pb-4">
                         <h3 className="text-lg font-medium mb-4">Order Status</h3>
                         <div className="flex gap-4">
                             <button
@@ -349,10 +349,10 @@ const EditOrderForm = ({ setShowEditForm, setShipmentsData, id, shipmentData, se
                                 Delivered
                             </button>
                         </div>
-                    </div>
+                    </div> */}
 
                     {/* Transport Form */}
-                    {editData.status === 'Delivered' && (
+                    {/* {editData.status === 'Delivered' && (
                         <div className="border-b pb-4">
                             <h3 className="text-lg font-medium mb-4">Transport Details</h3>
                             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -388,13 +388,13 @@ const EditOrderForm = ({ setShowEditForm, setShipmentsData, id, shipmentData, se
                                 </div>
                             </div>
                         </div>
-                    )}
+                    )} */}
 
                     {/* Form Actions */}
                     <div className="flex justify-end gap-4">
                         <button
                             type="button"
-                            onClick={() => setShowForm(false)}
+                            onClick={() => setShowEditForm(false)}
                             className="bg-gray-500 text-white px-4 py-2 rounded-md"
                         >
                             Cancel
