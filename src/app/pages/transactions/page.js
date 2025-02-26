@@ -1,135 +1,147 @@
 'use client'
-import { useContext, useState } from "react";
+import React from "react";
+import { useContext, useState, useEffect } from "react";
 import { SupplierContext } from "@/app/ContextApi/SupplierDataApi";
+import { FaChevronDown, FaChevronRight, FaPlusCircle } from 'react-icons/fa'; // Example icons
 
 export default function FinancialTransactions() {
-  const { suppliers } = useContext(SupplierContext);
+  const { suppliers, fetchSuppliers } = useContext(SupplierContext);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [expandedSuppliers, setExpandedSuppliers] = useState({});
 
+  useEffect(() => {
+      if (fetchSuppliers) {
+          const fetchData = async () => {
+              try {
+                  await fetchSuppliers();
+                  setLoading(false);
+              } catch (err) {
+                  setError(err.message || "An error occurred while fetching data.");
+                  setLoading(false);
+              }
+          };
+          fetchData();
+      } else {
+          setLoading(false);
+          setError("fetchSuppliers function is not available.");
+      }
+  }, [fetchSuppliers]);
 
+  const toggleExpanded = (supplierId) => {
+    setExpandedSuppliers((prevExpanded) => ({
+      ...prevExpanded,
+      [supplierId]: !prevExpanded[supplierId],
+    }));
+  };
 
-  // const [newTransaction, setNewTransaction] = useState({
-  //   companyName: "",
-  //   amount: "",
-  //   date: "",
-  //   paymentMethod: "Bank Transfer",
-  //   status: "Pending",
-  // });
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
-  // const handleChange = (e) => {
-  //   setNewTransaction({ ...newTransaction, [e.target.name]: e.target.value });
-  // };
-
-  // const handleSubmit = (e) => {
-  //   e.preventDefault();
-  //   const newEntry = { ...newTransaction, id: transactions.length + 1 };
-  //   setTransactions([...transactions, newEntry]);
-  //   setNewTransaction({
-  //     companyName: "",
-  //     amount: "",
-  //     date: "",
-  //     paymentMethod: "Bank Transfer",
-  //     status: "Pending",
-  //   });
-  // };
+  if (error) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="text-red-500 text-xl">Error: {error}</div>
+      </div>
+    );
+  }
 
   return (
-    <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-4">Financial Transactions</h1>
+    <div className="bg-gray-100 min-h-screen p-8">
+      <div className="container mx-auto">
+        <h1 className="text-4xl font-bold text-blue-600 mb-4">Financial Transactions</h1>
+        <p className="text-gray-600 mb-8">Manage and track your supplier transactions with ease.</p>
 
-      {/* Transactions Table */}
-      <div className="overflow-x-auto shadow-md rounded-lg">
-        <table className="min-w-full bg-white border border-gray-300">
-          <thead>
-            <tr className="bg-gray-200">
-              <th className="py-2 px-4 border">Company</th>
-              <th className="py-2 px-4 border">Amount</th>
-              <th className="py-2 px-4 border">Date</th>
-              <th className="py-2 px-4 border">Payment Method</th>
-              <th className="py-2 px-4 border">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {suppliers.map((company) => (
-              <tr key={company._id} className="text-center">
-                <td className="py-2 px-4 border">{company.companyName}</td>
-              </tr>
-            ))}
-            {suppliers?.shipments?.map((items, index) => {
-              return (
-                <tr key={index}>             
-                  <td className="py-2 px-4 border">{items.totalAmount}</td>
-                  <td className="py-2 px-4 border">{items.totalDebit}</td>
-                  <td
-                    className={`py-2 px-4 border ${items.status === "Delivered" ? "text-green-600" : "text-red-500"
-                      }`}
-                  >
-                    {items.status}
-                  </td>
+        <h2 className="text-2xl font-semibold text-gray-700 mb-4">Suppliers</h2>
+        <div className="bg-white rounded-lg shadow-md overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full">
+              <thead className="bg-blue-50">
+                <tr>
+                  <th className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
+                  <th className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company Name</th>
+                  <th className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Amount</th>
+                  <th className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Debit</th>
+                  <th className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                 </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {suppliers && suppliers.length > 0 ? (
+                  suppliers.map((supplier) => {
+                    // Create an array of rows *within* the map
+                    const rows = [];
 
-              )
-            })}
-          </tbody>
-        </table>
+                    // Always add the supplier row
+                    rows.push(
+                      <tr key={supplier._id} className="hover:bg-blue-50 transition-colors duration-200 cursor-pointer">
+                        <td className="py-4 px-6 whitespace-nowrap" onClick={() => toggleExpanded(supplier._id)}>
+                          <div className="flex items-center">
+                            {expandedSuppliers[supplier._id] ? (
+                              <FaChevronDown className="text-blue-600" />
+                            ) : (
+                              <FaChevronRight className="text-blue-600" />
+                            )}
+                          </div>
+                        </td>
+                        <td className="py-4 px-6 whitespace-nowrap" onClick={() => toggleExpanded(supplier._id)}>
+                          <div className="text-sm font-medium text-gray-900">{supplier.companyName}</div>
+                        </td>
+                        <td className="py-4 px-6 whitespace-nowrap"></td>
+                        <td className="py-4 px-6 whitespace-nowrap"></td>
+                        <td className="py-4 px-6 whitespace-nowrap"></td>
+                      </tr>
+                    );
+
+                    // Conditionally add shipment rows *to the same array*
+                    if (expandedSuppliers[supplier._id] && supplier.shipments) {
+                      supplier.shipments.forEach((shipment, index) => {
+                        rows.push(
+                          <tr key={`${supplier._id}-shipment-${index}`} className="bg-gray-50 hover:bg-gray-100 transition-colors duration-200">
+                            <td className="py-4 px-6 whitespace-nowrap"></td>
+                            <td className="py-4 px-6 whitespace-nowrap">
+                              <div className="text-sm text-gray-700">{supplier.companyName}</div>
+                            </td>
+                            <td className="py-4 px-6 whitespace-nowrap">
+                              <div className="text-sm text-gray-900">{shipment.transactions?.totalAmount}</div>
+                            </td>
+                            <td className="py-4 px-6 whitespace-nowrap">
+                              <div className="text-sm text-gray-900">{shipment.transactions?.totalDebit}</div>
+                            </td>
+                            <td className="py-4 px-6 whitespace-nowrap">
+                              <span
+                                className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                                  shipment.status === "Delivered"
+                                    ? "bg-green-100 text-green-800"
+                                    : "bg-red-100 text-red-800"
+                                }`}
+                              >
+                                {shipment.status}
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      });
+                    }
+                      return rows; // Return the array of rows
+
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan="5" className="py-4 px-6 text-center text-gray-500">
+                      No suppliers found.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
-
-      {/* Add New Transaction Form
-      <div className="mt-6 bg-white p-4 shadow-md rounded-lg">
-        <h2 className="text-xl font-bold mb-4">Add New Transaction</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="text"
-            name="companyName"
-            placeholder="Company Name"
-            value={newTransaction.companyName}
-            onChange={handleChange}
-            className="w-full border p-2 rounded-md"
-            required
-          />
-          <input
-            type="number"
-            name="amount"
-            placeholder="Amount (Rs.)"
-            value={newTransaction.amount}
-            onChange={handleChange}
-            className="w-full border p-2 rounded-md"
-            required
-          />
-          <input
-            type="date"
-            name="date"
-            value={newTransaction.date}
-            onChange={handleChange}
-            className="w-full border p-2 rounded-md"
-            required
-          />
-          <select
-            name="paymentMethod"
-            value={newTransaction.paymentMethod}
-            onChange={handleChange}
-            className="w-full border p-2 rounded-md"
-          >
-            <option value="Bank Transfer">Bank Transfer</option>
-            <option value="Cash">Cash</option>
-            <option value="Cheque">Cheque</option>
-          </select>
-          <select
-            name="status"
-            value={newTransaction.status}
-            onChange={handleChange}
-            className="w-full border p-2 rounded-md"
-          >
-            <option value="Pending">Pending</option>
-            <option value="Completed">Completed</option>
-          </select>
-          <button
-            type="submit"
-            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-800 transition"
-          >
-            Add Transaction
-          </button>
-        </form> */}
-      {/* </div> */}
     </div>
   );
 }
