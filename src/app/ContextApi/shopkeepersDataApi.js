@@ -1,39 +1,24 @@
 'use client'
 import { createContext, useState, useCallback, useEffect } from 'react'
+import axios from 'axios'
 
 export const ShopContext = createContext()
 
 export const ShopProvider = ({ children }) => {
   const [shops, setShops] = useState([])
 
-  useEffect(() => {
-    // Dummy data of shop, replace it with api call
-    setShops([
-      {
-        id: 1,
-        shopName: "Shop 1",
-        shopKeeperName: "shopKeeperName 1",
-        contact: "1234567890",
-        address: "Address 1",
-      },
-      {
-        id: 2,
-        shopName: "Shop 2",
-        shopKeeperName: "shopKeeperName 2",
-        contact: "1234567890",
-        address: "Address 2",
-      },
-      {
-        id: 3,
-        shopName: "Shop 3",
-        shopKeeperName: "shopKeeperName 3",
-        contact: "1234567890",
-        address: "Address 3",
-      },
-    ]);
+  const fetchShops = useCallback(async () => {
+    try {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/shopkeeper`)
+      setShops(response.data)
+    } catch (error) {
+      console.error(error)
+    }
+  }, [shops])
 
-  }, [setShops]);
-  
+  useEffect(() => {
+    fetchShops();
+  }, [fetchShops])
 
   const AddShop = useCallback((shopId) => {
     if (!shopId) return
@@ -56,13 +41,11 @@ export const ShopProvider = ({ children }) => {
   const value = {
     shops,
     setShops,
-    AddShop,
-    removeShop,
-    isShop
+    
   }
 
   return (
-    <ShopContext.Provider value={value}>
+    <ShopContext.Provider async value={value}>
       {children}
     </ShopContext.Provider>
   )

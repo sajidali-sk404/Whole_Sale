@@ -6,11 +6,14 @@ import { ShopContext } from '@/app/ContextApi/shopkeepersDataApi';
 import SideBar from "./components/SideBar";
 import AddOrderForm from "./components/AddOrderForm";
 import DataList from "./components/DataList";
+import axios from "axios";
 
 const Page = ({ params }) => {
 
   const [isEditing, setIsEditing] = useState(false);
   const [editId, setEditId] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [shipmentsData, setShipmentsData] = useState([]);
 
   const param = use(params);
 
@@ -36,13 +39,28 @@ console.log(currentShop)
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  useEffect(() => {
 
-    if (shops.length > 0) {
-      const foundCompany = shops.find((shop) => shop.id == param.id);
-      setCurrentShop(foundCompany || null);
-    }
-  }, [param.id, shops, setDataList]);
+
+    useEffect(() => {
+
+      const fetchShopData = async () => {
+        try {
+          const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/shopkeeper/${param.id}`);
+          setCurrentShop(response.data);
+          setShipmentsData(response.data.shipments);
+          console.log(response.data);
+  
+        } catch (err) {
+          console.log(err.message);
+        } finally {
+          setLoading(true);
+        }
+      }
+      fetchShopData();
+  
+  
+    }, [param.id]);
+  
 
   const handleAddData = (e) => {
     e.preventDefault();
