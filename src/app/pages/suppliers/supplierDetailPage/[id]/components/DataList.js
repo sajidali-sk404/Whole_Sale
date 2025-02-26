@@ -8,12 +8,11 @@ import {
 import { MdKeyboardDoubleArrowDown, MdKeyboardDoubleArrowUp } from "react-icons/md";
 
 const DataList = ({ data, handleEdit, handleDelete }) => {
+
     const [showDetails, setShowDetails] = useState(false); // Add a toggle state
     const toggleDetails = () => {
         setShowDetails(!showDetails);
     };
-
-    console.log("from datalist shipments", data);
 
     return (
 
@@ -34,7 +33,7 @@ const DataList = ({ data, handleEdit, handleDelete }) => {
                 <div className="flex gap-2 justify-center items-center">
                     <button
                         className="text-yellow-500 hover:text-yellow-600"
-                        onClick={() => handleEdit(data._id)}>
+                        onClick={() => handleEdit(data)}>
                         <PencilIcon className="w-5 h-5" />
                     </button>
                     <button

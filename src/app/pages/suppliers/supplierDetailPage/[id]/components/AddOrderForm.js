@@ -59,16 +59,16 @@ const AddOrderForm = ({ setShowForm, newData, setNewData, setShipmentsData, id }
   const resetForm = () => {
     setNewData({
       date: new Date().toISOString().split('T')[0],
-      items: [{ itemName: "", quantity: 0, price: 0 }],
+      items: [{ itemName: "", quantity: "", price: "" }],
       driver: { name: "", vehicle: "" },
       status: "Pending",
       transactions: {
         paymentDate: new Date().toISOString().split('T')[0],
-        partialPayment: 0,
+        partialPayment: "",
         invoice: null,
-        totalAmount: 0,
-        totalDebit: 0,
-        totalCredit: 0,
+        totalAmount: "",
+        totalDebit: "",
+        totalCredit: "",
         payments: []
       }
     });
