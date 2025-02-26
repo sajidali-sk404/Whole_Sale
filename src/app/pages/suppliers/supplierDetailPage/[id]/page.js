@@ -24,6 +24,31 @@ const Page = ({ params }) => {
 
   const [loading, setLoading] = useState(false);
 
+  const [newData, setNewData] = useState({
+    date: new Date().toISOString().split('T')[0],
+    items: [{
+      itemName: "",
+      quantity: 0,
+      price: 0
+    }],
+    driver: {
+      name: "",
+      vehicle: ""
+    },
+    status: "Pending",
+    partialPayment: 0,
+    invoice: null,
+    transactions: {
+      paymentDate: new Date().toISOString().split('T')[0],
+      partialPayment: 0,
+      invoice: "",
+      totalAmount: 0,
+      totalDebit: 0,
+      totalCredit: 0,
+      payments: []
+    }
+  });
+
 
   useEffect(() => {
 
@@ -48,165 +73,23 @@ const Page = ({ params }) => {
   console.log("shipmentsData", shipmentsData)
   console.log(loading)
 
-  // const handleAddData = (e) => {
-  //   e.preventDefault();
+  const handleDelete = (id) => {
+    setShipmentsData(shipmentsData.filter(order => order._id !== id));
+  };
 
-  //   const totalAmount = newData.items.reduce((acc, item) => acc + Number((item.price * item.quantity) || 0), 0);
-  //   const totalPaid = newData.payments?.reduce((acc, payment) => acc + Number(payment.amount), 0) || 0;
-  //   const newTotalPaid = totalPaid + Number(newData.partialPayment || 0);
-  //   const remainingDebit = totalAmount - newTotalPaid;
+  const handleEdit = (id) => {
+    const orderToEdit = shipmentsData.find((order) => order._id === id);
 
-  //   const updatedOrder = {
-  //     ...newData,
-  //     id: editId || Date.now(),
-  //     date: new Date().toISOString(),
-  //     debit: remainingDebit,
-  //     credit: newTotalPaid,
-  //     payments: [
-  //       ...(newData.payments || []),
-  //       {
-  //         amount: Number(newData.partialPayment || 0),
-  //         invoice: newData.invoice,
-  //         date: new Date().toISOString(),
-  //         debit: remainingDebit,
-  //         credit: newTotalPaid
-  //       },
-  //     ],
-  //   };
+    setNewData({
+      ...orderToEdit,
+      partialPayment: "", // Reset new payment input
+      invoice: null, // Reset invoice input
+    });
 
-  //   if (isEditing) {
-  //     setShipmentsData((prev) => prev.map((order) => (order.id === editId ? updatedOrder : order)));
-  //   } else {
-  //     setShipmentsData([...shipmentsData, updatedOrder]);
-  //   }
-
-  //   resetForm();
-  //   setShowForm(false);
-  //   console.log(shipmentsData)
-  // };
-
-  // const handleAddData = async (e) => {
-  //   e.preventDefault();
-
-  //   // Calculate total amount and payments
-  //   const totalAmount = newData.items.reduce((acc, item) => acc + Number((item.price * item.quantity) || 0), 0);
-  //   const totalPaid = newData.payments?.reduce((acc, payment) => acc + Number(payment.amount), 0) || 0;
-  //   const newTotalPaid = totalPaid + Number(newData.partialPayment || 0);
-  //   const remainingDebit = totalAmount - newTotalPaid;
-
-  //   // Ensure transport details are properly structured
-  //   const driverDetails = {
-  //     name: newData.transportDetails.name || "Unknown",  // Ensure required field is not empty
-  //     vehicle: newData.transportDetails.vehicle || "Unknown"  // Fix incorrect property
-  //   };
-
-  //   // Create the order object matching the backend schema
-  //   const orderData = {
-  //     shipments: [{
-  //       date: new Date().toISOString(),
-  //       items: newData.items,
-  //       driver: driverDetails,  // Corrected driver details
-  //       status: newData.status || "Pending",
-  //     }],
-  //     transactions: [
-  //       {
-  //         paymentDate: new Date().toISOString(),
-  //         partialPayment: Number(newData.partialPayment || 0),
-  //         invoice: newData.invoice || "N/A",  // Avoid sending undefined values
-  //         totalAmount: totalAmount || 0,  // Ensure numeric values
-  //         totalDebit: remainingDebit || 0,
-  //         totalCredit: newTotalPaid || 0,
-  //         payments: [
-  //           {
-  //             amount: Number(newData.partialPayment || 0),
-  //             invoice: newData.invoice || "N/A",
-  //             paymentDate: new Date().toISOString(),
-  //             debit: remainingDebit || 0,
-  //             credit: newTotalPaid || 0
-  //           },
-  //         ]
-  //       }
-  //     ]
-  //   };
-
-  //   try {
-  //     // Send data to the backend API
-  //     const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/supplier/${param.id}`, orderData);
-
-  //     if (response.status === 201) {
-  //       // Update local state with new data
-  //       setShipmentsData([...shipmentsData, response.data]);
-  //       alert("Order added successfully!");
-  //       resetForm();
-  //       setShowForm(false);
-  //     } else {
-  //       throw new Error("Failed to add order");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error adding order:", error);
-  //     alert("Error adding order. Please try again.");
-  //   }
-  // };
-
-  // const resetForm = () => {
-  //   setNewData({
-  //     items: [{ itemName: "", quantity: "", price: "", date: "" }],
-  //     status: "Pending",
-  //     transportDetails: { name: "", driver: "", deliveryDate: "" }
-  //   });
-  //   setIsEditing(false);  // Reset editing state
-  //   setEditId(null);      // Reset edit ID
-  // };
-
-  // const addNewItem = () => {
-  //   setNewData(prev => ({
-  //     ...prev,
-  //     items: [...prev.items, { itemName: "", quantity: "", price: "", date: new Date().toISOString().split('T')[0] }]
-  //   }));
-  // };
-
-
-  // const handleItemChange = (index, field, value) => {
-  //   const updatedItems = [...newData.items];
-  //   updatedItems[index][field] = value;
-  //   setNewData(prev => ({ ...prev, items: updatedItems }));
-  // };
-
-  // const handleStatusChange = (status) => {
-  //   setNewData(prev => ({
-  //     ...prev,
-  //     status,
-  //     transportDetails: {
-  //       ...prev.transportDetails,
-  //       deliveryDate: status === 'Delivered' ? new Date().toISOString().split('T')[0] : prev.transportDetails.deliveryDate
-  //     }
-  //   }));
-  // };
-
-  // const handleTransportChange = (field, value) => {
-  //   setNewData(prev => ({
-  //     ...prev,
-  //     transportDetails: { ...prev.transportDetails, [field]: value }
-  //   }));
-  // };
-
-  // const handleDelete = (id) => {
-  //   setShipmentsData(shipmentsData.filter(item => item.id !== id));
-  // };
-
-  // const handleEdit = (id) => {
-  //   const orderToEdit = shipmentsData.find((order) => order.id === id);
-
-  //   setNewData({
-  //     ...orderToEdit,
-  //     partialPayment: "", // Reset new payment input
-  //     invoice: null, // Reset invoice input
-  //   });
-
-  //   setIsEditing(true);
-  //   setEditId(id);
-  //   setShowForm(true);
-  // };
+    setIsEditing(true);
+    setEditId(id);
+    setShowForm(true);
+  };
 
   return (
     <div className="flex h-auto">
@@ -240,13 +123,8 @@ const Page = ({ params }) => {
             shipmentsData={shipmentsData}
             setShipmentsData={setShipmentsData}
             id={param.id}
-          // handleAddData={handleAddData}
-          // newData={newData}
-          // setNewData={setNewData}
-          // handleItemChange={handleItemChange}
-          // addNewItem={addNewItem}
-          // handleStatusChange={handleStatusChange}
-          // handleTransportChange={handleTransportChange}
+            newData={newData}
+            setNewData={setNewData}
           />
 
         )}
@@ -258,10 +136,10 @@ const Page = ({ params }) => {
             <DataList
               key={index}
               data={data}
-              // handleEdit={handleEdit}
-              // handleDelete={handleDelete}
-              // setNewData={setNewData}
-               />
+              handleEdit={handleEdit}
+              handleDelete={handleDelete}
+              setNewData={setNewData}
+            />
           ))}
 
         </div>

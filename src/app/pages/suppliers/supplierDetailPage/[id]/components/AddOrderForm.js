@@ -3,32 +3,17 @@ import React, { useState } from 'react'
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import axios from 'axios';
 
-const AddOrderForm = ({ setShowForm, shipmentsData, setShipmentsData, id }) => {
+const AddOrderForm = ({ setShowForm, newData, setNewData, setShipmentsData, id }) => {
 
-  const [newData, setNewData] = useState({
-    date: new Date().toISOString().split('T')[0],
-    items: [{
-      itemName: "",
-      quantity: 0,
-      price: 0
-    }],
-    driver: {
-      name: "",
-      vehicle: ""
-    },
-    status: "Pending",
-    partialPayment: 0,
-    invoice: "N/A",
-    transactions: {
-      paymentDate: new Date().toISOString().split('T')[0],
-      partialPayment: 0,
-      invoice: "",
-      totalAmount: 0,
-      totalDebit: 0,
-      totalCredit: 0,
-      payments: []
-    }
-  });
+  const handleFileChange = (e) => {
+    setNewData(prev => ({
+      ...prev,
+      transactions: {
+        ...prev.transactions,
+        invoice: e.target.files[0]
+      }
+    }));
+  }
 
   const handleItemChange = (index, field, value) => {
     const updatedItems = [...newData.items];
@@ -62,7 +47,7 @@ const AddOrderForm = ({ setShowForm, shipmentsData, setShipmentsData, id }) => {
           [field]: value
         }
       }));
-    } 
+    }
     else if (field === 'deliveryDate') {
       setNewData(prev => ({
         ...prev,
@@ -73,21 +58,21 @@ const AddOrderForm = ({ setShowForm, shipmentsData, setShipmentsData, id }) => {
 
   const resetForm = () => {
     setNewData({
-     date: new Date().toISOString().split('T')[0],
-     items: [{ itemName: "", quantity: 0, price: 0 }],
-     driver: { name: "", vehicle: "" },
-     status: "Pending",
-     transactions: {
-       paymentDate: new Date().toISOString().split('T')[0],
-       partialPayment: 0,
-       invoice: "N/A",
-       totalAmount: 0,
-       totalDebit: 0,
-       totalCredit: 0,
-       payments: []
-     }
-   });
- };
+      date: new Date().toISOString().split('T')[0],
+      items: [{ itemName: "", quantity: 0, price: 0 }],
+      driver: { name: "", vehicle: "" },
+      status: "Pending",
+      transactions: {
+        paymentDate: new Date().toISOString().split('T')[0],
+        partialPayment: 0,
+        invoice: null,
+        totalAmount: 0,
+        totalDebit: 0,
+        totalCredit: 0,
+        payments: []
+      }
+    });
+  };
 
   const handleAddData = async (e) => {
     e.preventDefault();
@@ -98,51 +83,58 @@ const AddOrderForm = ({ setShowForm, shipmentsData, setShipmentsData, id }) => {
     const newTotalPaid = totalPaid + Number(newData.transactions.partialPayment || 0);
     const remainingDebit = totalAmount - newTotalPaid;
 
-    console.log(newData.transactions.invoice)
-    // Create the order object matching the backend schema
-    const orderData = {
-      date: new Date().toISOString(),
-      items: newData.items,
-      driver: {
-        name: newData.driver.name,
-        vehicle: newData.driver.vehicle
-      },
-      status: newData.status || "Pending",
-      transactions: {
+    const formData = new FormData();
+    formData.append('date', newData.date);
+
+    // Append items as JSON string (backend needs to parse it if it expects array)
+    formData.append('items', JSON.stringify(newData.items)); // Important: Stringify items array
+
+    formData.append('driver[name]', newData.driver.name); // Append nested driver fields
+    formData.append('driver[vehicle]', newData.driver.vehicle);
+    formData.append('status', newData.status);
+
+    // Append transactions data
+    formData.append('transactions[paymentDate]', newData.transactions.paymentDate);
+    formData.append('transactions[partialPayment]', newData.transactions.partialPayment);
+    formData.append('transactions[totalAmount]', totalAmount);
+    formData.append('transactions[totalDebit]', remainingDebit);
+    formData.append('transactions[totalCredit]', newTotalPaid);
+
+    const payments = [
+      ...newData.transactions.payments,
+      {
+        amount: Number(newData.transactions.partialPayment),
+        invoice: newData.transactions.invoice,
         paymentDate: new Date().toISOString(),
-        partialPayment: Number(newData.transactions.partialPayment),
-        invoice: newData.transactions.invoice || "N/A",
-        totalAmount: totalAmount,
-        totalDebit: remainingDebit,
-        totalCredit: newTotalPaid,
-        payments: [
-          ...newData.transactions.payments,
-          {
-            amount: Number(newData.transactions.partialPayment),
-            invoice: newData.transactions.invoice || "N/A",
-            paymentDate: new Date().toISOString(),
-            debit: remainingDebit,
-            credit: newTotalPaid
-          }]
-      }
-    };
+        debit: remainingDebit,
+        credit: newTotalPaid
+      }]
+
+    // Append payments array as JSON string (backend needs to parse it if it expects array)
+    formData.append('transactions[payments]', JSON.stringify(payments));
+
+    // Append the invoice file.
+    if (newData.transactions.invoice) {
+
+      // 'invoice' is the field name multer is looking for
+      formData.append('invoice', newData.transactions.invoice);
+
+    }
 
     try {
-      // Fixed API endpoint to match backend route: /api/supplier/:id/shipment
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/supplier/${id}/shipment`, orderData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/supplier/${id}/shipment`, formData);
 
       if (response.status === 201) {
+
         // Update local state with new data
         setShipmentsData(response.data.supplier.shipments);
         resetForm();
         setShowForm(false);
+
       } else {
         throw new Error("Failed to add order");
       }
+
     } catch (error) {
       console.error("Error adding order:", error);
       alert(`Error adding order: ${error.response?.data?.message || 'Please try again.'}`);
@@ -242,12 +234,12 @@ const AddOrderForm = ({ setShowForm, shipmentsData, setShipmentsData, id }) => {
                 <input
                   type="number"
                   value={newData.transactions.partialPayment || ''}
-                  onChange={(e) => setNewData(prev => ({ 
-                    ...prev, 
-                    transactions: { 
-                      ...prev.transactions, 
-                      partialPayment: e.target.value 
-                    } 
+                  onChange={(e) => setNewData(prev => ({
+                    ...prev,
+                    transactions: {
+                      ...prev.transactions,
+                      partialPayment: e.target.value
+                    }
                   }))}
                   className="w-full p-2 border rounded-md"
                 />
@@ -258,16 +250,7 @@ const AddOrderForm = ({ setShowForm, shipmentsData, setShipmentsData, id }) => {
                 <input
                   type="file"
                   name="invoice"
-                  onChange={(e) => {
-                    const file = e.target.files[0]; // Get the file object
-                    setNewData(prev => ({
-                      ...prev,
-                      transactions: {
-                        ...prev.transactions,
-                        invoice: file ? file.name : "N/A" // Use file.name ONLY if file exists
-                      }
-                    }));
-                  }}
+                  onChange={handleFileChange}
                   className="w-full p-2 border rounded-md"
                   required
                 />

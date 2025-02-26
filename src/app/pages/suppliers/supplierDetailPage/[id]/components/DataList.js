@@ -80,7 +80,7 @@ const DataList = ({ data, handleEdit, handleDelete }) => {
                                 <p className="text-sm">
                                     Invoice:{" "}
                                     <a
-                                        href={`${process.env.NEXT_PUBLIC_API_URL}/supplier/invoices/${payment.invoice}`}
+                                        href={`${process.env.NEXT_PUBLIC_API_URL}/uploads/${payment.invoice}`}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="text-blue-500 underline"
