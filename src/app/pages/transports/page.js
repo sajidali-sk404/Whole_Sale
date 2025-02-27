@@ -1,62 +1,58 @@
 'use client'
-import { useState } from "react";
-import { FaTruck, FaUser, FaCalendarAlt, FaMoneyBillWave, FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa'; // Import icons
+import { useContext, useState, useEffect } from "react";
+import { FaChevronDown, FaChevronRight } from 'react-icons/fa'; // Import icons
+import { SupplierContext } from "@/app/ContextApi/SupplierDataApi";
 
 export default function TransportationManagement() {
-  const [transportRecords, setTransportRecords] = useState([
-    {
-      id: 1,
-      companyName: "ABC Suppliers",
-      truckId: "TRK-001",
-      driverName: "Ali Khan",
-      rent: 5000,
-      date: "2025-02-10",
-      status: "Transported",
-    },
-    {
-      id: 2,
-      companyName: "XYZ Traders",
-      truckId: "TRK-002",
-      driverName: "Raza Ahmed",
-      rent: 7000,
-      date: "2025-02-12",
-      status: "Pending",
-    },
-  ]);
 
-  const [newRecord, setNewRecord] = useState({
-    companyName: "",
-    truckId: "",
-    driverName: "",
-    rent: "",
-    date: "",
-    status: "Pending",
-  });
+  const { suppliers, fetchSuppliers } = useContext(SupplierContext);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [expandedSuppliers, setExpandedSuppliers] = useState({});
 
-    const [isFormVisible, setIsFormVisible] = useState(false); // Control form visibility
+  useEffect(() => {
+    if (fetchSuppliers) {
+      const fetchData = async () => {
+        try {
+          await fetchSuppliers();
+          setLoading(false);
+        } catch (err) {
+          setError(err.message || "An error occurred while fetching data.");
+          setLoading(false);
+        }
+      };
+      fetchData();
+    } else {
+      setLoading(false);
+      setError("fetchSuppliers function is not available.");
+    }
+  }, [fetchSuppliers]);
 
-  const handleChange = (e) => {
-    setNewRecord({ ...newRecord, [e.target.name]: e.target.value });
+  const toggleExpanded = (supplierId) => {
+    setExpandedSuppliers((prevExpanded) => ({
+      ...prevExpanded,
+      [supplierId]: !prevExpanded[supplierId],
+    }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const newEntry = { ...newRecord, id: transportRecords.length + 1 };
-    setTransportRecords([...transportRecords, newEntry]);
-    setNewRecord({
-      companyName: "",
-      truckId: "",
-      driverName: "",
-      rent: "",
-      date: "",
-      status: "Pending",
-    });
-    setIsFormVisible(false); // Hide form after submit
-  };
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
-    const toggleForm = () => {
-        setIsFormVisible(!isFormVisible);
-    };
+  if (error) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="text-red-500 text-xl">Error: {error}</div>
+      </div>
+    );
+  }
+
+
+  
 
   return (
     <div className="bg-gray-100 min-h-screen p-8">
@@ -67,199 +63,91 @@ export default function TransportationManagement() {
 
         {/* Transportation Table */}
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-           <div className="overflow-x-auto">
-          <table className="min-w-full">
-            <thead className="bg-blue-50">
-              <tr>
-                <th className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
-                <th className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Truck ID</th>
-                <th className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Driver</th>
-                <th className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rent</th>
-                <th className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                <th className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {transportRecords.length > 0 ? (
-                transportRecords.map((record) => (
-                <tr key={record.id} className="hover:bg-blue-50 transition-colors duration-200">
-                  <td className="py-4 px-6 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">{record.companyName}</div>
-                  </td>
-                  <td className="py-4 px-6 whitespace-nowrap">
-                    <div className="text-sm text-gray-700">{record.truckId}</div>
-                  </td>
-                  <td className="py-4 px-6 whitespace-nowrap">
-                    <div className="text-sm text-gray-700">{record.driverName}</div>
-                  </td>
-                  <td className="py-4 px-6 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">Rs. {record.rent}</div>
-                  </td>
-                  <td className="py-4 px-6 whitespace-nowrap">
-                    <div className="text-sm text-gray-700">{record.date}</div>
-                  </td>
-                  <td className="py-4 px-6 whitespace-nowrap">
-                    <span
-                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        record.status === "Transported"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-yellow-100 text-yellow-800"
-                      }`}
-                    >
-                      {record.status}
-                    </span>
-                  </td>
-                </tr>
-              ))
-              ) : (
+          <div className="overflow-x-auto">
+            <table className="min-w-full">
+              <thead className="bg-blue-50">
                 <tr>
-                    <td colSpan="6" className="py-4 px-6 text-center text-gray-500"> No records Found</td>
+                  <th className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
+                  <th className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
+                  <th className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Driver</th>
+                  <th className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Truck ID</th>
+                  <th className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                  <th className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {suppliers && suppliers.length > 0 ? (
+                  suppliers.map((supplier) => {
+                    // Create an array of rows *within* the map
+                    const rows = [];
+
+                    // Always add the supplier row
+                    rows.push(
+                      <tr key={supplier._id} className="hover:bg-blue-50 transition-colors duration-200 cursor-pointer">
+                        <td className="py-4 px-6 whitespace-nowrap" onClick={() => toggleExpanded(supplier._id)}>
+                          <div className="flex items-center">
+                            {expandedSuppliers[supplier._id] ? (
+                              <FaChevronDown className="text-blue-600" />
+                            ) : (
+                              <FaChevronRight className="text-blue-600" />
+                            )}
+                          </div>
+                        </td>
+                        <td className="py-4 px-6 whitespace-nowrap" onClick={() => toggleExpanded(supplier._id)}>
+                          <div className="text-sm font-medium text-gray-900">{supplier.companyName}</div>
+                        </td>
+                        <td className="py-4 px-6 whitespace-nowrap"></td>
+                        <td className="py-4 px-6 whitespace-nowrap"></td>
+                        <td className="py-4 px-6 whitespace-nowrap"></td>
+                        <td className="py-4 px-6 whitespace-nowrap"></td>
+                      </tr>
+                    );
+                    // Conditionally add shipment rows *to the same array*
+                    if (expandedSuppliers[supplier._id] && supplier.shipments) {
+                      supplier.shipments.forEach((shipment, index) => {
+                        rows.push(
+                          <tr key={`${supplier._id}-shipment-${index}`} className="bg-gray-50 hover:bg-gray-100 transition-colors duration-200">
+                            <td className="py-4 px-6 whitespace-nowrap"></td>
+                            <td className="py-4 px-6 whitespace-nowrap">
+                              <div className="text-sm text-gray-700">{supplier.companyName}</div>
+                            </td>
+                            <td className="py-4 px-6 whitespace-nowrap">
+                              <div className="text-sm text-gray-900">{shipment.driver?.name}</div>
+                            </td>
+                            <td className="py-4 px-6 whitespace-nowrap">
+                              <div className="text-sm text-gray-900">{shipment.driver?.vehicle}</div>
+                            </td>
+                            <td className="py-4 px-6 whitespace-nowrap">
+                              <div className="text-sm text-gray-900">{new Date(shipment.date).toISOString().split('T')[0]}</div>
+                            </td>
+                            <td className="py-4 px-6 whitespace-nowrap">
+                              <span
+                                className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${shipment.status === "Delivered"
+                                    ? "bg-green-100 text-green-800"
+                                    : "bg-red-100 text-red-800"
+                                  }`}
+                              >
+                                {shipment.status}
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      });
+                    }
+                    return rows; // Return the array of rows
+
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan="5" className="py-4 px-6 text-center text-gray-500">
+                      No suppliers found.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
-
-
-        {/* Toggleable Form */}
-            <button
-                onClick={toggleForm}
-                className="mt-6 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200 flex items-center"
-            >
-                <FaTruck className="mr-2" />
-                {isFormVisible ? 'Hide Form' : 'Add New Transportation Record'}
-            </button>
-
-
-      {isFormVisible && (
-        <div className="mt-4 bg-white p-6 rounded-lg shadow-md transition-all duration-300">
-          <h2 className="text-2xl font-bold text-gray-700 mb-4">Add New Transportation</h2>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label htmlFor="companyName" className="block text-sm font-medium text-gray-700">Company Name</label>
-              <div className="mt-1 relative rounded-md shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FaUser className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  type="text"
-                  name="companyName"
-                  id="companyName"
-                  placeholder="Company Name"
-                  value={newRecord.companyName}
-                  onChange={handleChange}
-                  className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md"
-                  required
-                />
-              </div>
-            </div>
-
-            {/* Truck ID */}
-            <div>
-              <label htmlFor="truckId" className="block text-sm font-medium text-gray-700">Truck ID</label>
-              <div className="mt-1 relative rounded-md shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FaTruck className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  type="text"
-                  name="truckId"
-                  id="truckId"
-                  placeholder="Truck ID"
-                  value={newRecord.truckId}
-                  onChange={handleChange}
-                  className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md"
-                  required
-                />
-              </div>
-            </div>
-
-             {/* Driver Name */}
-            <div>
-              <label htmlFor="driverName" className="block text-sm font-medium text-gray-700">Driver Name</label>
-              <div className="mt-1 relative rounded-md shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FaUser className="h-5 w-5 text-gray-400" /> {/* Driver Icon */}
-                </div>
-                <input
-                  type="text"
-                  name="driverName"
-                  id="driverName"
-                  placeholder="Driver Name"
-                  value={newRecord.driverName}
-                  onChange={handleChange}
-                  className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md"
-                  required
-                />
-              </div>
-            </div>
-
-            {/* Rent */}
-            <div>
-              <label htmlFor="rent" className="block text-sm font-medium text-gray-700">Rent (Rs.)</label>
-              <div className="mt-1 relative rounded-md shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FaMoneyBillWave className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  type="number"
-                  name="rent"
-                  id="rent"
-                  placeholder="Rent (Rs.)"
-                  value={newRecord.rent}
-                  onChange={handleChange}
-                  className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md"
-                  required
-                />
-              </div>
-            </div>
-
-            {/* Date */}
-             <div>
-              <label htmlFor="date" className="block text-sm font-medium text-gray-700">Date</label>
-              <div className="mt-1 relative rounded-md shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FaCalendarAlt className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  type="date"
-                  name="date"
-                  id="date"
-                  value={newRecord.date}
-                  onChange={handleChange}
-                  className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md"
-                  required
-                />
-              </div>
-            </div>
-
-            {/* Status */}
-            <div>
-              <label htmlFor="status" className="block text-sm font-medium text-gray-700">Status</label>
-              <div className="mt-1 relative rounded-md shadow-sm">
-                <select
-                  name="status"
-                  id="status"
-                  value={newRecord.status}
-                  onChange={handleChange}
-                  className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-3 pr-10 py-2 sm:text-sm border-gray-300 rounded-md"
-                >
-                  <option value="Pending">Pending</option>
-                  <option value="Transported">Transported</option>
-                </select>
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200"
-            >
-              Add Transportation
-            </button>
-          </form>
-        </div>
-      )}
       </div>
     </div>
   );

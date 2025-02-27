@@ -24,7 +24,7 @@ export const InventoryProvider = ({ children }) => {
     }, [fetchInventoryData]);
 
     return (
-        <InventoryContext.Provider value={{inventoryData, totalInventory}}>
+        <InventoryContext.Provider value={{inventoryData, setInventoryData, totalInventory}}>
           {children}
         </InventoryContext.Provider>
       )

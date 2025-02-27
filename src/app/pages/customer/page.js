@@ -18,14 +18,14 @@ const CustomerBilling = () => {
     const [debt, setDebt] = useState(0);
     const [showDetails, setShowDetails] = useState({});
     const [discountPercentage, setDiscountPercentage] = useState(0);
-    const [errors, setErrors] = useState({}); // Add error state
+    const [errors, setErrors] = useState({});
     const printRef = useRef();
-    const [filteredShops, setFilteredShops] = useState([]); // For shop filtering
-    const [selectedShop, setSelectedShop] = useState(null); // For selected shop
+    const [filteredShops, setFilteredShops] = useState([]);
+    const [selectedShop, setSelectedShop] = useState(null);
 
 
-    const { inventoryData } = useContext(InventoryContext);
-    const { shops, setShops } = useContext(ShopContext)
+    const { inventoryData, setInventoryData } = useContext(InventoryContext); // Access setInventoryData
+    const { shops, setShops } = useContext(ShopContext);
 
     useEffect(() => {
         if (customerName) {
@@ -35,20 +35,16 @@ const CustomerBilling = () => {
             setFilteredShops(filtered);
         } else {
             setFilteredShops([]);
-            setSelectedShop(null);  //Also clear when customerName is cleared
+            setSelectedShop(null);
         }
     }, [customerName, shops]);
 
     useEffect(() => {
-        console.log("selectedShop changed:", selectedShop);  // Debug: Check if selectedShop is updated
         if (selectedShop) {
-            console.log("Fetching old balance from selectedShop:", selectedShop);
             setOldBalance(selectedShop.totalDebit || 0);
-            setAddress(selectedShop.address || "") // Autofill address on shop selection
+            setAddress(selectedShop.address || "")
         } else {
             setOldBalance(0);
-            // Optionally clear the address field when no shop is selected
-            //setAddress("");
         }
     }, [selectedShop]);
 
@@ -89,10 +85,9 @@ const CustomerBilling = () => {
     const handleInputChange = (e) => {
         const { name, value } = e.target;
 
-        //For customer form.
         if (name === 'customerName') {
             setCustomerName(value);
-            setSelectedShop(null); // clear selection when customerName changes
+            setSelectedShop(null);
         }
         else if (name === 'address') {
             setAddress(value)
@@ -138,7 +133,7 @@ const CustomerBilling = () => {
             return;
         }
         if (newItem.name && newItem.quantity && newItem.price) {
-            setCart([...cart, { ...newItem, itemName: newItem.name, total: newItem.quantity * newItem.price }]);  // Use newItem.name as itemName
+            setCart([...cart, { ...newItem, itemName: newItem.name, total: newItem.quantity * newItem.price }]);
             setNewItem({ name: "", quantity: "", price: "" });
             setErrors({})
         }
@@ -153,8 +148,8 @@ const CustomerBilling = () => {
             const totalAmount = cart.reduce((acc, item) => acc + parseFloat(item.total), 0);
             const discountAmount = (discountPercentage / 100) * totalAmount;
             const totalAfterDiscount = totalAmount - discountAmount;
-            const netAmount = totalAfterDiscount + parseFloat(oldBalance || 0); // Ensure oldBalance is a number
-            const calculatedDebt = netAmount - parseFloat(customerGivenAmount || 0);  // Ensure customerGivenAmount is a number
+            const netAmount = totalAfterDiscount + parseFloat(oldBalance || 0);
+            const calculatedDebt = netAmount - parseFloat(customerGivenAmount || 0);
 
             setDebt(calculatedDebt);
 
@@ -168,12 +163,23 @@ const CustomerBilling = () => {
                 discountPercentage,
                 discountAmount,
                 totalAfterDiscount,
-                oldBalance: parseFloat(oldBalance || 0), // Ensure oldBalance is stored as a number
+                oldBalance: parseFloat(oldBalance || 0),
                 netAmount,
-                customerGivenAmount: parseFloat(customerGivenAmount || 0),  // Ensure customerGivenAmount is a number
+                customerGivenAmount: parseFloat(customerGivenAmount || 0),
                 debt: calculatedDebt
             };
 
+
+            // Update Inventory
+            const updatedInventory = inventoryData.map(item => {
+                const cartItem = cart.find(cartItem => cartItem.itemName === item.itemName);
+                if (cartItem) {
+                    return { ...item, quantity: item.quantity - parseInt(cartItem.quantity) }; //Subtracted quantity should be parsed to int.
+                }
+                return item;
+            });
+
+            setInventoryData(updatedInventory);
             setBills([...bills, newBill]);
             setShowDetails({ ...showDetails, [invoiceNo]: false });
             setCustomerName("");
@@ -185,7 +191,7 @@ const CustomerBilling = () => {
             setInvoiceNo(invoiceNo + 1);
             setDate(new Date().toISOString().split('T')[0]);
             setErrors({});
-            setSelectedShop(null);  //Clear selection after bill generation
+            setSelectedShop(null);
         }
     };
 
@@ -418,10 +424,9 @@ const CustomerBilling = () => {
     };
 
     const handleShopSelect = (shop) => {
-        console.log("Selected shop:", shop); // Debug
         setSelectedShop(shop);
-        setCustomerName(shop.shopkeeperName); // Auto-fill customer name
-        setFilteredShops([]); // Hide the dropdown
+        setCustomerName(shop.shopkeeperName);
+        setFilteredShops([]);
     };
 
 
@@ -548,9 +553,9 @@ const CustomerBilling = () => {
                             <select
                                 id="newItemName"
                                 name="newItemName"
-                                value={newItem.name} // Corrected to newItem.name
+                                value={newItem.name}
                                 onChange={handleInputChange}
-                                className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-3 pr-10 py-2 sm:text-sm border-gray-300 rounded-md"
+                                className="focus:ring-blue-500 hover:ring-blue-400 focus:border-blue-500 block w-full pl-3 pr-10 py-2 sm:text-sm border-gray-300 rounded-md"
                             >
                                 <option value="">Select Item</option>
                                 {inventoryData.map((item, index) => (

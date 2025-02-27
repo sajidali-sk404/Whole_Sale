@@ -7,6 +7,7 @@ export const SupplierContext = createContext()
 export const SupplierProvider = ({ children }) => {
   const [suppliers, setSuppliers] = useState([]);
   const [totalSupplier, setTotalSupplier] = useState()
+  console.log(suppliers)
 
   const fetchSuppliers = useCallback(async () => {
     try {
