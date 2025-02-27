@@ -9,6 +9,47 @@ export default function Inventory() {
   const [error, setError] = useState(null);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' }); // Add sorting state
 
+  // Function to consolidate items with case-insensitive matching
+  const consolidateInventory = (data) => {
+    if (!data || !Array.isArray(data)) return [];
+
+    const consolidated = {};
+    const consolidatedList = [];
+
+    data.forEach(item => {
+      const itemNameLower = item.itemName.toLowerCase();
+
+      if (consolidated[itemNameLower]) {
+        // Item already exists (case-insensitive match)
+        consolidated[itemNameLower].quantity += item.quantity;
+      } else {
+        // New item
+        consolidated[itemNameLower] = { ...item }; // Create a copy
+      }
+    });
+
+    // Convert the consolidated object back to an array
+    for (const key in consolidated) {
+      consolidatedList.push(consolidated[key]);
+    }
+
+    return consolidatedList;
+  };
+
+
+  // Sort the data
+  const [sortedInventory, setSortedInventory] = useState([]);
+
+  useEffect(() => {
+    if (inventoryData) {
+      const consolidatedData = consolidateInventory(inventoryData);
+      setSortedInventory([...consolidatedData]); // Create a copy
+    } else {
+      setSortedInventory([]);
+    }
+  }, [inventoryData]); // React when inventoryData changes
+
+
   // Sorting function
   const requestSort = (key) => {
     let direction = 'ascending';
@@ -18,23 +59,28 @@ export default function Inventory() {
     setSortConfig({ key, direction });
   };
 
-  // Sort the data
-    let sortedInventory = [];
-    if (inventoryData) {
-    sortedInventory = [...inventoryData]; // Create a copy to avoid mutating the original array
-    }
 
-  if (sortConfig.key !== null && inventoryData) {
-    sortedInventory.sort((a, b) => {
-      if (a[sortConfig.key] < b[sortConfig.key]) {
-        return sortConfig.direction === 'ascending' ? -1 : 1;
-      }
-      if (a[sortConfig.key] > b[sortConfig.key]) {
-        return sortConfig.direction === 'ascending' ? 1 : -1;
-      }
-      return 0;
-    });
-  }
+
+  useEffect(() => {
+    if (sortConfig.key !== null && sortedInventory) {
+      const sorted = [...sortedInventory].sort((a, b) => {
+        const aValue = a[sortConfig.key];
+        const bValue = b[sortConfig.key];
+
+        if (aValue < bValue) {
+          return sortConfig.direction === 'ascending' ? -1 : 1;
+        }
+        if (aValue > bValue) {
+          return sortConfig.direction === 'ascending' ? 1 : -1;
+        }
+        return 0;
+      });
+      setSortedInventory(sorted); // Update sortedInventory state
+    }
+  }, [sortConfig, sortedInventory]);
+
+
+
 
    if (loading) {
     return (
