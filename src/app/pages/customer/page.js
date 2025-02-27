@@ -5,6 +5,7 @@ import { FaUser, FaAddressCard, FaCalendarAlt, FaMoneyBillWave, FaTags, FaHandHo
 import { InventoryContext } from "@/app/ContextApi/inventoryDataApi";
 import { ShopContext } from "@/app/ContextApi/shopkeepersDataApi";
 
+
 const CustomerBilling = () => {
     const [bills, setBills] = useState([]);
     const [invoiceNo, setInvoiceNo] = useState(1);
@@ -22,11 +23,13 @@ const CustomerBilling = () => {
     const printRef = useRef();
     const [filteredShops, setFilteredShops] = useState([]);
     const [selectedShop, setSelectedShop] = useState(null);
-
-
+    
+    
+    
     const { inventoryData, setInventoryData } = useContext(InventoryContext); // Access setInventoryData
     const { shops, setShops } = useContext(ShopContext);
-
+    const watermarkImageUrl = '/watermark_p.PNG';
+    
     useEffect(() => {
         if (customerName) {
             const filtered = shops.filter(shop =>
@@ -210,11 +213,13 @@ const CustomerBilling = () => {
           <title>Sale Invoice</title>
           <style>
               body {
+
                   font-family: Arial, sans-serif;
                   margin: 0;
                   padding: 0;
                   background-color: #f4f4f4;
                   box-sizing: border-box;
+                 
               }
               .invoice-container {
                   width: 95%;
@@ -224,6 +229,13 @@ const CustomerBilling = () => {
                   border: 1px solid #ddd;
                   padding: 20px;
                   box-shadow: 0 0 10px rgba(0,0,0,0.1);
+                //    /* Watermark Styles */
+                //    background-image: url("${watermarkImageUrl}"); /* Set the background image URL */
+                // background-repeat: no-repeat;
+                // background-position: center; /* Center the image */
+                // background-size: contain;   /* Scale the image to cover the element */
+                // opacity: 2; 
+                
               }
               .header {
                   text-align: center;
@@ -241,6 +253,7 @@ const CustomerBilling = () => {
                   width: 100%;
                   margin-bottom: 20px;
                   table-layout: fixed;
+                  
               }
               .details td {
                   padding: 5px;
@@ -310,16 +323,20 @@ const CustomerBilling = () => {
                   .header p {
                       font-size: 12px;
                   }
+
+                  .image {
+                  position: absolute;
+                  }
               }
           </style>
       </head>
       <body>
           <div class="invoice-container">
               <div class="header">
-                  <h1>GK Traders</h1>
-                  <p>Distributor Shama Ghee, C.Oil, Sugar & Pvt. Ghee</p>
-                  <p>Bypass Chowk, Fizaghat Mingora Swat</p>
-                  <p>Ph#: 0946-711500, 813364, 0346-9408399</p>
+                  <h1>M.Amir Traders</h1>
+                  <p>Whole Sale Distributor Sugar, Ghee, Wheat etc</p>
+                  <p>Watkay Chowk Shadara Mingora Swat</p>
+                  <p>Ph#: 0341-6120696, 0946-818811</p>
               </div>
 
               <table class="details">
@@ -361,6 +378,8 @@ const CustomerBilling = () => {
                       `).join('')}
                   </tbody>
               </table>
+                        
+              <div class="image"></div>
 
               <table class="summary-table">
                   <tr>
