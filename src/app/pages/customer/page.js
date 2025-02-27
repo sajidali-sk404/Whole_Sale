@@ -23,13 +23,13 @@ const CustomerBilling = () => {
     const printRef = useRef();
     const [filteredShops, setFilteredShops] = useState([]);
     const [selectedShop, setSelectedShop] = useState(null);
-    
-    
-    
+
+
+
     const { inventoryData, setInventoryData } = useContext(InventoryContext); // Access setInventoryData
     const { shops, setShops } = useContext(ShopContext);
     const watermarkImageUrl = '/watermark_p.PNG';
-    
+
     useEffect(() => {
         if (customerName) {
             const filtered = shops.filter(shop =>
@@ -212,34 +212,40 @@ const CustomerBilling = () => {
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <title>Sale Invoice</title>
           <style>
-              body {
+           body {
+             font-family: Arial, sans-serif;
+             margin: 0;
+             padding: 0;
+             box-sizing: border-box;
 
-                  font-family: Arial, sans-serif;
-                  margin: 0;
-                  padding: 0;
-                  background-color: #f4f4f4;
-                  box-sizing: border-box;
-                 
-              }
-              .invoice-container {
-                  width: 95%;
-                  max-width: 800px;
-                  margin: 20px auto;
-                  background: white;
-                  border: 1px solid #ddd;
-                  padding: 20px;
-                  box-shadow: 0 0 10px rgba(0,0,0,0.1);
-                //    /* Watermark Styles */
-                //    background-image: url("${watermarkImageUrl}"); /* Set the background image URL */
-                // background-repeat: no-repeat;
-                // background-position: center; /* Center the image */
-                // background-size: contain;   /* Scale the image to cover the element */
-                // opacity: 2; 
-                
-              }
+           }
+            .invoice-container {
+                width: 95%;
+                max-width: 800px;
+                margin: 20px auto;
+                background: white;
+                border: 1px solid #ddd;
+                padding: 20px;
+                box-shadow: 0 0 10px rgba(0,0,0,0.1);
+                position: relative; /* Needed for absolute positioning */
+                overflow: hidden; /* Clip content if it overflows the container */
+             }
+
+             .watermark {
+                position: absolute;
+                top: 60%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 85%; 
+                height: auto;
+                opacity: 0.2; 
+                z-index: 0; 
+            }
+
               .header {
                   text-align: center;
                   margin-bottom: 10px;
+                  position:relative;
               }
               .header h1 {
                   margin: 0;
@@ -253,7 +259,8 @@ const CustomerBilling = () => {
                   width: 100%;
                   margin-bottom: 20px;
                   table-layout: fixed;
-                  
+                  position:relative;
+
               }
               .details td {
                   padding: 5px;
@@ -265,6 +272,8 @@ const CustomerBilling = () => {
                   width: 100%;
                   border-collapse: collapse;
                   margin-bottom: 20px;
+                  position:relative;
+
               }
               .table-container th, .table-container td {
                   border: 1px solid #ddd;
@@ -279,6 +288,8 @@ const CustomerBilling = () => {
                   width: 100%;
                   margin-left: auto;
                   border-collapse: collapse;
+                  position:relative;
+
               }
               .summary-table td {
                   padding: 5px;
@@ -298,11 +309,16 @@ const CustomerBilling = () => {
                   color: #666;
                   border-top: 1px solid #ddd;
                   padding-top: 10px;
+                  position:relative;
+                  z-index: 1;
+
               }
               .signature {
                   text-align: left;
                   margin-top: 30px;
                   color: #333;
+                  position:relative;
+
               }
               @media (max-width: 768px) {
                   .invoice-container {
@@ -324,104 +340,100 @@ const CustomerBilling = () => {
                       font-size: 12px;
                   }
 
-                  .image {
-                  position: absolute;
-                  }
+    
               }
           </style>
       </head>
       <body>
-          <div class="invoice-container">
-              <div class="header">
-                  <h1>M.Amir Traders</h1>
-                  <p>Whole Sale Distributor Sugar, Ghee, Wheat etc</p>
-                  <p>Watkay Chowk Shadara Mingora Swat</p>
-                  <p>Ph#: 0341-6120696, 0946-818811</p>
-              </div>
+        <div class="invoice-container">
+            <img src="${watermarkImageUrl}" alt="Watermark" class="watermark">
+                <div class="header">
+                    <h1>M.Amir Traders</h1>
+                    <p>Whole Sale Distributor Sugar, Ghee, Wheat etc</p>
+                    <p>Watkay Chowk Shadara Mingora Swat</p>
+                    <p>Ph#: 0341-6120696, 0946-818811</p>
+                </div>
 
-              <table class="details">
-                  <tr>
-                      <td><strong>Code:</strong> 1200</td>
-                      <td><strong>Invoice No:</strong> ${bill.invoiceNo}</td>
-                  </tr>
-                  <tr>
-                      <td><strong>Name:</strong> ${bill.customerName}</td>
-                      <td><strong>Date:</strong> ${bill.date}</td>
-                  </tr>
-                  <tr>
-                      <td><strong>Address:</strong> ${bill.address}</td>
-                      <td><strong>Mob#:</strong> </td>
-                  </tr>
-                  <tr>
-                      <td><strong>Ref. Name:</strong> SWAT</td>
-                      <td><strong>CNIC#:</strong> </td>
-                  </tr>
-              </table>
+                <table class="details">
+                    <tr>
+                        <td><strong>Code:</strong> 1200</td>
+                        <td><strong>Invoice No:</strong> ${bill.invoiceNo}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Name:</strong> ${bill.customerName}</td>
+                        <td><strong>Date:</strong> ${bill.date}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Address:</strong> ${bill.address}</td>
+                        <td><strong>Mob#:</strong> </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Ref. Name:</strong> SWAT</td>
+                        <td><strong>CNIC#:</strong> </td>
+                    </tr>
+                </table>
 
-              <table class="table-container">
-                  <thead>
-                      <tr>
-                          <th>Qty</th>
-                          <th>Product Name</th>
-                          <th>Price</th>
-                          <th>Net Amount</th>
-                      </tr>
-                  </thead>
-                  <tbody>
-                      ${bill.cart.map((item, index) => `
-                          <tr key=${index}>
-                              <td>${item.quantity}</td>
-                              <td>${item.itemName}</td>
-                              <td>${item.price} PKR</td>
-                              <td>${item.total} PKR</td>
-                          </tr>
-                      `).join('')}
-                  </tbody>
-              </table>
-                        
-              <div class="image"></div>
+                <table class="table-container">
+                    <thead>
+                        <tr>
+                            <th>Qty</th>
+                            <th>Product Name</th>
+                            <th>Price</th>
+                            <th>Net Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${bill.cart.map((item, index) => `
+                            <tr key=${index}>
+                                <td>${item.quantity}</td>
+                                <td>${item.itemName}</td>
+                                <td>${item.price} PKR</td>
+                                <td>${item.total} PKR</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+                <table class="summary-table">
+                    <tr>
+                        <td><strong>Total Amount</strong></td>
+                        <td>${bill.totalAmount.toFixed(2)} PKR</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Discount:</strong></td>
+                        <td>${bill.discountAmount.toFixed(2)} PKR</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Total After Discount:</strong></td>
+                        <td>${bill.totalAfterDiscount.toFixed(2)} PKR</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Old Balance:</strong></td>
+                        <td>${bill.oldBalance.toFixed(2)} PKR</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Net Bill Amount:</strong></td>
+                        <td>${bill.netAmount.toFixed(2)} PKR</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Given Amount</strong></td>
+                        <td>${bill.customerGivenAmount.toFixed(2)} PKR</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Remaining Amount</strong></td>
+                        <td>${bill.debt.toFixed(2)} PKR</td>
+                    </tr>
+                </table>
 
-              <table class="summary-table">
-                  <tr>
-                      <td><strong>Total Amount</strong></td>
-                      <td>${bill.totalAmount.toFixed(2)} PKR</td>
-                  </tr>
-                  <tr>
-                      <td><strong>Discount:</strong></td>
-                      <td>${bill.discountAmount.toFixed(2)} PKR</td>
-                  </tr>
-                  <tr>
-                      <td><strong>Total After Discount:</strong></td>
-                      <td>${bill.totalAfterDiscount.toFixed(2)} PKR</td>
-                  </tr>
-                  <tr>
-                      <td><strong>Old Balance:</strong></td>
-                      <td>${bill.oldBalance.toFixed(2)} PKR</td>
-                  </tr>
-                  <tr>
-                      <td><strong>Net Bill Amount:</strong></td>
-                      <td>${bill.netAmount.toFixed(2)} PKR</td>
-                  </tr>
-                  <tr>
-                      <td><strong>Given Amount</strong></td>
-                      <td>${bill.customerGivenAmount.toFixed(2)} PKR</td>
-                  </tr>
-                  <tr>
-                      <td><strong>Remaining Amount</strong></td>
-                      <td>${bill.debt.toFixed(2)} PKR</td>
-                  </tr>
-              </table>
+                <div class="signature">
+                    <p><strong>Generated By:</strong> Store Manager</p>
+                </div>
 
-              <div class="signature">
-                  <p><strong>Generated By:</strong> Store Manager</p>
-              </div>
-
-              <div class="footer">
-                  <p>Note: This is a computer-generated invoice and does not require a signature.</p>
-              </div>
-          </div>
-      </body>
-      </html>
+                <div class="footer">
+                    <p>Note: This is a computer-generated invoice and does not require a signature.</p>
+                </div>
+            </div>
+        </body>
+        </html>
     `;
 
         const printWindow = window.open('', '', 'width=800,height=600');
@@ -453,96 +465,6 @@ const CustomerBilling = () => {
         <div className="bg-gray-100 min-h-screen py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-xl p-8">
                 <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">Customer Billing</h1>
-
-                {/* Add Item Form */}
-                <div className="mb-6">
-                    <h2 className="text-xl font-semibold text-gray-700 mb-4">Add Items</h2>
-                    {errors.newItem && <p className="text-red-500 text-xs mt-1">{errors.newItem}</p>}
-                    <div className="grid grid-cols-3 gap-4">
-                        <div className="relative rounded-md shadow-sm">
-                            <select
-                                id="newItemName"
-                                name="newItemName"
-                                value={newItem.name}
-                                onChange={handleInputChange}
-                                className="focus:ring-blue-500 hover:ring-blue-400 focus:border-blue-500 block w-full pl-3 pr-10 py-2 sm:text-sm border-gray-300 rounded-md"
-                            >
-                                <option value="">Select Item</option>
-                                {inventoryData.map((item, index) => (
-                                    <option key={index} value={item.itemName}>{item.itemName}</option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <div className="relative rounded-md shadow-sm">
-                            <input
-                                type="number"
-                                name="newItemQuantity"
-                                id="newItemQuantity"
-                                placeholder="Quantity"
-                                value={newItem.quantity}
-                                onChange={handleInputChange}
-                                className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-3 pr-10 py-2 sm:text-sm border-gray-300 rounded-md"
-                            />
-                        </div>
-
-                        <div className="relative rounded-md shadow-sm">
-                            <input
-                                type="number"
-                                name="newItemPrice"
-                                id="newItemPrice"
-                                placeholder="Price"
-                                value={newItem.price}
-                                onChange={handleInputChange}
-                                className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-3 pr-10 py-2 sm:text-sm border-gray-300 rounded-md"
-                            />
-                        </div>
-                    </div>
-                    <button
-                        onClick={handleAddToCart}
-                        className="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200 flex items-center"
-                    >
-                        <MdAddShoppingCart className="mr-2" />
-                        Add Item
-                    </button>
-                </div>
-
-                {/* Cart Table */}
-                <div className="mb-6">
-                    {errors.cart && <p className="text-red-500 text-xs mt-1">{errors.cart}</p>}
-
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
-                                <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"> Action</th>
-                                </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
-                                {cart.map((item, index) => (
-                                    <tr key={index}>
-                                        <td className="px-6 py-4 whitespace-nowrap">{item.itemName}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">{item.quantity}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">PKR {item.price}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">PKR {item.total}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <button
-                                                onClick={() => handleRemoveItem(index)}
-                                                className="text-red-600 hover:text-red-800 transition-colors duration-200"
-                                            >
-                                                Remove
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
 
                 {/* Customer Details Form */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -653,9 +575,99 @@ const CustomerBilling = () => {
                     </div>
                 </div>
 
-                {/* Totals and Generate Bill Button */}
+                {/* Add Item Form */}
+                <div className="mb-6">
+                    <h2 className="text-xl font-semibold text-gray-700 mb-4">Add Items</h2>
+                    {errors.newItem && <p className="text-red-500 text-xs mt-1">{errors.newItem}</p>}
+                    <div className="grid grid-cols-3 gap-4">
+                        <div className="relative rounded-md shadow-sm">
+                            <select
+                                id="newItemName"
+                                name="newItemName"
+                                value={newItem.name}
+                                onChange={handleInputChange}
+                                className="focus:ring-blue-500 hover:ring-blue-400 focus:border-blue-500 block w-full pl-3 pr-10 py-2 sm:text-sm border-gray-300 rounded-md"
+                            >
+                                <option value="">Select Item</option>
+                                {inventoryData.map((item, index) => (
+                                    <option key={index} value={item.itemName}>{item.itemName}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="relative rounded-md shadow-sm">
+                            <input
+                                type="number"
+                                name="newItemQuantity"
+                                id="newItemQuantity"
+                                placeholder="Quantity"
+                                value={newItem.quantity}
+                                onChange={handleInputChange}
+                                className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-3 pr-10 py-2 sm:text-sm border-gray-300 rounded-md"
+                            />
+                        </div>
+
+                        <div className="relative rounded-md shadow-sm">
+                            <input
+                                type="number"
+                                name="newItemPrice"
+                                id="newItemPrice"
+                                placeholder="Price"
+                                value={newItem.price}
+                                onChange={handleInputChange}
+                                className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-3 pr-10 py-2 sm:text-sm border-gray-300 rounded-md"
+                            />
+                        </div>
+                    </div>
+                    <button
+                        onClick={handleAddToCart}
+                        className="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200 flex items-center"
+                    >
+                        <MdAddShoppingCart className="mr-2" />
+                        Add Item
+                    </button>
+                </div>
+
+                {/* Cart Table */}
                 <div className="mb-6">
                     <h2 className="text-xl font-semibold text-gray-700 mb-4">Current Bill</h2>
+                    {errors.cart && <p className="text-red-500 text-xs mt-1">{errors.cart}</p>}
+
+                    <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-gray-200">
+                            <thead className="bg-gray-50">
+                                <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"> Action</th>
+                                </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                                {cart.map((item, index) => (
+                                    <tr key={index}>
+                                        <td className="px-6 py-4 whitespace-nowrap">{item.itemName}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap">{item.quantity}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap">PKR {item.price}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap">PKR {item.total}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <button
+                                                onClick={() => handleRemoveItem(index)}
+                                                className="text-red-600 hover:text-red-800 transition-colors duration-200"
+                                            >
+                                                Remove
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                {/* Totals and Generate Bill Button */}
+                <div className="mb-6">
                     <p className="text-lg font-semibold text-gray-700">Total Amount: PKR {cart.reduce((acc, item) => acc + item.total, 0).toFixed(2)}</p>
                     <p className="text-lg font-semibold text-gray-700">Total After Discount: PKR {(cart.reduce((acc, item) => acc + item.total, 0) - ((discountPercentage / 100) * cart.reduce((acc, item) => acc + item.total, 0))).toFixed(2)}</p>
                     <p className="text-lg font-semibold text-gray-700">Net Amount: PKR {((cart.reduce((acc, item) => acc + item.total, 0) - ((discountPercentage / 100) * cart.reduce((acc, item) => acc + item.total, 0))) + parseFloat(oldBalance || 0)).toFixed(2)}</p>
