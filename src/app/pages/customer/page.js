@@ -454,6 +454,96 @@ const CustomerBilling = () => {
             <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-xl p-8">
                 <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">Customer Billing</h1>
 
+                {/* Add Item Form */}
+                <div className="mb-6">
+                    <h2 className="text-xl font-semibold text-gray-700 mb-4">Add Items</h2>
+                    {errors.newItem && <p className="text-red-500 text-xs mt-1">{errors.newItem}</p>}
+                    <div className="grid grid-cols-3 gap-4">
+                        <div className="relative rounded-md shadow-sm">
+                            <select
+                                id="newItemName"
+                                name="newItemName"
+                                value={newItem.name}
+                                onChange={handleInputChange}
+                                className="focus:ring-blue-500 hover:ring-blue-400 focus:border-blue-500 block w-full pl-3 pr-10 py-2 sm:text-sm border-gray-300 rounded-md"
+                            >
+                                <option value="">Select Item</option>
+                                {inventoryData.map((item, index) => (
+                                    <option key={index} value={item.itemName}>{item.itemName}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="relative rounded-md shadow-sm">
+                            <input
+                                type="number"
+                                name="newItemQuantity"
+                                id="newItemQuantity"
+                                placeholder="Quantity"
+                                value={newItem.quantity}
+                                onChange={handleInputChange}
+                                className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-3 pr-10 py-2 sm:text-sm border-gray-300 rounded-md"
+                            />
+                        </div>
+
+                        <div className="relative rounded-md shadow-sm">
+                            <input
+                                type="number"
+                                name="newItemPrice"
+                                id="newItemPrice"
+                                placeholder="Price"
+                                value={newItem.price}
+                                onChange={handleInputChange}
+                                className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-3 pr-10 py-2 sm:text-sm border-gray-300 rounded-md"
+                            />
+                        </div>
+                    </div>
+                    <button
+                        onClick={handleAddToCart}
+                        className="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200 flex items-center"
+                    >
+                        <MdAddShoppingCart className="mr-2" />
+                        Add Item
+                    </button>
+                </div>
+
+                {/* Cart Table */}
+                <div className="mb-6">
+                    {errors.cart && <p className="text-red-500 text-xs mt-1">{errors.cart}</p>}
+
+                    <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-gray-200">
+                            <thead className="bg-gray-50">
+                                <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"> Action</th>
+                                </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                                {cart.map((item, index) => (
+                                    <tr key={index}>
+                                        <td className="px-6 py-4 whitespace-nowrap">{item.itemName}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap">{item.quantity}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap">PKR {item.price}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap">PKR {item.total}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <button
+                                                onClick={() => handleRemoveItem(index)}
+                                                className="text-red-600 hover:text-red-800 transition-colors duration-200"
+                                            >
+                                                Remove
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
                 {/* Customer Details Form */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div>
@@ -563,99 +653,9 @@ const CustomerBilling = () => {
                     </div>
                 </div>
 
-                {/* Add Item Form */}
-                <div className="mb-6">
-                    <h2 className="text-xl font-semibold text-gray-700 mb-4">Add Items</h2>
-                    {errors.newItem && <p className="text-red-500 text-xs mt-1">{errors.newItem}</p>}
-                    <div className="grid grid-cols-3 gap-4">
-                        <div className="relative rounded-md shadow-sm">
-                            <select
-                                id="newItemName"
-                                name="newItemName"
-                                value={newItem.name}
-                                onChange={handleInputChange}
-                                className="focus:ring-blue-500 hover:ring-blue-400 focus:border-blue-500 block w-full pl-3 pr-10 py-2 sm:text-sm border-gray-300 rounded-md"
-                            >
-                                <option value="">Select Item</option>
-                                {inventoryData.map((item, index) => (
-                                    <option key={index} value={item.itemName}>{item.itemName}</option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <div className="relative rounded-md shadow-sm">
-                            <input
-                                type="number"
-                                name="newItemQuantity"
-                                id="newItemQuantity"
-                                placeholder="Quantity"
-                                value={newItem.quantity}
-                                onChange={handleInputChange}
-                                className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-3 pr-10 py-2 sm:text-sm border-gray-300 rounded-md"
-                            />
-                        </div>
-
-                        <div className="relative rounded-md shadow-sm">
-                            <input
-                                type="number"
-                                name="newItemPrice"
-                                id="newItemPrice"
-                                placeholder="Price"
-                                value={newItem.price}
-                                onChange={handleInputChange}
-                                className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-3 pr-10 py-2 sm:text-sm border-gray-300 rounded-md"
-                            />
-                        </div>
-                    </div>
-                    <button
-                        onClick={handleAddToCart}
-                        className="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200 flex items-center"
-                    >
-                        <MdAddShoppingCart className="mr-2" />
-                        Add Item
-                    </button>
-                </div>
-
-                {/* Cart Table */}
-                <div className="mb-6">
-                    <h2 className="text-xl font-semibold text-gray-700 mb-4">Current Bill</h2>
-                    {errors.cart && <p className="text-red-500 text-xs mt-1">{errors.cart}</p>}
-
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
-                                <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"> Action</th>
-                                </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
-                                {cart.map((item, index) => (
-                                    <tr key={index}>
-                                        <td className="px-6 py-4 whitespace-nowrap">{item.itemName}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">{item.quantity}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">PKR {item.price}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">PKR {item.total}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <button
-                                                onClick={() => handleRemoveItem(index)}
-                                                className="text-red-600 hover:text-red-800 transition-colors duration-200"
-                                            >
-                                                Remove
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
                 {/* Totals and Generate Bill Button */}
                 <div className="mb-6">
+                    <h2 className="text-xl font-semibold text-gray-700 mb-4">Current Bill</h2>
                     <p className="text-lg font-semibold text-gray-700">Total Amount: PKR {cart.reduce((acc, item) => acc + item.total, 0).toFixed(2)}</p>
                     <p className="text-lg font-semibold text-gray-700">Total After Discount: PKR {(cart.reduce((acc, item) => acc + item.total, 0) - ((discountPercentage / 100) * cart.reduce((acc, item) => acc + item.total, 0))).toFixed(2)}</p>
                     <p className="text-lg font-semibold text-gray-700">Net Amount: PKR {((cart.reduce((acc, item) => acc + item.total, 0) - ((discountPercentage / 100) * cart.reduce((acc, item) => acc + item.total, 0))) + parseFloat(oldBalance || 0)).toFixed(2)}</p>
