@@ -5,6 +5,7 @@ import { useContext } from "react";
 import { InventoryContext } from "../ContextApi/inventoryDataApi";
 import { SupplierContext } from "../ContextApi/SupplierDataApi";
 import { FaShoppingCart, FaChartLine, FaBuilding, FaUserFriends } from 'react-icons/fa'; // Import icons
+import Link from "next/link";
 
 const Card = ({ title, value, icon: Icon }) => ( // Receive icon as a prop
   <motion.div
@@ -31,9 +32,9 @@ const Navbar = () => {
     <nav className="bg-blue-600 py-4 shadow-md"> {/* Use <nav> for semantic HTML */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-          <Card title="Total Stock" value={inventoryValue} icon={FaShoppingCart} />
-          <Card title="Daily Profit" value="0" icon={FaChartLine} />
-          <Card title="Total Suppliers" value={supplierValue} icon={FaBuilding} />
+          <Link href="/pages/products"><Card title="Total Stock" value={inventoryValue} icon={FaShoppingCart} /></Link>
+         <Card title="Daily Profit" value="0" icon={FaChartLine} />
+         <Link href="/pages/suppliers"><Card title="Total Suppliers" value={supplierValue} icon={FaBuilding} /></Link>
           <Card title="Local Customers" value="0" icon={FaUserFriends} />
         </div>
       </div>
