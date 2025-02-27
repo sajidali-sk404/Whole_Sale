@@ -1,51 +1,137 @@
 'use client'
-import { useState, useRef, useEffect } from "react";
-import { MdKeyboardDoubleArrowDown, MdKeyboardDoubleArrowUp } from "react-icons/md";
+import React, { useState, useRef, useEffect } from "react";
+import { MdKeyboardDoubleArrowDown, MdKeyboardDoubleArrowUp, MdPrint, MdAddShoppingCart, MdReceipt } from "react-icons/md";
+import { FaUser, FaAddressCard, FaCalendarAlt, FaMoneyBillWave, FaTags, FaHandHoldingUsd } from 'react-icons/fa';
+
 
 const CustomerBilling = () => {
   const [bills, setBills] = useState([]);
-  const [invoiceNo, setInvoiceNo] = useState(1); // Start at invoice number 1
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]); // Set default to today's date
+  const [invoiceNo, setInvoiceNo] = useState(1);
+  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [customerName, setCustomerName] = useState("");
   const [address, setAddress] = useState("");
   const [cart, setCart] = useState([]);
   const [newItem, setNewItem] = useState({ name: "", quantity: "", price: "" });
   const [oldBalance, setOldBalance] = useState(0);
-  const [customerGivenAmount, setCustomerGivenAmount] = useState(0); // New field for customer's given amount
-  const [debt, setDebt] = useState(0); // To store customer's debt
-  const [showDetails, setShowDetails] = useState({}); // Track visibility of each bill's details
-  const [discountPercentage, setDiscountPercentage] = useState(0); // New state for percentage
+  const [customerGivenAmount, setCustomerGivenAmount] = useState(0);
+  const [debt, setDebt] = useState(0);
+  const [showDetails, setShowDetails] = useState({});
+  const [discountPercentage, setDiscountPercentage] = useState(0);
+    const [errors, setErrors] = useState({}); // Add error state
   const printRef = useRef();
 
   // Example items for the dropdown
   const availableItems = ["Sugar", "Milk", "Ghee", "lubya", "foot"];
 
-  // Increment invoice number after each bill generation
+    const validateForm = () => {
+      const newErrors = {};
+
+        if (!customerName.trim()) {
+          newErrors.customerName = 'Customer Name is required';
+        }
+        if (cart.length === 0) {
+          newErrors.cart = 'Add at least one item to the cart.';
+        }
+        if (newItem.name && (!newItem.quantity || !newItem.price))
+        {
+          newErrors.newItem = "Quantity and price are needed"
+        }
+
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+    const validateItemForm = () => {
+        const itemErrors = {};
+
+        if (newItem.name && (!newItem.quantity || !newItem.price)) {
+            itemErrors.newItem = "Quantity and price are required for new items.";
+        }
+        setErrors(itemErrors)
+        return Object.keys(itemErrors).length === 0;
+    }
+
+
   useEffect(() => {
     if (bills.length > 0) {
-      setInvoiceNo(bills[bills.length - 1].invoiceNo + 1); // Increment by 1
+      setInvoiceNo(bills[bills.length - 1].invoiceNo + 1);
     }
   }, [bills]);
 
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+
+      //For customer form.
+      if (name === 'customerName') {
+          setCustomerName(value)
+      }
+      else if (name === 'address') {
+          setAddress(value)
+      }
+      else if (name === 'date') {
+          setDate(value)
+      }
+      else if (name === 'oldBalance') {
+            if (value === '' || /^[0-9]*$/.test(value)) {
+                setOldBalance(value === '' ? '' : parseFloat(value));
+            }
+      }
+      else if (name === 'customerGivenAmount') {
+          if (value === '' || /^[0-9]*$/.test(value)) {
+                setCustomerGivenAmount(value === '' ? '' : parseFloat(value))
+            }
+      }
+      else if (name === 'discountPercentage') {
+          if (value === '' || /^[0-9]*$/.test(value)) {
+                setDiscountPercentage(value === '' ? '' : parseFloat(value))
+            }
+      }
+        //For adding a new Item.
+        else if (name === "newItemName") {
+            setNewItem({ ...newItem, name: value })
+        }
+        else if (name === "newItemQuantity") {
+            if (/^[0-9]*$/.test(value)) {
+               setNewItem({ ...newItem, quantity: value });
+            }
+        }
+        else if (name === "newItemPrice") {
+            if (/^[0-9]*$/.test(value)) {
+                setNewItem({ ...newItem, price: value });
+            }
+
+        }
+
+       setErrors(prevErrors => ({ ...prevErrors, [name]: null }));
+
+  };
+
+
   const handleAddToCart = () => {
+     if (!validateItemForm()) {
+            return;
+      }
     if (newItem.name && newItem.quantity && newItem.price) {
       setCart([...cart, { ...newItem, total: newItem.quantity * newItem.price }]);
       setNewItem({ name: "", quantity: "", price: "" });
+      setErrors({})
     }
   };
 
-  // Calculate the debt and generate the bill
   const handleGenerateBill = () => {
+
+      if (!validateForm()) {
+        return;
+      }
+
     if (customerName && cart.length > 0) {
-      const totalAmount = cart.reduce((acc, item) => acc + item.total, 0);
-      // Apply discount
-      const discountAmount = (discountPercentage / 100) * totalAmount; // Calculate discount
-      const totalAfterDiscount = totalAmount - discountAmount; // Subtract discount from total
+       const totalAmount = cart.reduce((acc, item) => acc + parseFloat(item.total), 0);
+      const discountAmount = (discountPercentage / 100) * totalAmount;
+      const totalAfterDiscount = totalAmount - discountAmount;
+      const netAmount = totalAfterDiscount + parseFloat(oldBalance || 0); // Ensure oldBalance is a number
+      const calculatedDebt = netAmount - parseFloat(customerGivenAmount || 0);  // Ensure customerGivenAmount is a number
 
-      const netAmount = totalAmount + parseFloat(oldBalance);
-      const calculatedDebt = netAmount - parseFloat(customerGivenAmount);
-
-      setDebt(calculatedDebt); // Store debt
+      setDebt(calculatedDebt);
 
       const newBill = {
         invoiceNo,
@@ -54,70 +140,87 @@ const CustomerBilling = () => {
         address,
         cart,
         totalAmount,
-        discountPercentage, // Store the discount percentage
-        discountAmount, // Store the discount amount
-        totalAfterDiscount, // Store the total after applying the discount
-        oldBalance,
+        discountPercentage,
+        discountAmount,
+        totalAfterDiscount,
+        oldBalance: parseFloat(oldBalance || 0), // Ensure oldBalance is stored as a number
         netAmount,
-        customerGivenAmount,
+        customerGivenAmount: parseFloat(customerGivenAmount || 0),  // Ensure customerGivenAmount is a number
         debt: calculatedDebt
       };
 
       setBills([...bills, newBill]);
-
-      // Toggle details visibility for the new bill (default hidden)
       setShowDetails({ ...showDetails, [invoiceNo]: false });
-
-      // Reset form fields except invoiceNo and date
       setCustomerName("");
       setAddress("");
       setCart([]);
-      setDiscountPercentage(0); // Reset discount percentage
+      setDiscountPercentage(0);
       setOldBalance(0);
       setCustomerGivenAmount(0);
-
-      // Auto increment invoice number for the next bill
       setInvoiceNo(invoiceNo + 1);
-
-      // Set current date for the next bill
       setDate(new Date().toISOString().split('T')[0]);
+       setErrors({});
     }
   };
 
+    const handleRemoveItem = (index) => {
+        const newCart = [...cart];
+        newCart.splice(index, 1);
+        setCart(newCart);
+    };
 
 
 
   const handlePrint = (bill) => {
+    // ... (rest of your print function remains the same, just update the CSS) ...
     const printContent = `
-  
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sale Invoice</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-        }
-        .invoice-container {
-            width: 700px;
-            margin: 0 auto;
-            border: 1px solid #000;
-            padding: 10px;
-        }
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f4;
+        box-sizing: border-box; /* Added to include padding and border in element's total width/height */
+      }
+      .invoice-container {
+        width: 95%; /* Use percentage for responsiveness */
+        max-width: 800px; /* Limit maximum width */
+        margin: 20px auto;
+        background: white;
+        border: 1px solid #ddd;
+        padding: 20px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      }
         .header {
             text-align: center;
             margin-bottom: 10px;
         }
         .header h1 {
             margin: 0;
+             color: #333; /* Darker header text */
+
+        }
+        .header p {
+            color: #666; /* Lighter text for details */
+            margin: 5px 0;
         }
         .details {
             width: 100%;
             margin-bottom: 20px;
+            table-layout: fixed; /* Helps with consistent layout */
         }
         .details td {
             padding: 5px;
+        }
+
+        .details strong{
+           color: #333;
         }
         .table-container {
             width: 100%;
@@ -125,24 +228,72 @@ const CustomerBilling = () => {
             margin-bottom: 20px;
         }
         .table-container th, .table-container td {
-            border: 1px solid black;
-            padding: 8px;
+            border: 1px solid #ddd;
+             padding: 8px;
             text-align: center;
+             word-wrap: break-word; /* Prevent long words from breaking layout */
         }
-        .summary-table td {           
-            padding: 5px;      
+
+         .table-container th {
+            background-color: #f2f2f2; /* Light gray background for header */
+        }
+
+        .summary-table {
+            width: 100%;
+            margin-left: auto; /* Right-align the table */
+            border-collapse: collapse;
+
+        }
+
+        .summary-table td {
+            padding: 5px;
             text-align: right;
-            margin-left:30%
+            border-bottom: 1px solid #eee;
         }
-            
+
+          .summary-table tr:last-child td {
+            border-bottom: none; /* Remove border from last row */
+        }
+
+        .summary-table strong {
+           color: #333
+        }
+
         .footer {
             margin-top: 20px;
             text-align: center;
             font-size: 12px;
+            color: #666;
+             border-top: 1px solid #ddd; /* Separator line */
+            padding-top: 10px; /* Space above the text */
         }
         .signature {
             text-align: left;
-            margin-top: 50px;
+            margin-top: 30px;
+            color: #333
+        }
+
+       /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .invoice-container {
+              width: 95%;
+              padding: 10px;
+            }
+              .table-container th, .table-container td {
+                padding: 5px;
+                font-size: 12px;
+            }
+            .summary-table td{
+               padding: 5px;
+                font-size: 12px;
+            }
+             .header h1{
+               font-size: 20px
+             }
+             .header p{
+               font-size: 12px
+             }
+
         }
     </style>
 </head>
@@ -195,31 +346,36 @@ const CustomerBilling = () => {
             </tbody>
         </table>
 
-        <table class="summary-table" style="width: 100%;">
-            <tr>
+        <table class="summary-table">
+           <tr>
                 <td><strong>Total Amount</strong></td>
-                <td>${bill.totalAmount} PKR</td>
+                <td>${bill.totalAmount.toFixed(2)} PKR</td>
             </tr>
             <tr>
-                <td><strong>Total Discount:</strong></td>
-                <td>0 PKR</td>
+                <td><strong>Discount:</strong></td>
+                <td>${bill.discountAmount.toFixed(2)} PKR</td>
+            </tr>
+              <tr>
+                <td><strong>Total After Discount:</strong></td>
+                <td>${bill.totalAfterDiscount.toFixed(2)} PKR</td>
+            </tr>
+            <tr>
+                <td><strong>Old Balance:</strong></td>
+                <td>${bill.oldBalance.toFixed(2)} PKR</td>
             </tr>
             <tr>
                 <td><strong>Net Bill Amount:</strong></td>
-                <td>${bill.netAmount} PKR</td>
+                <td>${bill.netAmount.toFixed(2)} PKR</td>
             </tr>
             <tr>
                 <td><strong>Given Amount</strong></td>
-                <td>${bill.customerGivenAmount} PKR</td>
+                <td>${bill.customerGivenAmount.toFixed(2)} PKR</td>
             </tr>
             <tr>
                 <td><strong>Remaining Amount</strong></td>
-                <td>${bill.debt} PKR</td>
+                <td>${bill.debt.toFixed(2)} PKR</td>
             </tr>
-            <tr>
-                <td><strong>Tax % Value:</strong></td>
-                <td>0.00</td>
-            </tr>
+
         </table>
 
         <div class="signature">
@@ -235,13 +391,17 @@ const CustomerBilling = () => {
 `;
 
     const printWindow = window.open('', '', 'width=800,height=600');
-    printWindow.document.open();
-    printWindow.document.write(printContent);
-    printWindow.document.close();
-    printWindow.print();
+      if (printWindow) {
+        printWindow.document.open();
+        printWindow.document.write(printContent);
+        printWindow.document.close();
+         printWindow.print();
+    } else {
+        alert('Failed to open print window. Please check your browser settings.');
+    }
+
   };
 
-  // Toggle the visibility of the bill details (Customer Name, Date)
   const toggleDetails = (invoiceNo) => {
     setShowDetails(prevState => ({
       ...prevState,
@@ -250,172 +410,275 @@ const CustomerBilling = () => {
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto bg-white shadow-md rounded-md">
-      <h2 className="text-2xl font-bold mb-4">Customer Billing</h2>
+    <div className="bg-gray-100 min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-xl p-8">
+        <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">Customer Billing</h1>
 
-      <div className="mb-4">
-        <input
-          type="text"
-          placeholder="Invoice No"
-          value={invoiceNo}
-          onChange={(e) => setInvoiceNo(e.target.value)}
-          className="border p-2 mr-2 rounded w-full"
-          readOnly // Make invoice number read-only
-          disabled
-        />
-      </div>
-
-      <div className="mb-4">
-        <input
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          className="border p-2 mr-2 rounded w-full"
-        />
-      </div>
-
-      <div className="mb-4">
-        <input
-          type="text"
-          placeholder="Customer Name"
-          value={customerName}
-          onChange={(e) => setCustomerName(e.target.value)}
-          className="border p-2 mr-2 rounded w-full"
-        />
-      </div>
-
-      <div className="mb-4">
-        <input
-          type="text"
-          placeholder="Address"
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
-          className="border p-2 mr-2 rounded w-full"
-        />
-      </div>
-
-      <div className="mb-4 flex space-x-2">
-        {/* Dropdown for Item Names */}
-        <select
-          value={newItem.name}
-          onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
-          className="border p-2 rounded w-1/3"
-        >
-          <option value="">Select Item</option>
-          {availableItems.map((item, index) => (
-            <option key={index} value={item}>{item}</option>
-          ))}
-        </select>
-
-        <input
-          type="number"
-          placeholder="Quantity"
-          value={newItem.quantity}
-          onChange={(e) => setNewItem({ ...newItem, quantity: e.target.value })}
-          className="border p-2 rounded w-1/3"
-        />
-        <input
-          type="number"
-          placeholder="Price per unit"
-          value={newItem.price}
-          onChange={(e) => setNewItem({ ...newItem, price: e.target.value })}
-          className="border p-2 rounded w-1/3"
-        />
-        <button onClick={handleAddToCart} className="bg-blue-500 text-white px-4 py-2 rounded">Add</button>
-      </div>
-
-      <h3 className="text-lg font-semibold mt-4">Current Bill</h3>
-      <table className="w-full border-collapse border border-gray-300 mt-2">
-        <thead>
-          <tr className="bg-gray-100">
-            <th className="border p-2">Item Name</th>
-            <th className="border p-2">Quantity</th>
-            <th className="border p-2">Price</th>
-            <th className="border p-2">Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          {cart.map((item, index) => (
-            <tr key={index} className="border">
-              <td className="border p-2">{item.name}</td>
-              <td className="border p-2">{item.quantity}</td>
-              <td className="border p-2">{item.price} PKR</td>
-              <td className="border p-2">{item.total} PKR</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      
-      <h3 className=" font-bold mt-4">
-        Total Amount: {cart.reduce((acc, item) => acc + item.total, 0) - parseFloat(discountPercentage)} PKR
-      </h3>
-
-      <div className="mb-4">
-        <span>Old Amount</span>
-        <input
-          type="number"
-          placeholder="Old Amount"
-          value={oldBalance}
-          onChange={(e) => setOldBalance(e.target.value)}
-          className="border p-2 rounded w-full"
-        />
-      </div>
-
-      <h3 className=" font-bold mt-4">
-        Net Amount: {cart.reduce((acc, item) => acc + item.total, 0) + parseFloat(oldBalance) - parseFloat(discountPercentage)} PKR
-      </h3>
-
-      <div className="mb-4">
-        <span>Given Amount:</span>
-        <input
-          type="number"
-          placeholder="Given Amount"
-          value={customerGivenAmount}
-          onChange={(e) => setCustomerGivenAmount(e.target.value)}
-          className="border p-2 rounded w-full"
-        />
-      </div>
-
-      <button onClick={handleGenerateBill} className="bg-green-500 text-white px-4 py-2 rounded mt-4">Generate Bill</button>
-
-      {/* Bills List */}
-      <h3 className="text-xl font-bold mt-6">Generated Bills</h3>
-      {bills.map((bill, index) => (
-        <div key={index} className="border p-4  rounded my-2">
-          <div className="flex justify-between items-center">
-            <p><strong>Invoice No:</strong> {bill.invoiceNo}</p>
-            <p><strong>Customer:</strong> {bill.customerName}</p>
-            <p><strong>Date:</strong> {bill.date}</p>
-
-
-
-
-
-            <button onClick={() => handlePrint(bill)} className="bg-blue-500 text-white px-4 py-2 rounded mt-2">Print Bill</button>
-            {/* Toggle button to show/hide details */}
-            <button
-              onClick={() => toggleDetails(bill.invoiceNo)}
-              className="  px-4 py-2 rounded mt-2"
-            >
-              {showDetails[bill.invoiceNo] ? <MdKeyboardDoubleArrowUp className="h-6 w-6 text-gray-500" />
-                : <MdKeyboardDoubleArrowDown className="h-6 w-6 text-gray-500" />}
-            </button>
+        {/* Customer Details Form */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div>
+            <label htmlFor="customerName" className="block text-sm font-medium text-gray-700">
+               <FaUser className="inline-block mr-2 text-gray-400" />
+              Customer Name <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              id="customerName"
+              name="customerName"
+              placeholder="Enter customer name"
+              value={customerName}
+              onChange={handleInputChange}
+              className={`mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${errors.customerName ? 'border-red-500' : 'border-gray-300'}`}
+            />
+              {errors.customerName && <p className="text-red-500 text-xs mt-1">{errors.customerName}</p>}
           </div>
+          <div>
+            <label htmlFor="address" className="block text-sm font-medium text-gray-700">
+              <FaAddressCard className="inline-block mr-2 text-gray-400" />
+              Address
+            </label>
+            <input
+              type="text"
+              id="address"
+              name="address"
+              placeholder="Enter address"
+              value={address}
+              onChange={handleInputChange}
+              className="mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm border-gray-300"
+            />
+          </div>
+          <div>
+            <label htmlFor="date" className="block text-sm font-medium text-gray-700">
+               <FaCalendarAlt className="inline-block mr-2 text-gray-400"/>
+              Date
+            </label>
+            <input
+              type="date"
+              id="date"
+              name="date"
+              value={date}
+              onChange={handleInputChange}
+              className="mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm border-gray-300"
+            />
+          </div>
+             <div>
+            <label htmlFor="oldBalance" className="block text-sm font-medium text-gray-700">
+              <FaMoneyBillWave className="inline-block mr-2 text-gray-400" />
+              Old Balance
+            </label>
+            <input
+              type="number"
+              name="oldBalance"
+              id="oldBalance"
+              placeholder="Enter old balance"
+              value={oldBalance}
+              onChange={handleInputChange}
+              className="mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm border-gray-300"
+            />
+          </div>
+           <div>
+            <label htmlFor="customerGivenAmount" className="block text-sm font-medium text-gray-700">
+               <FaHandHoldingUsd className="inline-block mr-2 text-gray-400" />
+              Given Amount
+            </label>
+            <input
+              type="number"
+              name="customerGivenAmount"
+              id="customerGivenAmount"
+              placeholder="Enter amount given by customer"
+              value={customerGivenAmount}
+              onChange={handleInputChange}
+              className="mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm border-gray-300"
+            />
+          </div>
+          <div>
+            <label htmlFor="discountPercentage" className="block text-sm font-medium text-gray-700">
+                <FaTags className="inline-block mr-2 text-gray-400" />
 
-          {/* Conditionally show details based on toggle */}
-          {showDetails[bill.invoiceNo] && (
-            <div className="flex flex-col">
-
-              <p><strong>Total Amount:</strong> {bill.totalAmount} PKR</p>
-              <p><strong>Old Amount:</strong> {bill.oldBalance} PKR</p>
-              <p><strong>Net Amount:</strong> {bill.netAmount} PKR</p>
-              <p><strong>Given Amount:</strong> {bill.customerGivenAmount} PKR</p>
-              <p><strong>Remaining Amount:</strong> {bill.debt} PKR</p>
-            </div>
-          )}
+              Discount (%)
+            </label>
+            <input
+              type="number"
+              name="discountPercentage"
+              id="discountPercentage"
+              placeholder="Enter discount percentage"
+              value={discountPercentage}
+              onChange={handleInputChange}
+              className="mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm border-gray-300"
+            />
+          </div>
         </div>
-      ))}
+
+        {/* Add Item Form */}
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold text-gray-700 mb-4">Add Items</h2>
+           {errors.newItem && <p className="text-red-500 text-xs mt-1">{errors.newItem}</p>}
+          <div className="grid grid-cols-3 gap-4">
+            <div className="relative rounded-md shadow-sm">
+                <select
+                id="newItemName"
+                name="newItemName"
+                value={newItem.name}
+                onChange={handleInputChange}
+                className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-3 pr-10 py-2 sm:text-sm border-gray-300 rounded-md"
+                >
+                <option value="">Select Item</option>
+                {availableItems.map((item, index) => (
+                    <option key={index} value={item}>{item}</option>
+                ))}
+                </select>
+
+            </div>
+
+            <div className="relative rounded-md shadow-sm">
+              <input
+                type="number"
+                name="newItemQuantity"
+                id="newItemQuantity"
+                placeholder="Quantity"
+                value={newItem.quantity}
+                onChange={handleInputChange}
+                className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-3 pr-10 py-2 sm:text-sm border-gray-300 rounded-md"
+              />
+            </div>
+
+            <div className="relative rounded-md shadow-sm">
+              <input
+                type="number"
+                name="newItemPrice"
+                id="newItemPrice"
+                placeholder="Price"
+                value={newItem.price}
+                onChange={handleInputChange}
+                className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-3 pr-10 py-2 sm:text-sm border-gray-300 rounded-md"
+              />
+            </div>
+          </div>
+            <button
+              onClick={handleAddToCart}
+              className="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200 flex items-center"
+            >
+              <MdAddShoppingCart className="mr-2" />
+              Add Item
+            </button>
+        </div>
+
+        {/* Cart Table */}
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold text-gray-700 mb-4">Current Bill</h2>
+          {errors.cart && <p className="text-red-500 text-xs mt-1">{errors.cart}</p>}
+
+           <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"> Action</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {cart.map((item, index) => (
+                <tr key={index}>
+                  <td className="px-6 py-4 whitespace-nowrap">{item.name}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{item.quantity}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">PKR {item.price}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">PKR {item.total}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <button
+                      onClick={() => handleRemoveItem(index)}
+                      className="text-red-600 hover:text-red-800 transition-colors duration-200"
+                    >
+                      Remove
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+            </div>
+
+        </div>
+
+        {/* Totals and Generate Bill Button */}
+        <div className="mb-6">
+          <p className="text-lg font-semibold text-gray-700">Total Amount: PKR {cart.reduce((acc, item) => acc + item.total, 0).toFixed(2)}</p>
+           <p className="text-lg font-semibold text-gray-700">Total After Discount: PKR {(cart.reduce((acc, item) => acc + item.total, 0) - ((discountPercentage/100)*cart.reduce((acc, item) => acc + item.total, 0))).toFixed(2)}</p>
+           <p className="text-lg font-semibold text-gray-700">Net Amount: PKR {((cart.reduce((acc, item) => acc + item.total, 0) - ((discountPercentage/100)*cart.reduce((acc, item) => acc + item.total, 0))) + parseFloat(oldBalance || 0)).toFixed(2)}</p>
+
+          <p className="text-lg font-semibold text-gray-700">Remaining: PKR {(((cart.reduce((acc, item) => acc + item.total, 0) - ((discountPercentage/100)*cart.reduce((acc, item) => acc + item.total, 0))) + parseFloat(oldBalance || 0)) - parseFloat(customerGivenAmount || 0) ).toFixed(2)}</p>
+          <button
+            onClick={handleGenerateBill}
+            className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200 flex items-center"
+          >
+            <MdReceipt className="mr-2" />
+            Generate Bill
+          </button>
+        </div>
+
+        {/* Bills List */}
+        <div>
+          <h2 className="text-xl font-semibold text-gray-700 mb-4">Generated Bills</h2>
+           <div className="overflow-x-auto">
+          {bills.map((bill) => (
+            <div key={bill.invoiceNo} className="bg-gray-100 p-4 rounded-md shadow mb-4">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-lg font-semibold text-gray-700">Invoice #{bill.invoiceNo}</h3>
+                <div>
+                  <button onClick={() => handlePrint(bill)} className="text-blue-600 hover:text-blue-800 transition-colors duration-200 mr-4 flex items-center">
+                    <MdPrint className="mr-1" /> Print
+                  </button>
+                  <button onClick={() => toggleDetails(bill.invoiceNo)} className="text-gray-600 hover:text-gray-800 focus:outline-none transition-colors duration-200">
+                    {showDetails[bill.invoiceNo] ? <MdKeyboardDoubleArrowUp  className="h-6 w-6 text-gray-500"/> : <MdKeyboardDoubleArrowDown className="h-6 w-6 text-gray-500" />}
+                  </button>
+                </div>
+              </div>
+              {showDetails[bill.invoiceNo] && (
+                <>
+                    <p className="text-gray-600"><strong>Customer:</strong> {bill.customerName}</p>
+                    <p className="text-gray-600"><strong>Date:</strong> {bill.date}</p>
+                  <p className="text-gray-600"><strong>Total Amount:</strong> PKR {bill.totalAmount.toFixed(2)}</p>
+                  <p className="text-gray-600"><strong>Discount:</strong> {bill.discountPercentage}% (PKR {bill.discountAmount.toFixed(2)})</p>
+                   <p className="text-gray-600"><strong>Total After Discount:</strong> PKR {bill.totalAfterDiscount.toFixed(2)}</p>
+                    <p className="text-gray-600"><strong>Old Balance:</strong> PKR {bill.oldBalance.toFixed(2)}</p>
+
+                  <p className="text-gray-600"><strong>Net Amount:</strong> PKR {bill.netAmount.toFixed(2)}</p>
+                    <p className="text-gray-600"><strong>Given Amount:</strong> PKR {bill.customerGivenAmount.toFixed(2)}</p>
+                  <p className="text-gray-600"><strong>Remaining Amount:</strong> PKR {bill.debt.toFixed(2)}</p>
+                  {/* Display other bill details */}
+                  <div className="mt-2">
+                    <h4 className="text-md font-semibold text-gray-700">Items:</h4>
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead>
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+
+                        {bill.cart.map((item, index) => (
+                          <tr key={index}>
+                            <td className="px-6 py-4 whitespace-nowrap">{item.name}</td>
+                            <td className="px-6 py-4 whitespace-nowrap">{item.quantity}</td>
+                            <td className="px-6 py-4 whitespace-nowrap">PKR {item.price}</td>
+                            <td className="px-6 py-4 whitespace-nowrap">PKR {item.total}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
+              )}
+            </div>
+          ))}
+        </div>
+        </div>
+      </div>
     </div>
   );
 };

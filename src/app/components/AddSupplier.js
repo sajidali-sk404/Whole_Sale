@@ -1,159 +1,251 @@
-import React, { useState, useContext } from "react";
+'use client'
+import React, { useState } from "react";
 import axios from "axios";
-import { XMarkIcon } from "@heroicons/react/24/outline";
-import { SupplierContext } from '@/app/ContextApi/SupplierDataApi';
+import { FaTimes, FaBuilding, FaUser, FaPhone, FaEnvelope, FaMapMarkerAlt } from 'react-icons/fa'; // Import icons
 
-const AddSupplier = ({ setShowForm }) => {
+const AddSupplier = ({ setShowForm, refreshSuppliers }) => { // Add refreshSuppliers prop
 
-  const { suppliers, setSuppliers } = useContext(SupplierContext);
-
-  const [supplierDetails, setSupplierDetails] = useState({
+  const [formData, setFormData] = useState({
     companyName: "",
     owner: "",
     contact: "",
     email: "",
     address: "",
   });
+  const [errors, setErrors] = useState({}); // Add error state
+  const [successMessage, setSuccessMessage] = useState(''); // Add success message
+
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+    // Clear the error for the field being changed
+    setErrors(prevErrors => ({ ...prevErrors, [e.target.name]: null }));
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formData.companyName.trim()) {
+      newErrors.companyName = 'Company Name is required';
+    }
+    if (!formData.owner.trim()) {
+      newErrors.owner = 'Owner Name is required';
+    }
+    if (formData.contact && !/^[0-9]{10,15}$/.test(formData.contact)) { // Basic phone number validation
+        newErrors.contact = 'Invalid phone number';
+    }
+
+     if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+        newErrors.email = 'Invalid email address';
+    }
+
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0; // Return true if no errors
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!validateForm()) {
+      return; // Stop submission if validation fails
+    }
+
     try {
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/supplier`,
-        supplierDetails
+        formData
       );
-      setSuppliers((prevSuppliers) => [...prevSuppliers, response.data]);
+      console.log("Company added successfully", response.data);
+      setSuccessMessage('Supplier added successfully!'); // Set success message
+
+      // Reset form and close modal
+        setFormData({
+            companyName: "",
+            owner: "",
+            contact: "",
+            email: "",
+            address: "",
+        });
       setShowForm(false);
-      setSupplierDetails({
-        companyName: "",
-        owner: "",
-        contact: "",
-        address: "",
-      });
-      console.log("Company added successfully", suppliers);
+        setErrors({}); // Clear errors
+      refreshSuppliers(); // Refresh supplier list in parent component
     } catch (err) {
-      console.error("Error adding company:", err.message);
+        if (err.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        console.log(err.response.data);
+        console.log(err.response.status);
+        console.log(err.response.headers);
+
+        // Set a generic error message, or use a specific one from the server if available
+        setErrors({ api: err.response.data.message || 'An error occurred while adding the supplier.' });
+
+
+      } else if (err.request) {
+        // The request was made but no response was received
+        console.log(err.request);
+          setErrors({ api: 'No response received from the server. Please check your network connection.' });
+
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        console.log('Error', err.message);
+           setErrors({ api: 'An unexpected error occurred.  Please try again.' });
+      }
     }
   };
 
+  const handleClose = () => {
+    setFormData({
+        companyName: "",
+        owner: "",
+        contact: "",
+        email: "",
+        address: "",
+    });
+      setShowForm(false)
+      setErrors({})
+      setSuccessMessage('')
+
+  }
+
   return (
-    <div className="p-6">
-      <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4">
-        <div className="relative max-w-3xl w-full bg-white shadow-lg rounded-lg p-6 ">
-          <button
-            onClick={() => setShowForm(false)}
-            className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
-          >
-            <XMarkIcon className="w-6 h-6" />
-          </button>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl p-8">
+        <button
+          onClick={handleClose}
+          className="absolute top-4 right-4 text-gray-600 hover:text-gray-800 transition-colors duration-200"
+        >
+          <FaTimes className="text-2xl" />
+        </button>
+        <h2 className="text-2xl font-bold text-gray-800 mb-6">Add Supplier Company</h2>
+        {successMessage && <div className="text-green-500 mb-4">{successMessage}</div>}
+         {errors.api && <div className="text-red-500 mb-4">{errors.api}</div>}
 
-          <h2 className="text-2xl font-semibold mb-4 text-center">
-            Add Supplier Company
-          </h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+           <div>
+            <label htmlFor="companyName" className="block text-sm font-medium text-gray-700">
+              Company Name <span className="text-red-500">*</span>
+            </label>
+            <div className="mt-1 relative rounded-md shadow-sm">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <FaBuilding className="h-5 w-5 text-gray-400" />
+              </div>
+              <input
+                type="text"
+                name="companyName"
+                id="companyName"
+                className={`block w-full pl-10 pr-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${errors.companyName ? 'border-red-500' : 'border-gray-300'}`}
+                value={formData.companyName}
+                onChange={handleChange}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Company Name*
-              </label>
-              <input
-                type="text"
-                className="mt-1 block w-full p-2 border rounded-md"
-                value={supplierDetails.companyName}
-                onChange={(e) =>
-                  setSupplierDetails({
-                    ...supplierDetails,
-                    companyName: e.target.value,
-                  })
-                }
-                required
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Owner Name*
-              </label>
-              <input
+            {errors.companyName && <p className="text-red-500 text-xs mt-1">{errors.companyName}</p>}
+          </div>
+
+          {/* Owner Name */}
+          <div>
+            <label htmlFor="owner" className="block text-sm font-medium text-gray-700">
+              Owner Name <span className="text-red-500">*</span>
+            </label>
+             <div className="mt-1 relative rounded-md shadow-sm">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <FaUser className="h-5 w-5 text-gray-400" />
+              </div>
+                <input
                 type="text"
-                className="mt-1 block w-full p-2 border rounded-md"
-                value={supplierDetails.owner}
-                onChange={(e) =>
-                  setSupplierDetails({
-                    ...supplierDetails,
-                    owner: e.target.value,
-                  })
-                }
-                required
+                name="owner"
+                id="owner"
+                className={`block w-full pl-10 pr-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${errors.owner ? 'border-red-500' : 'border-gray-300'}`}
+                value={formData.owner}
+                onChange={handleChange}
+
+              />
+             </div>
+            {errors.owner && <p className="text-red-500 text-xs mt-1">{errors.owner}</p>}
+          </div>
+
+            {/* Contact Number */}
+          <div>
+            <label htmlFor="contact" className="block text-sm font-medium text-gray-700">
+              Contact Number
+            </label>
+            <div className="mt-1 relative rounded-md shadow-sm">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <FaPhone className="h-5 w-5 text-gray-400" />
+              </div>
+              <input
+                type="text"  // Change to "tel" for better mobile keyboard
+                name="contact"
+                id="contact"
+                className={`block w-full pl-10 pr-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${errors.contact ? 'border-red-500' : 'border-gray-300'}`}
+                value={formData.contact}
+                onChange={handleChange}
+
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Contact Number
-              </label>
-              <input
-                type="text"
-                className="mt-1 block w-full p-2 border rounded-md"
-                value={supplierDetails.contact}
-                onChange={(e) =>
-                  setSupplierDetails({
-                    ...supplierDetails,
-                    contact: e.target.value,
-                  })
-                }
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Email*
-              </label>
-              <input
+             {errors.contact && <p className="text-red-500 text-xs mt-1">{errors.contact}</p>}
+          </div>
+
+           {/* Email */}
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              Email
+            </label>
+             <div className="mt-1 relative rounded-md shadow-sm">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <FaEnvelope className="h-5 w-5 text-gray-400" />
+              </div>
+                <input
                 type="email"
-                className="mt-1 block w-full p-2 border rounded-md"
-                value={supplierDetails.email}
-                onChange={(e) =>
-                  setSupplierDetails({
-                    ...supplierDetails,
-                    email: e.target.value,
-                  })
-                }
-                required
+                name="email"
+                id="email"
+                className={`block w-full pl-10 pr-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${errors.email ? 'border-red-500' : 'border-gray-300'}`}
+                value={formData.email}
+                onChange={handleChange}
+
               />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Business Address
-              </label>
+             </div>
+               {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+          </div>
+
+          {/* Business Address */}
+          <div>
+            <label htmlFor="address" className="block text-sm font-medium text-gray-700">
+              Business Address
+            </label>
+            <div className="mt-1 relative rounded-md shadow-sm">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <FaMapMarkerAlt className="h-5 w-5 text-gray-400" />
+              </div>
               <input
                 type="text"
-                className="mt-1 block w-full p-2 border rounded-md"
-                value={supplierDetails.address}
-                onChange={(e) =>
-                  setSupplierDetails({
-                    ...supplierDetails,
-                    address: e.target.value,
-                  })
-                }
+                name="address"
+                id="address"
+                className="block w-full pl-10 pr-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm border-gray-300"
+                value={formData.address}
+                onChange={handleChange}
               />
             </div>
+          </div>
 
-            <div className="flex justify-between mt-6">
-              <button
-                type="button"
-                onClick={() => setShowForm(false)}
-                className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
-              >
-                Create Company
-              </button>
-            </div>
-          </form>
-        </div>
+          <div className="flex justify-between mt-6">
+            <button
+              type="button"
+              onClick={handleClose}
+              className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200"
+            >
+              Create Company
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

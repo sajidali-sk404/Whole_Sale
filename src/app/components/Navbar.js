@@ -4,28 +4,40 @@ import { motion } from "framer-motion";
 import { useContext } from "react";
 import { InventoryContext } from "../ContextApi/inventoryDataApi";
 import { SupplierContext } from "../ContextApi/SupplierDataApi";
+import { FaShoppingCart, FaChartLine, FaBuilding, FaUserFriends } from 'react-icons/fa'; // Import icons
 
-const Card = ({ title, value }) => (
+const Card = ({ title, value, icon: Icon }) => ( // Receive icon as a prop
   <motion.div
-    whileHover={{ scale: 1.05 }}
-    className="bg-white cursor-pointer shadow-md p-4 rounded-md flex flex-col items-center w-full"
+    whileHover={{ scale: 1.05, y: -5 }} // Add slight vertical lift
+    whileTap={{ scale: 0.95 }} // Add slight scale down on tap
+    className="bg-white rounded-lg shadow-lg p-6 flex flex-col items-center justify-between transition-all duration-200 cursor-pointer"
   >
-    <h3 className="text-sm sm:text-base md:text-lg font-semibold text-center">{title}</h3>
-    <p className="text-lg sm:text-xl font-bold">{value}</p>
+    {Icon && <Icon className="text-4xl text-blue-600 mb-4" />} {/* Render the icon */}
+    <h3 className="text-lg font-semibold text-gray-700 text-center">{title}</h3>
+    <p className="text-2xl font-bold text-gray-900 mt-2">{value}</p>
   </motion.div>
 );
 
 const Navbar = () => {
   const { totalInventory } = useContext(InventoryContext);
-  const { totalSupplier } = useContext(SupplierContext)
+  const { totalSupplier } = useContext(SupplierContext);
+
+  // Handle null or undefined values, provide default
+  const inventoryValue = totalInventory !== null && totalInventory !== undefined ? totalInventory : 0;
+    const supplierValue = totalSupplier !== null && totalSupplier !== undefined ? totalSupplier : 0;
+
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4 bg-gray-100 shadow-md">
-      <Card title="Total Amount of Stock" value={totalInventory} />
-      <Card title="Daily Profit" value="0" />
-      <Card title="Added Company" value={totalSupplier} />
-      <Card title="Added Local Cust." value="0" />
-    </div>
+    <nav className="bg-blue-600 py-4 shadow-md"> {/* Use <nav> for semantic HTML */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+          <Card title="Total Stock" value={inventoryValue} icon={FaShoppingCart} />
+          <Card title="Daily Profit" value="0" icon={FaChartLine} />
+          <Card title="Total Suppliers" value={supplierValue} icon={FaBuilding} />
+          <Card title="Local Customers" value="0" icon={FaUserFriends} />
+        </div>
+      </div>
+    </nav>
   );
 };
 
