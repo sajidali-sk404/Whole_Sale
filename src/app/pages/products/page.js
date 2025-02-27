@@ -9,6 +9,47 @@ export default function Inventory() {
   const [error, setError] = useState(null);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' }); // Add sorting state
 
+  // Function to consolidate items with case-insensitive matching
+  const consolidateInventory = (data) => {
+    if (!data || !Array.isArray(data)) return [];
+
+    const consolidated = {};
+    const consolidatedList = [];
+
+    data.forEach(item => {
+      const itemNameLower = item.itemName.toLowerCase();
+
+      if (consolidated[itemNameLower]) {
+        // Item already exists (case-insensitive match)
+        consolidated[itemNameLower].quantity += item.quantity;
+      } else {
+        // New item
+        consolidated[itemNameLower] = { ...item }; // Create a copy
+      }
+    });
+
+    // Convert the consolidated object back to an array
+    for (const key in consolidated) {
+      consolidatedList.push(consolidated[key]);
+    }
+
+    return consolidatedList;
+  };
+
+
+  // Sort the data
+  const [sortedInventory, setSortedInventory] = useState([]);
+
+  useEffect(() => {
+    if (inventoryData) {
+      const consolidatedData = consolidateInventory(inventoryData);
+      setSortedInventory([...consolidatedData]); // Create a copy
+    } else {
+      setSortedInventory([]);
+    }
+  }, [inventoryData]); // React when inventoryData changes
+
+
   // Sorting function
   const requestSort = (key) => {
     let direction = 'ascending';
@@ -18,23 +59,28 @@ export default function Inventory() {
     setSortConfig({ key, direction });
   };
 
-  // Sort the data
-    let sortedInventory = [];
-    if (inventoryData) {
-    sortedInventory = [...inventoryData]; // Create a copy to avoid mutating the original array
-    }
 
-  if (sortConfig.key !== null && inventoryData) {
-    sortedInventory.sort((a, b) => {
-      if (a[sortConfig.key] < b[sortConfig.key]) {
-        return sortConfig.direction === 'ascending' ? -1 : 1;
-      }
-      if (a[sortConfig.key] > b[sortConfig.key]) {
-        return sortConfig.direction === 'ascending' ? 1 : -1;
-      }
-      return 0;
-    });
-  }
+console.log(inventoryData)
+  useEffect(() => {
+    if (sortConfig.key !== null && sortedInventory) {
+      const sorted = [...sortedInventory].sort((a, b) => {
+        const aValue = a[sortConfig.key];
+        const bValue = b[sortConfig.key];
+
+        if (aValue < bValue) {
+          return sortConfig.direction === 'ascending' ? -1 : 1;
+        }
+        if (aValue > bValue) {
+          return sortConfig.direction === 'ascending' ? 1 : -1;
+        }
+        return 0;
+      });
+      setSortedInventory(sorted); // Update sortedInventory state
+    }
+  }, [sortConfig]);
+
+
+
 
    if (loading) {
     return (
@@ -89,6 +135,12 @@ export default function Inventory() {
                    <FaSort className="inline-block ml-1" />
                    )}
                 </th>
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                >
+                  Last Date
+                </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -104,6 +156,9 @@ export default function Inventory() {
                       >
                         {item.quantity}
                       </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {item.lastUpdated ? new Date(item.lastUpdated).toISOString().split('T')[0] : 'N/A'}
                     </td>
                   </tr>
                 ))
