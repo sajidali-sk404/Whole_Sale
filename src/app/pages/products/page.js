@@ -60,7 +60,7 @@ export default function Inventory() {
   };
 
 
-
+console.log(inventoryData)
   useEffect(() => {
     if (sortConfig.key !== null && sortedInventory) {
       const sorted = [...sortedInventory].sort((a, b) => {
@@ -77,7 +77,7 @@ export default function Inventory() {
       });
       setSortedInventory(sorted); // Update sortedInventory state
     }
-  }, [sortConfig, sortedInventory]);
+  }, [sortConfig]);
 
 
 
@@ -135,6 +135,12 @@ export default function Inventory() {
                    <FaSort className="inline-block ml-1" />
                    )}
                 </th>
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                >
+                  Last Date
+                </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -150,6 +156,9 @@ export default function Inventory() {
                       >
                         {item.quantity}
                       </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {item.lastUpdated ? new Date(item.lastUpdated).toISOString().split('T')[0] : 'N/A'}
                     </td>
                   </tr>
                 ))
