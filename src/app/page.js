@@ -17,19 +17,19 @@ export default function Home() {
           {/* Hero Section */}
           <div className="text-center">
             <h1 className="text-4xl font-extrabold text-gray-900 sm:text-5xl md:text-6xl">
-              <span className="block">Your Business,</span>
-              <span className="block text-blue-600">Simplified.</span>
+              <span className="block">Muhammad Amir,</span>
+              <span className="block text-blue-600">Traders.</span>
             </h1>
-            <p className="mt-3 text-base text-gray-500 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl">
+            {/* <p className="mt-3 text-base text-gray-500 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl">
               Manage suppliers, shopkeepers, inventory, transactions, transportation, and customers all in one place.
-            </p>
+            </p> */}
             {/* Optional: Call to Action Button */}
              {/* <div className="mt-8">
               <Link href="/pages/suppliers" className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
                   Get Started
               </Link>
             </div>  */}
-            <div className="mt-5 sm:mt-8 sm:flex sm:justify-center">
+            {/* <div className="mt-5 sm:mt-8 sm:flex sm:justify-center">
               <div className="rounded-md shadow">
                 <Link href="/pages/suppliers" className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 md:py-4 md:text-lg md:px-10">
                     Get started
@@ -40,7 +40,7 @@ export default function Home() {
                     Learn more
                 </Link>
               </div>
-            </div>
+            </div> */}
           </div>
 
           {/* Feature Cards */}

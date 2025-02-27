@@ -12,13 +12,20 @@ const EditOrderForm = ({ setShowStatusForm, setShipmentsData, id, shipmentData }
             name: "",
             vehicle: ""
         },
-        status: "Pending"
+        status: "Pending",
+        items: [{
+            itemName: "",
+            quantity: 0,
+            price: 0,
+            status: "Pending",
+        }],
     });
 
     // useEffect to pre-populate form when shipmentData prop changes
     useEffect(() => {
         if (shipmentData) {
             setEditData({
+                items: shipmentData.items || [{ itemName: "", quantity: 0, price: 0, status: "Pending" }],
                 date: shipmentData.date ? new Date(shipmentData.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
                 driver: shipmentData.driver || { name: "", vehicle: "" },
                 status: shipmentData.status || "Pending",
@@ -62,6 +69,7 @@ const EditOrderForm = ({ setShowStatusForm, setShipmentsData, id, shipmentData }
         e.preventDefault();
 
         const updatedData = {
+            items: editData.items,
             date: editData.date,
             driver: {
                 name: editData.driver.name,

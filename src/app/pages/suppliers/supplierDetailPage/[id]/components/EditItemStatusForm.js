@@ -94,7 +94,10 @@ const EditItemStatusForm = ({ setShowItemStatusForm, setShipmentsData, id, shipm
                     <div className="border-b pb-4">
                         <h3 className="text-lg font-medium mb-4">Items Status</h3>
                         {editData.items.map((item, index) => (
-                            <div key={index} className="grid max-sm:grid-cols-3 grid-cols-4 gap-4 mb-4">
+                            <div key={index} className="grid grid-cols-2 gap-4 mb-4">
+                                
+                                {/* Item Name */}
+                                <h1>{item.itemName}</h1>
 
                                 {/* Status Buttons*/}
                                 <div className="flex gap-4">
