@@ -1,9 +1,12 @@
 'use client'
 import React, { useState } from 'react'
 import { XMarkIcon } from "@heroicons/react/24/outline";
+import { FaPlus, FaTruck, FaMoneyBillWave, FaClipboardCheck, FaFileInvoiceDollar, FaBoxOpen } from 'react-icons/fa';
 import axios from 'axios';
 
 const AddOrderForm = ({ setShowForm, newData, setNewData, setShipmentsData, id }) => {
+
+  // ... (All the handler functions - handleFileChange, handleItemChange, etc. - remain the SAME)
 
   const handleFileChange = (e) => {
     setNewData(prev => ({
@@ -95,7 +98,7 @@ const AddOrderForm = ({ setShowForm, newData, setNewData, setShipmentsData, id }
     const formData = new FormData();
     formData.append('date', newData.date);
 
-    // Append items as JSON string (backend needs to parse it if it expects array)
+    // Append items as JSON string (backend needs to parse it)
     formData.append('items', JSON.stringify(newData.items)); // Important: Stringify items array
 
     formData.append('driver[name]', newData.driver.name); // Append nested driver fields
@@ -119,7 +122,7 @@ const AddOrderForm = ({ setShowForm, newData, setNewData, setShipmentsData, id }
         credit: newTotalPaid
       }]
 
-    // Append payments array as JSON string (backend needs to parse it if it expects array)
+    // Append payments array as JSON string (backend needs to parse it)
     formData.append('transactions[payments]', JSON.stringify(payments));
 
     // Append the invoice file.
@@ -150,70 +153,71 @@ const AddOrderForm = ({ setShowForm, newData, setNewData, setShipmentsData, id }
     }
   };
 
+
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4">
-      <div className="relative max-w-4xl w-full bg-white shadow-lg rounded-lg max-sm:p-2 p-6">
+      <div className="relative max-w-4xl w-full bg-white rounded-lg p-6 shadow-lg">
         <button
           onClick={() => setShowForm(false)}
-          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition-colors duration-200"
         >
           <XMarkIcon className="w-6 h-6" />
         </button>
 
-        <h2 className="text-2xl font-semibold mb-4 text-center">Create New Order</h2>
+        <h2 className="text-2xl font-bold text-blue-600 mb-4 text-center">Create New Order</h2>
 
-        <form encType="multipart/form-data" onSubmit={handleAddData} className="space-y-6 overflow-y-auto max-h-96">
+        <form encType="multipart/form-data" onSubmit={handleAddData} className="space-y-4 overflow-y-auto max-h-[70vh]">
           {/* Items Section */}
-          <div className="border-b pb-4">
-            <h3 className="text-lg font-medium mb-4">Items Details</h3>
+          <div>
+            <h3 className="text-lg font-semibold text-gray-700 mb-2 flex items-center"><FaBoxOpen className="mr-2 text-blue-600" />Items</h3>
             {newData.items.map((item, index) => (
-              <div key={index} className="grid max-sm:grid-cols-3 grid-cols-4 gap-4 mb-4">
-                <div>
-                  <label className="block text-sm font-medium">Item Name*</label>
+              <div key={index} className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-2">
+                <div className="md:col-span-1">
+                  <label className="block text-sm font-medium text-gray-600">Item Name*</label>
                   <input
                     type="text"
                     value={item.itemName || ''}
                     onChange={(e) => handleItemChange(index, 'itemName', e.target.value)}
-                    className="w-full p-2 border rounded-md"
+                    className="mt-1 block w-full border rounded-md shadow-sm py-1 px-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm border-gray-300"
                     required
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium">Quantity*</label>
+                <div className="md:col-span-1">
+                  <label className="block text-sm font-medium text-gray-600">Quantity*</label>
                   <input
                     type="number"
                     value={item.quantity}
                     onChange={(e) => handleItemChange(index, 'quantity', e.target.value)}
-                    className="w-full p-2 border rounded-md"
+                    className="mt-1 block w-full border rounded-md shadow-sm py-1 px-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm border-gray-300"
                     required
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium">Per Price</label>
+                <div className="md:col-span-1">
+                  <label className="block text-sm font-medium text-gray-600">Price</label>
                   <input
                     type="number"
                     value={item.price}
                     onChange={(e) => handleItemChange(index, 'price', e.target.value)}
-                    className="w-full p-2 border rounded-md"
+                    className="mt-1 block w-full border rounded-md shadow-sm py-1 px-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm border-gray-300"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium">Total Price</label>
+                <div className="md:col-span-1">
+                  <label className="block text-sm font-medium text-gray-600">Total</label>
                   <input
                     type="number"
                     value={item.price * item.quantity}
-                    className="w-full p-2 border rounded-md bg-gray-200"
+                    className="mt-1 block w-full border rounded-md shadow-sm py-1 px-2 focus:outline-none  text-sm border-gray-300 bg-gray-100"
                     disabled
                   />
                 </div>
-                {/* Status Buttons for each item */}
-                <div className="flex gap-4">
+                {/* Status Buttons - Simpler Styling */}
+                <div className="md:col-span-4 flex gap-2">
                   <button
                     type="button"
                     onClick={() => handleItemStatusChange(index, 'Pending')}
-                    className={`px-4 py-2 rounded-md ${item.status === 'Pending'
-                      ? 'bg-yellow-500 text-white'
-                      : 'bg-gray-200'
+                    className={`px-3 py-1 rounded text-sm transition-colors duration-200 ${item.status === 'Pending'
+                      ? 'bg-yellow-100 text-yellow-600'
+                      : 'text-gray-500 hover:bg-yellow-50'
                       }`}
                   >
                     Pending
@@ -221,9 +225,9 @@ const AddOrderForm = ({ setShowForm, newData, setNewData, setShipmentsData, id }
                   <button
                     type="button"
                     onClick={() => handleItemStatusChange(index, 'Delivered')}
-                    className={`px-4 py-2 rounded-md ${item.status === 'Delivered'
-                      ? 'bg-green-500 text-white'
-                      : 'bg-gray-200'
+                    className={`px-3 py-1 rounded text-sm transition-colors duration-200 ${item.status === 'Delivered'
+                      ? 'bg-green-100 text-green-600'
+                      : 'text-gray-500 hover:bg-green-50'
                       }`}
                   >
                     Delivered
@@ -234,35 +238,33 @@ const AddOrderForm = ({ setShowForm, newData, setNewData, setShipmentsData, id }
             <button
               type="button"
               onClick={addNewItem}
-              className="mt-2 text-blue-500 text-sm flex items-center"
+              className="mt-1 text-blue-600 hover:text-blue-700 transition-colors duration-200 text-sm flex items-center"
             >
-              <span className="mr-1">+ Add Another Item</span>
+              <FaPlus className="mr-1 text-xs" /> Add Item
             </button>
           </div>
 
           {/* Payment Details */}
-          <div className="border-b pb-4">
-            <h3 className="text-lg font-medium mb-4">Payment Details</h3>
+          <div>
+            <h3 className="text-lg font-semibold text-gray-700 mb-2 flex items-center"><FaMoneyBillWave className="mr-2 text-blue-600" />Payment</h3>
 
-            {/* Show Previous Payments */}
+            {/* Simplified Previous Payments Display */}
             {newData.transactions.payments?.length > 0 && (
-              <div className="mb-4">
-                <h4 className="text-md font-semibold">Previous Payments</h4>
-                <ul className="space-y-2">
+              <div className="mb-2">
+                <h4 className="text-sm font-semibold text-gray-600">Previous Payments</h4>
+                <ul className="space-y-1">
                   {newData.transactions.payments.map((payment, index) => (
-                    <li key={index} className="bg-gray-100 p-2 rounded-md flex justify-between">
-                      <span>Amount: {payment.amount}</span>
-                      <span className="text-sm text-gray-600">Date: {new Date(payment.paymentDate).toLocaleDateString()}</span>
+                    <li key={index} className="text-sm text-gray-600">
+                      {new Date(payment.paymentDate).toLocaleDateString()} - ${payment.amount}
                     </li>
                   ))}
                 </ul>
               </div>
             )}
 
-            {/* New Payment Input */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium">Partial Payment*</label>
+                <label className="block text-sm font-medium text-gray-600">Partial Payment*</label>
                 <input
                   type="number"
                   value={newData.transactions.partialPayment || ''}
@@ -273,65 +275,52 @@ const AddOrderForm = ({ setShowForm, newData, setNewData, setShipmentsData, id }
                       partialPayment: e.target.value
                     }
                   }))}
-                  className="w-full p-2 border rounded-md"
+                  className="mt-1 block w-full border rounded-md shadow-sm py-1 px-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm border-gray-300"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium">Upload Invoice*</label>
+                <label className="block text-sm font-medium text-gray-600 items-center"><FaFileInvoiceDollar className="mr-2 text-blue-600" />Invoice*</label>
                 <input
                   type="file"
                   name="invoice"
                   onChange={handleFileChange}
-                  className="w-full p-2 border rounded-md"
+                  className="mt-1 block w-full border rounded-md shadow-sm py-1 px-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm border-gray-300 file:bg-gray-50 file:border-none file:py-1 file:px-4 file:mr-4 file:rounded-md file:text-sm file:text-blue-700"
                   required
                 />
               </div>
             </div>
           </div>
 
-          {/* Debit and Credit Section */}
-          <div className="border-b pb-4">
-            <h3 className="text-lg font-medium mb-4">Debit & Credit</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium">Debit (Remaining Balance)</label>
-                <input
-                  type="number"
-                  value={
-                    newData.items.reduce((acc, item) => acc + Number((item.price * item.quantity) || 0), 0) -
-                    (newData.transactions.payments?.reduce((acc, payment) => acc + Number(payment.amount), 0) || 0) -
-                    Number(newData.transactions.partialPayment || 0)
-                  }
-                  disabled
-                  className="w-full p-2 border rounded-md bg-gray-200"
-                />
+          {/* Debit and Credit - Simplified Display */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-600">Debit (Remaining)</label>
+              <div className="mt-1 block w-full py-1 px-2 text-sm text-gray-700 bg-gray-100 rounded-md">
+                {newData.items.reduce((acc, item) => acc + Number((item.price * item.quantity) || 0), 0) -
+                  (newData.transactions.payments?.reduce((acc, payment) => acc + Number(payment.amount), 0) || 0) -
+                  Number(newData.transactions.partialPayment || 0)}
               </div>
-              <div>
-                <label className="block text-sm font-medium">Credit (Total Amount Paid)</label>
-                <input
-                  type="number"
-                  value={
-                    (newData.transactions.payments?.reduce((acc, payment) => acc + Number(payment.amount), 0) || 0) +
-                    Number(newData.transactions.partialPayment || 0)
-                  }
-                  disabled
-                  className="w-full p-2 border rounded-md bg-gray-200"
-                />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-600">Credit (Paid)</label>
+              <div className="mt-1 block w-full py-1 px-2 text-sm text-gray-700 bg-gray-100 rounded-md">
+                {(newData.transactions.payments?.reduce((acc, payment) => acc + Number(payment.amount), 0) || 0) +
+                  Number(newData.transactions.partialPayment || 0)}
               </div>
             </div>
           </div>
 
           {/* Status Section */}
-          <div className="border-b pb-4">
-            <h3 className="text-lg font-medium mb-4">Order Status</h3>
-            <div className="flex gap-4">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-700 mb-2 flex items-center"><FaClipboardCheck className="mr-2 text-blue-600" />Status</h3>
+            <div className="flex gap-2">
               <button
                 type="button"
                 onClick={() => handleStatusChange('Pending')}
-                className={`px-4 py-2 rounded-md ${newData.status === 'Pending'
-                  ? 'bg-yellow-500 text-white'
-                  : 'bg-gray-200'
+                className={`px-3 py-1 rounded text-sm transition-colors duration-200 ${newData.status === 'Pending'
+                  ? 'bg-yellow-100 text-yellow-600'
+                  : 'text-gray-500 hover:bg-yellow-50'
                   }`}
               >
                 Pending
@@ -339,9 +328,9 @@ const AddOrderForm = ({ setShowForm, newData, setNewData, setShipmentsData, id }
               <button
                 type="button"
                 onClick={() => handleStatusChange('Delivered')}
-                className={`px-4 py-2 rounded-md ${newData.status === 'Delivered'
-                  ? 'bg-green-500 text-white'
-                  : 'bg-gray-200'
+                className={`px-3 py-1 rounded text-sm transition-colors duration-200 ${newData.status === 'Delivered'
+                  ? 'bg-green-100 text-green-600'
+                  : 'text-gray-500 hover:bg-green-50'
                   }`}
               >
                 Delivered
@@ -351,36 +340,36 @@ const AddOrderForm = ({ setShowForm, newData, setNewData, setShipmentsData, id }
 
           {/* Transport Form */}
           {newData.status === 'Delivered' && (
-            <div className="border-b pb-4">
-              <h3 className="text-lg font-medium mb-4">Transport Details</h3>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-700 mb-2 flex items-center"><FaTruck className="mr-2 text-blue-600" />Transport</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium">Driver Name*</label>
+                  <label className="block text-sm font-medium text-gray-600">Driver Name*</label>
                   <input
                     type="text"
                     value={newData.driver.name}
                     onChange={(e) => handleTransportChange('name', e.target.value)}
-                    className="w-full p-2 border rounded-md"
+                    className="mt-1 block w-full border rounded-md shadow-sm py-1 px-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm border-gray-300"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium">Vehicle*</label>
+                  <label className="block text-sm font-medium text-gray-600">Vehicle*</label>
                   <input
                     type="text"
                     value={newData.driver.vehicle}
                     onChange={(e) => handleTransportChange('vehicle', e.target.value)}
-                    className="w-full p-2 border rounded-md"
+                    className="mt-1 block w-full border rounded-md shadow-sm py-1 px-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm border-gray-300"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium">Delivery Date*</label>
+                  <label className="block text-sm font-medium text-gray-600">Delivery Date*</label>
                   <input
                     type="date"
                     value={newData.date}
                     onChange={(e) => handleTransportChange('deliveryDate', e.target.value)}
-                    className="w-full p-2 border rounded-md"
+                    className="mt-1 block w-full border rounded-md shadow-sm py-1 px-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm border-gray-300"
                     required
                   />
                 </div>
@@ -393,13 +382,13 @@ const AddOrderForm = ({ setShowForm, newData, setNewData, setShipmentsData, id }
             <button
               type="button"
               onClick={() => setShowForm(false)}
-              className="bg-gray-500 text-white px-4 py-2 rounded-md"
+              className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-md transition-colors duration-200"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="bg-green-500 text-white px-4 py-2 rounded-md"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition-colors duration-200"
             >
               Save Order
             </button>
