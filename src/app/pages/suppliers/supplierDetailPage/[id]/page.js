@@ -7,13 +7,15 @@ import DataList from "./components/DataList";
 import EditOrderForm from "./components/EditOrderForm";
 import axios from "axios";
 import EditStatusForm from "./components/EditStatusForm";
+import EditItemStatusForm from "./components/EditItemStatusForm";
 
 const Page = ({ params }) => {
 
   const param = use(params);
 
   const [currentSupplier, setCurrentSupplier] = useState(null)
-
+  
+  const [showItemStatusForm, setShowItemStatusForm] = useState(false);
   const [showStatusForm, setShowStatusForm] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
@@ -30,7 +32,8 @@ const Page = ({ params }) => {
     items: [{
       itemName: "",
       quantity: 0,
-      price: 0
+      price: 0,
+      status: "Pending",
     }],
     driver: {
       name: "",
@@ -95,6 +98,11 @@ const Page = ({ params }) => {
     setShowStatusForm(true);
   }
 
+  const handleItemStatusEdit = (shipment) => {
+    setShipmentDataToEdit(shipment);
+    setShowItemStatusForm(true);
+  };
+
   return (
     <div className="flex h-auto">
 
@@ -143,8 +151,17 @@ const Page = ({ params }) => {
           />
         )}
 
+        {showItemStatusForm && (
+          <EditItemStatusForm
+            setShowItemStatusForm={setShowItemStatusForm}
+            setShipmentsData={setShipmentsData}
+            id={param.id}
+            shipmentData={shipmentDataToEdit}
+          />
+        )}
+
         {showStatusForm && (
-          <EditStatusForm 
+          <EditStatusForm
             setShowStatusForm={setShowStatusForm}
             setShipmentsData={setShipmentsData}
             id={param.id}
@@ -162,6 +179,7 @@ const Page = ({ params }) => {
               handleEdit={handleEditShipment}
               handleDelete={handleDeleteShipment}
               handleStatusEdit={handleStatusEdit}
+              handleItemStatusEdit={handleItemStatusEdit}
             />
           ))}
 

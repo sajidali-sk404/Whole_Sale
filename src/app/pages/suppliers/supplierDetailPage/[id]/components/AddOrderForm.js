@@ -24,10 +24,19 @@ const AddOrderForm = ({ setShowForm, newData, setNewData, setShipmentsData, id }
     }));
   };
 
+  const handleItemStatusChange = (index, status) => {
+    const updatedItems = [...newData.items];
+    updatedItems[index].status = status; // Set the status for the specific item at index
+    setNewData(prev => ({
+      ...prev,
+      items: updatedItems
+    }));
+  };
+
   const addNewItem = () => {
     setNewData(prev => ({
       ...prev,
-      items: [...prev.items, { itemName: "", quantity: 0, price: 0 }]
+      items: [...prev.items, { itemName: "", quantity: 0, price: 0, status: "Pending" }]
     }));
   };
 
@@ -59,7 +68,7 @@ const AddOrderForm = ({ setShowForm, newData, setNewData, setShipmentsData, id }
   const resetForm = () => {
     setNewData({
       date: new Date().toISOString().split('T')[0],
-      items: [{ itemName: "", quantity: "", price: "" }],
+      items: [{ itemName: "", quantity: "", price: "", status: "Pending", }],
       driver: { name: "", vehicle: "" },
       status: "Pending",
       transactions: {
@@ -196,6 +205,29 @@ const AddOrderForm = ({ setShowForm, newData, setNewData, setShipmentsData, id }
                     className="w-full p-2 border rounded-md bg-gray-200"
                     disabled
                   />
+                </div>
+                {/* Status Buttons for each item */}
+                <div className="flex gap-4">
+                  <button
+                    type="button"
+                    onClick={() => handleItemStatusChange(index, 'Pending')}
+                    className={`px-4 py-2 rounded-md ${item.status === 'Pending'
+                      ? 'bg-yellow-500 text-white'
+                      : 'bg-gray-200'
+                      }`}
+                  >
+                    Pending
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleItemStatusChange(index, 'Delivered')}
+                    className={`px-4 py-2 rounded-md ${item.status === 'Delivered'
+                      ? 'bg-green-500 text-white'
+                      : 'bg-gray-200'
+                      }`}
+                  >
+                    Delivered
+                  </button>
                 </div>
               </div>
             ))}
