@@ -11,13 +11,9 @@ const EditOrderForm = ({ setShowEditForm, setShipmentsData, id, shipmentData, se
         items: [{
             itemName: "",
             quantity: 0,
-            price: 0
+            price: 0,
+            status: "Pending",
         }],
-        // driver: {
-        //     name: "",
-        //     vehicle: ""
-        // },
-        // status: "Pending",
         partialPayment: 0,
         invoice: null,
         transactions: {
@@ -36,9 +32,7 @@ const EditOrderForm = ({ setShowEditForm, setShipmentsData, id, shipmentData, se
         if (shipmentData) {
             setEditData({
                 date: shipmentData.date ? new Date(shipmentData.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-                items: shipmentData.items || [{ itemName: "", quantity: 0, price: 0 }],
-                // driver: shipmentData.driver || { name: "", vehicle: "" },
-                // status: shipmentData.status || "Pending",
+                items: shipmentData.items || [{ itemName: "", quantity: 0, price: 0, status: "Pending" }],
                 transactions: {
                     paymentDate: shipmentData.transactions?.paymentDate ? new Date(shipmentData.transactions.paymentDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
                     partialPayment: shipmentData.transactions?.partialPayment || 0,
@@ -78,37 +72,19 @@ const EditOrderForm = ({ setShowEditForm, setShipmentsData, id, shipmentData, se
         }));
     };
 
-    // const handleStatusChange = (status) => {
-    //     setEditData(prev => ({
-    //         ...prev,
-    //         status: status
-    //     }));
-    // };
-
-    // const handleTransportChange = (field, value) => {
-    //     if (field === 'name' || field === 'vehicle') {
-    //         setEditData(prev => ({
-    //             ...prev,
-    //             driver: {
-    //                 ...prev.driver,
-    //                 [field]: value
-    //             }
-    //         }));
-    //     }
-    //     else if (field === 'deliveryDate') {
-    //         setEditData(prev => ({
-    //             ...prev,
-    //             date: value
-    //         }));
-    //     }
-    // };
+    const handleItemStatusChange = (index, status) => {
+        const updatedItems = [...editData.items];
+        updatedItems[index].status = status;
+        setEditData(prev => ({
+          ...prev,
+          items: updatedItems
+        }));
+      };
 
     const resetForm = () => {
         setEditData({
             date: new Date().toISOString().split('T')[0],
-            items: [{ itemName: "", quantity: "", price: "" }],
-            // driver: { name: "", vehicle: "" },
-            // status: "Pending",
+            items: [{ itemName: "", quantity: "", price: "", status: "Pending" }],
             transactions: {
                 paymentDate: new Date().toISOString().split('T')[0],
                 partialPayment: "",
@@ -133,12 +109,7 @@ const EditOrderForm = ({ setShowEditForm, setShipmentsData, id, shipmentData, se
         const formData = new FormData();
         formData.append('date', editData.date);
 
-        // Append items as JSON string (backend needs to parse it if it expects array)
-        formData.append('items', JSON.stringify(editData.items)); // Important: Stringify items array
-
-        // formData.append('driver[name]', editData.driver.name);
-        // formData.append('driver[vehicle]', editData.driver.vehicle);
-        // formData.append('status', editData.status);
+        formData.append('items', JSON.stringify(editData.items));
 
         // Append transactions data
         formData.append('transactions[paymentDate]', editData.transactions.paymentDate);
@@ -162,10 +133,11 @@ const EditOrderForm = ({ setShowEditForm, setShipmentsData, id, shipmentData, se
         try {
             const response = await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/supplier/${id}/shipment/${shipmentData._id}`, formData);
 
-            if (response.status === 200) { 
+            if (response.status === 200) {
                 setShipmentsData(response.data.supplier.shipments);
                 setShowEditForm(false);
                 setShowForm(false);
+                resetForm();
             } else {
                 throw new Error("Failed to update order");
             }
@@ -185,7 +157,7 @@ const EditOrderForm = ({ setShowEditForm, setShipmentsData, id, shipmentData, se
                     <XMarkIcon className="w-6 h-6" />
                 </button>
 
-                <h2 className="text-2xl font-semibold mb-4 text-center">Create New Order</h2>
+                <h2 className="text-2xl font-semibold mb-4 text-center">Update Order</h2>
 
                 <form encType="multipart/form-data" onSubmit={handleEditData} className="space-y-6 overflow-y-auto max-h-96">
                     {/* Items Section */}
@@ -230,6 +202,29 @@ const EditOrderForm = ({ setShowEditForm, setShipmentsData, id, shipmentData, se
                                         className="w-full p-2 border rounded-md bg-gray-200"
                                         disabled
                                     />
+                                </div>
+                                {/* Status Buttons for each item */}
+                                <div className="flex gap-4">
+                                    <button
+                                        type="button"
+                                        onClick={() => handleItemStatusChange(index, 'Pending')}
+                                        className={`px-4 py-2 rounded-md ${item.status === 'Pending'
+                                            ? 'bg-yellow-500 text-white'
+                                            : 'bg-gray-200'
+                                            }`}
+                                    >
+                                        Pending
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => handleItemStatusChange(index, 'Delivered')}
+                                        className={`px-4 py-2 rounded-md ${item.status === 'Delivered'
+                                            ? 'bg-green-500 text-white'
+                                            : 'bg-gray-200'
+                                            }`}
+                                    >
+                                        Delivered
+                                    </button>
                                 </div>
                             </div>
                         ))}
