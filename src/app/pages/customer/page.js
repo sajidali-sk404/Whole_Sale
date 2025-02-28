@@ -4,7 +4,7 @@ import { MdKeyboardDoubleArrowDown, MdKeyboardDoubleArrowUp, MdPrint, MdAddShopp
 import { FaUser, FaAddressCard, FaCalendarAlt, FaMoneyBillWave, FaTags, FaHandHoldingUsd } from 'react-icons/fa';
 import { InventoryContext } from "@/app/ContextApi/inventoryDataApi";
 import { ShopContext } from "@/app/ContextApi/shopkeepersDataApi";
-
+import axios from 'axios';
 
 const CustomerBilling = () => {
     const [bills, setBills] = useState([]);
@@ -20,6 +20,8 @@ const CustomerBilling = () => {
     const [showDetails, setShowDetails] = useState({});
     const [discountPercentage, setDiscountPercentage] = useState(0);
     const [errors, setErrors] = useState({});
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
     const printRef = useRef();
     const [filteredShops, setFilteredShops] = useState([]);
     const [selectedShop, setSelectedShop] = useState(null);
@@ -29,6 +31,32 @@ const CustomerBilling = () => {
     const { inventoryData, setInventoryData } = useContext(InventoryContext); // Access setInventoryData
     const { shops, setShops } = useContext(ShopContext);
     const watermarkImageUrl = '/watermark_p.PNG';
+
+    // Fetch Bills from Backend (useEffect)
+    useEffect(() => {
+        const fetchBills = async () => {
+            setLoading(true);
+            setError(null);
+            console.log("Fetching bills...",process.env.NEXT_PUBLIC_API_URL);
+            try {
+                const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/bills`); // Make sure your backend is running on port 5000
+                setBills(response.data);
+                // Set initial invoiceNo based on existing bills
+                if (response.data.length > 0) {
+                    setInvoiceNo(Math.max(...response.data.map(bill => bill.invoiceNo)) + 1);
+                } else {
+                    setInvoiceNo(1); // Start with 1 if no bills exist
+                }
+            } catch (err) {
+                console.error("Error fetching bills:", err);
+                setError(err.message || "Failed to fetch bills");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchBills();
+    }, []);
 
     useEffect(() => {
         if (customerName) {
@@ -78,12 +106,6 @@ const CustomerBilling = () => {
         setErrors(itemErrors)
         return Object.keys(itemErrors).length === 0;
     }
-
-    useEffect(() => {
-        if (bills.length > 0) {
-            setInvoiceNo(bills[bills.length - 1].invoiceNo + 1);
-        }
-    }, [bills]);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -142,10 +164,12 @@ const CustomerBilling = () => {
         }
     };
 
-    const handleGenerateBill = () => {
+    const handleGenerateBill = async () => {
         if (!validateForm()) {
             return;
         }
+        setLoading(true);
+        setError(null);
 
         if (customerName && cart.length > 0) {
             const totalAmount = cart.reduce((acc, item) => acc + parseFloat(item.total), 0);
@@ -169,21 +193,31 @@ const CustomerBilling = () => {
                 oldBalance: parseFloat(oldBalance || 0),
                 netAmount,
                 customerGivenAmount: parseFloat(customerGivenAmount || 0),
-                debt: calculatedDebt
+                debt: calculatedDebt,
+                shopkeeper: selectedShop ? selectedShop._id : null // Set the shopkeeper ID
             };
 
+            try {
+                const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/bills`, newBill); // Your API endpoint
+                setBills([...bills, response.data]); // Add the new bill to the state
 
-            // Update Inventory
-            const updatedInventory = inventoryData.map(item => {
-                const cartItem = cart.find(cartItem => cartItem.itemName === item.itemName);
-                if (cartItem) {
-                    return { ...item, quantity: item.quantity - parseInt(cartItem.quantity) }; //Subtracted quantity should be parsed to int.
-                }
-                return item;
-            });
+                //Update your state with inventory Data
+                const updatedInventory = inventoryData.map(item => {
+                    const cartItem = cart.find(cartItem => cartItem.itemName === item.itemName);
+                    if (cartItem) {
+                        return { ...item, quantity: item.quantity - parseInt(cartItem.quantity) };
+                    }
+                    return item;
+                });
 
-            setInventoryData(updatedInventory);
-            setBills([...bills, newBill]);
+                setInventoryData(updatedInventory);
+            } catch (error) {
+                console.error("Error generating bill:", error);
+                setError(error.message || "Failed to generate bill");
+            } finally {
+                setLoading(false);
+            }
+
             setShowDetails({ ...showDetails, [invoiceNo]: false });
             setCustomerName("");
             setAddress("");
@@ -460,6 +494,50 @@ const CustomerBilling = () => {
         setFilteredShops([]);
     };
 
+    const handleUpdateBill = async (bill) => {
+        setLoading(true);
+        setError(null);
+        try {
+            await axios.patch(`${process.env.NEXT_PUBLIC_API_URL}/bills/${bill.invoiceNo}`, bill);
+            // Update the bills array in state
+            setBills(bills.map(b => (b.invoiceNo === bill.invoiceNo ? bill : b)));
+        } catch (err) {
+            console.error("Error updating bill:", err);
+            setError(err.message || "Failed to update bill");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDeleteBill = async (invoiceNo) => {
+        setLoading(true);
+        setError(null);
+        try {
+            await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/bills/${invoiceNo}`);
+            setBills(bills.filter(bill => bill.invoiceNo !== invoiceNo));
+        } catch (err) {
+            console.error("Error deleting bill:", err);
+            setError(err.message || "Failed to delete bill");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center h-screen">
+                <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="flex justify-center items-center h-screen">
+                <div className="text-red-500 text-xl">Error: {error}</div>
+            </div>
+        );
+    }
 
     return (
         <div className="bg-gray-100 min-h-screen py-12 px-4 sm:px-6 lg:px-8">
@@ -686,7 +764,8 @@ const CustomerBilling = () => {
                 <div>
                     <h2 className="text-xl font-semibold text-gray-700 mb-4">Generated Bills</h2>
                     <div className="overflow-x-auto">
-                        {bills.map((bill) => (
+                        {bills.length > 0 &&
+                        bills.map((bill) => (
                             <div key={bill.invoiceNo} className="bg-gray-100 p-4 rounded-md shadow mb-4">
                                 <div className="flex items-center justify-between mb-2">
                                     <h3 className="text-lg font-semibold text-gray-700">Invoice #{bill.invoiceNo}</h3>
@@ -696,6 +775,18 @@ const CustomerBilling = () => {
                                         </button>
                                         <button onClick={() => toggleDetails(bill.invoiceNo)} className="text-gray-600 hover:text-gray-800 focus:outline-none transition-colors duration-200">
                                             {showDetails[bill.invoiceNo] ? <MdKeyboardDoubleArrowUp className="h-6 w-6 text-gray-500" /> : <MdKeyboardDoubleArrowDown className="h-6 w-6 text-gray-500" />}
+                                        </button>
+                                        <button
+                                            onClick={() => handleUpdateBill(bill)}
+                                            className="text-green-600 hover:text-green-800 transition-colors duration-200 mr-4 flex items-center"
+                                        >
+                                            Update
+                                        </button>
+                                        <button
+                                            onClick={() => handleDeleteBill(bill.invoiceNo)}
+                                            className="text-red-600 hover:text-red-800 transition-colors duration-200 mr-4 flex items-center"
+                                        >
+                                            Delete
                                         </button>
                                     </div>
                                 </div>
@@ -711,6 +802,7 @@ const CustomerBilling = () => {
                                         <p className="text-gray-600"><strong>Net Amount:</strong> PKR {bill.netAmount.toFixed(2)}</p>
                                         <p className="text-gray-600"><strong>Given Amount:</strong> PKR {bill.customerGivenAmount.toFixed(2)}</p>
                                         <p className="text-gray-600"><strong>Remaining Amount:</strong> PKR {bill.debt.toFixed(2)}</p>
+                                        
                                         {/* Display other bill details */}
                                         <div className="mt-2">
                                             <h4 className="text-md font-semibold text-gray-700">Items:</h4>

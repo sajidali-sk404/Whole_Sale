@@ -8,7 +8,7 @@ const Expenses = () => {
     const [expenses, setExpenses] = useState([]);
     const [description, setDescription] = useState('');
     const [amount, setAmount] = useState('');
-    const [date, setDate] = useState('');
+    const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
     const [category, setCategory] = useState('');
     const [editExpenseId, setEditExpenseId] = useState(null);
     const [loading, setLoading] = useState(false);
