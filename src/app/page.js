@@ -27,6 +27,8 @@ export default function Home() {
                     1000,
                     'Muhammad Amir...',
                     1000,
+                    '',
+                    1000,
                   ]}
                   wrapper="span"
                   speed={50}
