@@ -1,6 +1,8 @@
+// EditItemStatusForm.js
 'use client'
 import React, { useState, useEffect } from 'react'
 import { XMarkIcon } from "@heroicons/react/24/outline";
+import { FaBoxOpen } from 'react-icons/fa'; // Correct import
 import axios from 'axios';
 
 const EditItemStatusForm = ({ setShowItemStatusForm, setShipmentsData, id, shipmentData }) => {
@@ -79,34 +81,33 @@ const EditItemStatusForm = ({ setShowItemStatusForm, setShipmentsData, id, shipm
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4">
-            <div className="relative max-w-4xl w-full bg-white shadow-lg rounded-lg max-sm:p-2 p-6">
+            <div className="relative max-w-md w-full bg-white shadow-lg rounded-lg p-6">
                 <button
                     onClick={() => setShowItemStatusForm(false)}
-                    className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+                    className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition-colors duration-200"
                 >
                     <XMarkIcon className="w-6 h-6" />
                 </button>
 
-                <h2 className="text-2xl font-semibold mb-4 text-center">Update Item Status</h2>
+                <h2 className="text-2xl font-bold text-blue-600 mb-4 text-center">Update Item Status</h2>
 
-                <form encType="multipart/form-data" onSubmit={handleEditData} className="space-y-6 overflow-y-auto max-h-96">
+                <form onSubmit={handleEditData} className="space-y-4">
                     {/* Items Section */}
-                    <div className="border-b pb-4">
-                        <h3 className="text-lg font-medium mb-4">Items Status</h3>
+                    <div>
+                        <h3 className="text-lg font-semibold text-gray-700 mb-2 flex items-center"><FaBoxOpen className='mr-2 text-blue-600'/>Items Status</h3>
                         {editData.items.map((item, index) => (
-                            <div key={index} className="grid grid-cols-2 gap-4 mb-4">
-                                
+                            <div key={index} className="grid grid-cols-2 gap-4 items-center mb-2">
                                 {/* Item Name */}
-                                <h1>{item.itemName}</h1>
+                                <p className="text-sm font-medium text-gray-700">{item.itemName}</p>
 
-                                {/* Status Buttons*/}
-                                <div className="flex gap-4">
+                                {/* Status Buttons */}
+                                <div className="flex gap-2">
                                     <button
                                         type="button"
                                         onClick={() => handleItemStatusChange(index, 'Pending')}
-                                        className={`px-4 py-2 rounded-md ${item.status === 'Pending'
-                                            ? 'bg-yellow-500 text-white'
-                                            : 'bg-gray-200'
+                                        className={`px-3 py-1 rounded text-sm transition-colors duration-200 ${item.status === 'Pending'
+                                            ? 'bg-yellow-100 text-yellow-600'
+                                            : 'text-gray-500 hover:bg-yellow-50'
                                             }`}
                                     >
                                         Pending
@@ -114,9 +115,9 @@ const EditItemStatusForm = ({ setShowItemStatusForm, setShipmentsData, id, shipm
                                     <button
                                         type="button"
                                         onClick={() => handleItemStatusChange(index, 'Delivered')}
-                                        className={`px-4 py-2 rounded-md ${item.status === 'Delivered'
-                                            ? 'bg-green-500 text-white'
-                                            : 'bg-gray-200'
+                                        className={`px-3 py-1 rounded text-sm transition-colors duration-200 ${item.status === 'Delivered'
+                                            ? 'bg-green-100 text-green-600'
+                                            : 'text-gray-500 hover:bg-green-50'
                                             }`}
                                     >
                                         Delivered
@@ -131,13 +132,13 @@ const EditItemStatusForm = ({ setShowItemStatusForm, setShipmentsData, id, shipm
                         <button
                             type="button"
                             onClick={() => setShowItemStatusForm(false)}
-                            className="bg-gray-500 text-white px-4 py-2 rounded-md"
+                            className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-md transition-colors duration-200"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
-                            className="bg-green-500 text-white px-4 py-2 rounded-md"
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition-colors duration-200"
                         >
                             Save
                         </button>

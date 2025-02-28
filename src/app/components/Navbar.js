@@ -1,6 +1,5 @@
 "use client";
 import React from "react";
-import { motion } from "framer-motion";
 import { useContext } from "react";
 import { InventoryContext } from "../ContextApi/inventoryDataApi";
 import { SupplierContext } from "../ContextApi/SupplierDataApi";
@@ -8,15 +7,11 @@ import { FaShoppingCart, FaChartLine, FaBuilding, FaUserFriends } from 'react-ic
 import Link from "next/link";
 
 const Card = ({ title, value, icon: Icon }) => ( // Receive icon as a prop
-  <motion.div
-    whileHover={{ scale: 1.05, y: -5 }} // Add slight vertical lift
-    whileTap={{ scale: 0.95 }} // Add slight scale down on tap
-    className="bg-white rounded-lg shadow-lg p-6 flex flex-col items-center justify-between transition-all duration-200 cursor-pointer"
-  >
+  <div className="p-6 bg-white flex flex-col items-center h-full rounded-lg shadow-xl transition-all duration-300 hover:shadow-2xl hover:scale-105 cursor-pointer">
     {Icon && <Icon className="text-4xl text-blue-600 mb-4" />} {/* Render the icon */}
     <h3 className="text-lg font-semibold text-gray-700 text-center">{title}</h3>
     <p className="text-2xl font-bold text-gray-900 mt-2">{value}</p>
-  </motion.div>
+  </div>
 );
 
 const Navbar = () => {

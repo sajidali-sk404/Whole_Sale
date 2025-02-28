@@ -1,9 +1,12 @@
+//EditStatusForm.js
 'use client'
 import React, { useState, useEffect } from 'react'
 import { XMarkIcon } from "@heroicons/react/24/outline";
+import { FaTruck } from 'react-icons/fa'; // Correct imports
+
 import axios from 'axios';
 
-const EditOrderForm = ({ setShowStatusForm, setShipmentsData, id, shipmentData }) => {
+const EditStatusForm = ({ setShowStatusForm, setShipmentsData, id, shipmentData }) => {
 
 
     const [editData, setEditData] = useState({
@@ -81,7 +84,7 @@ const EditOrderForm = ({ setShowStatusForm, setShipmentsData, id, shipmentData }
         try {
             const response = await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/supplier/${id}/shipment/${shipmentData._id}/status`, updatedData);
 
-            if (response.status === 200) { 
+            if (response.status === 200) {
                 setShipmentsData(response.data.supplier.shipments);
                 setShowStatusForm(false);
                 resetForm();
@@ -96,28 +99,28 @@ const EditOrderForm = ({ setShowStatusForm, setShipmentsData, id, shipmentData }
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4">
-            <div className="relative max-w-4xl w-full bg-white shadow-lg rounded-lg max-sm:p-2 p-6">
+            <div className="relative max-w-md w-full bg-white shadow-lg rounded-lg p-6">
                 <button
                     onClick={() => setShowStatusForm(false)}
-                    className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+                    className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition-colors duration-200"
                 >
                     <XMarkIcon className="w-6 h-6" />
                 </button>
 
-                <h2 className="text-2xl font-semibold mb-4 text-center">Update Status</h2>
+                <h2 className="text-2xl font-bold text-blue-600 mb-4 text-center">Update Status</h2>
 
-                <form encType="multipart/form-data" onSubmit={handleEditData} className="space-y-6 overflow-y-auto max-h-96">
+                <form onSubmit={handleEditData} className="space-y-4">
 
                     {/* Status Section */}
-                    <div className="border-b pb-4">
-                        <h3 className="text-lg font-medium mb-4">Order Status</h3>
-                        <div className="flex gap-4">
+                    <div>
+                        <h3 className="text-lg font-semibold text-gray-700 mb-2 flex items-center">Order Status</h3>
+                        <div className="flex gap-2">
                             <button
                                 type="button"
                                 onClick={() => handleStatusChange('Pending')}
-                                className={`px-4 py-2 rounded-md ${editData.status === 'Pending'
-                                    ? 'bg-yellow-500 text-white'
-                                    : 'bg-gray-200'
+                                className={`px-3 py-1 rounded text-sm transition-colors duration-200 ${editData.status === 'Pending'
+                                    ? 'bg-yellow-100 text-yellow-600'
+                                    : 'text-gray-500 hover:bg-yellow-50'
                                     }`}
                             >
                                 Pending
@@ -125,9 +128,9 @@ const EditOrderForm = ({ setShowStatusForm, setShipmentsData, id, shipmentData }
                             <button
                                 type="button"
                                 onClick={() => handleStatusChange('Delivered')}
-                                className={`px-4 py-2 rounded-md ${editData.status === 'Delivered'
-                                    ? 'bg-green-500 text-white'
-                                    : 'bg-gray-200'
+                                className={`px-3 py-1 rounded text-sm transition-colors duration-200 ${editData.status === 'Delivered'
+                                    ? 'bg-green-100 text-green-600'
+                                    : 'text-gray-500 hover:bg-green-50'
                                     }`}
                             >
                                 Delivered
@@ -137,36 +140,36 @@ const EditOrderForm = ({ setShowStatusForm, setShipmentsData, id, shipmentData }
 
                     {/* Transport Form */}
                     {editData.status === 'Delivered' && (
-                        <div className="border-b pb-4">
-                            <h3 className="text-lg font-medium mb-4">Transport Details</h3>
-                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        <div>
+                            <h3 className="text-lg font-semibold text-gray-700 mb-2 flex items-center"><FaTruck className='mr-2 text-blue-600' />Transport Details</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium">Driver Name*</label>
+                                    <label className="block text-sm font-medium text-gray-600">Driver Name*</label>
                                     <input
                                         type="text"
                                         value={editData.driver.name}
                                         onChange={(e) => handleTransportChange('name', e.target.value)}
-                                        className="w-full p-2 border rounded-md"
+                                        className="mt-1 block w-full border rounded-md shadow-sm py-1 px-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm border-gray-300"
                                         required
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium">Vehicle*</label>
+                                    <label className="block text-sm font-medium text-gray-600">Vehicle*</label>
                                     <input
                                         type="text"
                                         value={editData.driver.vehicle}
                                         onChange={(e) => handleTransportChange('vehicle', e.target.value)}
-                                        className="w-full p-2 border rounded-md"
+                                        className="mt-1 block w-full border rounded-md shadow-sm py-1 px-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm border-gray-300"
                                         required
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium">Delivery Date*</label>
+                                    <label className="block text-sm font-medium text-gray-600">Delivery Date*</label>
                                     <input
                                         type="date"
                                         value={editData.date}
                                         onChange={(e) => handleTransportChange('deliveryDate', e.target.value)}
-                                        className="w-full p-2 border rounded-md"
+                                        className="mt-1 block w-full border rounded-md shadow-sm py-1 px-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm border-gray-300"
                                         required
                                     />
                                 </div>
@@ -179,13 +182,13 @@ const EditOrderForm = ({ setShowStatusForm, setShipmentsData, id, shipmentData }
                         <button
                             type="button"
                             onClick={() => setShowStatusForm(false)}
-                            className="bg-gray-500 text-white px-4 py-2 rounded-md"
+                            className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-md transition-colors duration-200"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
-                            className="bg-green-500 text-white px-4 py-2 rounded-md"
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition-colors duration-200"
                         >
                             Save
                         </button>
@@ -196,4 +199,4 @@ const EditOrderForm = ({ setShowStatusForm, setShipmentsData, id, shipmentData }
     )
 }
 
-export default EditOrderForm;
+export default EditStatusForm;

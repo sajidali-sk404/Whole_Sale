@@ -85,6 +85,7 @@ const EditOrderForm = ({ setShowEditForm, setShipmentsData, id, shipmentData, se
 
     const handleEditData = async (e) => {
         e.preventDefault();
+        setLoading(true);
 
         const totalAmount = editData.items.reduce((acc, item) => acc + Number((item.price * item.quantity) || 0), 0);
         const totalPaid = editData.transactions.payments?.reduce((acc, payment) => acc + Number(payment.amount), 0) || 0;
@@ -124,6 +125,7 @@ const EditOrderForm = ({ setShowEditForm, setShipmentsData, id, shipmentData, se
             const response = await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/supplier/${id}/shipment/${shipmentData._id}`, formData);
 
             if (response.status === 200) {
+                setLoading(false);
                 setShipmentsData(response.data.supplier.shipments);
                 setShowEditForm(false);
                 setShowForm(false);
@@ -136,6 +138,16 @@ const EditOrderForm = ({ setShowEditForm, setShipmentsData, id, shipmentData, se
             alert(`Error updating order: ${error.response?.data?.message || 'Please try again.'}`);
         }
     };
+
+    const [loading, setLoading] = useState(false);
+    
+      if (loading) {
+        return (
+          <div className="flex justify-center items-center h-screen">
+            <div className="animate-spin rounded-full h-24 w-24 border-b-2 border-blue-500"></div>
+          </div>
+        );
+      }
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4">
