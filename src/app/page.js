@@ -20,27 +20,6 @@ export default function Home() {
               <span className="block">Muhammad Amir,</span>
               <span className="block text-blue-600">Traders.</span>
             </h1>
-            {/* <p className="mt-3 text-base text-gray-500 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl">
-              Manage suppliers, shopkeepers, inventory, transactions, transportation, and customers all in one place.
-            </p> */}
-            {/* Optional: Call to Action Button */}
-             {/* <div className="mt-8">
-              <Link href="/pages/suppliers" className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
-                  Get Started
-              </Link>
-            </div>  */}
-            {/* <div className="mt-5 sm:mt-8 sm:flex sm:justify-center">
-              <div className="rounded-md shadow">
-                <Link href="/pages/suppliers" className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 md:py-4 md:text-lg md:px-10">
-                    Get started
-                </Link>
-              </div>
-              <div className="mt-3 sm:mt-0 sm:ml-3">
-                <Link href="#features" className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 md:py-4 md:text-lg md:px-10">
-                    Learn more
-                </Link>
-              </div>
-            </div> */}
           </div>
 
           {/* Feature Cards */}
@@ -121,6 +100,18 @@ export default function Home() {
                 <p className="mt-2 text-gray-500">Organize and manage your customer information and interactions.</p>
               </div>
             </Link>
+
+            {/* Card 8: Experience */}
+            <Link href="/pages/experience" className="group">
+              <div className="p-6 bg-white rounded-lg shadow-xl transition-all duration-300 hover:shadow-2xl hover:scale-105 cursor-pointer">
+                <div className="flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
+                   <BiSolidReport className="text-3xl" />
+                </div>
+                <h2 className="mt-4 text-xl font-semibold text-gray-900 group-hover:text-blue-600 transition-colors duration-300">Expenses</h2>
+                <p className="mt-2 text-gray-500">View Muhammad Amir's Professional Experience.</p>
+              </div>
+            </Link>
+
           </div>
 
            {/* Optional:  Image Section */}
