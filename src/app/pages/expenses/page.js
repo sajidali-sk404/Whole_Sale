@@ -117,6 +117,11 @@ const Expenses = () => {
         return `Rs. ${amount.toFixed(0)}`;
     };
 
+    const calculateDailyTotal = (date) => {
+        const dailyExpenses = groupedExpenses[date] || [];
+        return dailyExpenses.reduce((total, expense) => total + expense.amount, 0);
+    };
+
     if (loading) {
         return (
             <div className="flex justify-center items-center h-screen">
@@ -134,7 +139,7 @@ const Expenses = () => {
     }
 
     return (
-       
+
         <div className="bg-gray-100 min-h-screen p-8">
             <div className="container mx-auto">
                 <h1 className="text-4xl font-bold text-blue-600 mb-4">Expense Tracker</h1>
@@ -144,7 +149,7 @@ const Expenses = () => {
                     <h2 className="text-2xl font-semibold text-gray-700 mb-4">Add/Edit Expense</h2>
                     <form onSubmit={handleSubmit} className="mb-8">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
+                            <div>
                                 <label htmlFor="category" className="block text-gray-700 text-sm font-bold mb-2">Category:</label>
                                 <select
                                     id="category"
@@ -255,6 +260,11 @@ const Expenses = () => {
                                             <td className="py-4 px-6 whitespace-nowrap" colSpan="5">
                                                 <div className="text-lg font-semibold text-gray-900">
                                                     {date} ({dailyExpenses.length} Expenses)
+                                                    {expandedDates[date] && (
+                                                        <span className="ml-4">
+                                                            Total: {formatCurrency(calculateDailyTotal(date))}
+                                                        </span>
+                                                    )}
                                                 </div>
                                             </td>
                                         </tr>
@@ -292,7 +302,7 @@ const Expenses = () => {
                 </div>
             </div>
         </div>
-        
+
     );
 };
 
