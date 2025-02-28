@@ -90,25 +90,25 @@ export default function Home() {
               </div>
             </Link>
 
-            {/* Card 7: Customers */}
-            <Link href="/pages/customer" className="group">
+            {/* Card 7: printBill */}
+            <Link href="/pages/printBill" className="group">
               <div className="p-6 bg-white rounded-lg shadow-xl transition-all duration-300 hover:shadow-2xl hover:scale-105 cursor-pointer">
                 <div className="flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
                    <MdOutlinePeopleAlt className="text-3xl" />
                 </div>
-                <h2 className="mt-4 text-xl font-semibold text-gray-900 group-hover:text-blue-600 transition-colors duration-300">Customer Management</h2>
+                <h2 className="mt-4 text-xl font-semibold text-gray-900 group-hover:text-blue-600 transition-colors duration-300">Print Bill</h2>
                 <p className="mt-2 text-gray-500">Organize and manage your customer information and interactions.</p>
               </div>
             </Link>
 
             {/* Card 8: Expenses */}
             <Link href="/pages/expenses" className="group">
-              <div className="p-6 bg-white rounded-lg shadow-xl transition-all duration-300 hover:shadow-2xl hover:scale-105 cursor-pointer">
+              <div className="p-6 bg-white h-full rounded-lg shadow-xl transition-all duration-300 hover:shadow-2xl hover:scale-105 cursor-pointer">
                 <div className="flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
                    <BiSolidReport className="text-3xl" />
                 </div>
                 <h2 className="mt-4 text-xl font-semibold text-gray-900 group-hover:text-blue-600 transition-colors duration-300">Expenses</h2>
-                <p className="mt-2 text-gray-500">View Muhammad Amir's Professional Experience.</p>
+                <p className="mt-2 text-gray-500">Track day to day Expenses</p>
               </div>
             </Link>
 

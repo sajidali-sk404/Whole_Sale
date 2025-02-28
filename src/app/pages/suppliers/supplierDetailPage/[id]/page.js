@@ -1,193 +1,187 @@
+// Page.js
 'use client'
-import React, { useState, useContext, use, useEffect } from "react";
+import React, { useState, useContext, useEffect, use } from "react";
 import { Bars3Icon } from "@heroicons/react/24/outline";
 import SideBar from "./components/SideBar";
 import AddOrderForm from "./components/AddOrderForm";
 import DataList from "./components/DataList";
 import EditOrderForm from "./components/EditOrderForm";
-import axios from "axios";
 import EditStatusForm from "./components/EditStatusForm";
 import EditItemStatusForm from "./components/EditItemStatusForm";
+import axios from "axios";
 
 const Page = ({ params }) => {
+    const param = use(params);
+    const [currentSupplier, setCurrentSupplier] = useState(null);
+    const [showItemStatusForm, setShowItemStatusForm] = useState(false);
+    const [showStatusForm, setShowStatusForm] = useState(false);
+    const [showForm, setShowForm] = useState(false);
+    const [showEditForm, setShowEditForm] = useState(false);
+    const [shipmentDataToEdit, setShipmentDataToEdit] = useState(null);
+    const [shipmentsData, setShipmentsData] = useState([]);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const [loading, setLoading] = useState(true); // Initial loading state
+    const [error, setError] = useState(null); // Add error state
 
-  const param = use(params);
+    const [newData, setNewData] = useState({ //Keep this, as Add form use this
+        date: new Date().toISOString().split('T')[0],
+        items: [{ itemName: "", quantity: 0, price: 0, status: "Pending", }],
+        driver: { name: "", vehicle: "" },
+        status: "Pending",
+        transactions: {
+            paymentDate: new Date().toISOString().split('T')[0],
+            partialPayment: 0,
+            invoice: null,
+            totalAmount: 0,
+            totalDebit: 0,
+            totalCredit: 0,
+            payments: []
+        }
+    });
 
-  const [currentSupplier, setCurrentSupplier] = useState(null)
-  
-  const [showItemStatusForm, setShowItemStatusForm] = useState(false);
-  const [showStatusForm, setShowStatusForm] = useState(false);
-  const [showForm, setShowForm] = useState(false);
-  const [showEditForm, setShowEditForm] = useState(false);
-  const [shipmentDataToEdit, setShipmentDataToEdit] = useState(null);
+    useEffect(() => {
+        const fetchSupplierData = async () => {
+            setLoading(true); // Start loading
+            setError(null);    // Clear previous errors
+            try {
+                const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/supplier/${param.id}`);
+                setCurrentSupplier(response.data);
+                setShipmentsData(response.data.shipments);
+            } catch (err) {
+                setError(err.message || "An error occurred while fetching data."); // Set error message
+                console.error(err);
+            } finally {
+                setLoading(false); // Stop loading
+            }
+        };
+        fetchSupplierData();
+    }, [param.id]);
 
-  const [shipmentsData, setShipmentsData] = useState([]);
+    const handleDeleteShipment = async (id) => { //Make async
+      setLoading(true);
+        try {
+            await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/supplier/${param.id}/shipment/${id}`);
+            // Update state *after* successful deletion
+            setShipmentsData(prevShipments => prevShipments.filter(order => order._id !== id));
+        } catch (error) {
+            console.error("Error deleting shipment:", error);
+            setError("Failed to delete shipment. Please try again.");
+        } finally {
+          setLoading(false);
+        }
+    };
 
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const handleEditShipment = (shipment) => {
+        setShipmentDataToEdit(shipment);
+        setShowEditForm(true);
+        setShowForm(false);
+    };
 
-  const [loading, setLoading] = useState(false);
+    const handleStatusEdit = (shipment) => {
+        setShipmentDataToEdit(shipment);
+        setShowStatusForm(true);
+    };
 
-  const [newData, setNewData] = useState({
-    date: new Date().toISOString().split('T')[0],
-    items: [{
-      itemName: "",
-      quantity: 0,
-      price: 0,
-      status: "Pending",
-    }],
-    driver: {
-      name: "",
-      vehicle: ""
-    },
-    status: "Pending",
-    partialPayment: 0,
-    invoice: null,
-    transactions: {
-      paymentDate: new Date().toISOString().split('T')[0],
-      partialPayment: 0,
-      invoice: "",
-      totalAmount: 0,
-      totalDebit: 0,
-      totalCredit: 0,
-      payments: []
-    }
-  });
+    const handleItemStatusEdit = (shipment) => {
+        setShipmentDataToEdit(shipment);
+        setShowItemStatusForm(true);
+    };
 
-
-  useEffect(() => {
-
-    const fetchSupplierData = async () => {
-      try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/supplier/${param.id}`);
-        setCurrentSupplier(response.data);
-        setShipmentsData(response.data.shipments);
-        console.log(response.data);
-
-      } catch (err) {
-        console.log(err.message);
-      } finally {
-        setLoading(true);
-      }
-    }
-    fetchSupplierData();
-
-
-  }, [param.id]);
-
-  console.log("shipmentsData", shipmentsData)
-  console.log(loading)
-
-  const handleDeleteShipment = (id) => {
-    setShipmentsData(shipmentsData.filter(order => order._id !== id));
-    try {
-      const response = axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/supplier/${param.id}/shipment/${id}`);
-      console.log(response);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const handleEditShipment = (shipment) => { // Function called from DataList
-    setShipmentDataToEdit(shipment); // Set the shipment data to be edited
-    setShowEditForm(true); // Show the Edit Form
-    setShowForm(false); // Hide Add Form if it's currently shown
-  };
-
-  const handleStatusEdit = (shipment) => {
-    setShipmentDataToEdit(shipment);
-    setShowStatusForm(true);
-  }
-
-  const handleItemStatusEdit = (shipment) => {
-    setShipmentDataToEdit(shipment);
-    setShowItemStatusForm(true);
-  };
-
-  return (
-    <div className="flex h-auto">
-
-      {/* Sidebar */}
-      {isSidebarOpen ?
-        <SideBar setIsSidebarOpen={setIsSidebarOpen} currentSupplier={currentSupplier} />
-        :
-        <button
-          onClick={() => setIsSidebarOpen(true)}
-          className="text-blue-500 text-sm top-8 left-3 fixed -mt-4 "
-        >
-          <Bars3Icon className="w-6 h-6 " />
-        </button>
-
+    // Centralized loading and error display
+      if (loading) {
+        return (
+          <div className="flex justify-center items-center h-screen">
+            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
+          </div>
+        );
       }
 
-      {/* Main Content */}
-      <div className="flex-1 px-12 py-2">
-        <button
-          onClick={() => setShowForm(true)}
-          className="bg-blue-500 text-white px-4 py-2 rounded-md mb-4 hover:bg-blue-600"
-        >
-          Add New Order
-        </button>
+      if (error) {
+        return (
+          <div className="flex justify-center items-center h-screen">
+            <p className="text-red-500 text-xl">Error: {error}</p>
+          </div>
+        );
+      }
 
-        {showForm && (
+    return (
+        <div className="flex h-screen bg-gray-100">
+            {/* Sidebar */}
+            {isSidebarOpen ? (
+                <SideBar setIsSidebarOpen={setIsSidebarOpen} currentSupplier={currentSupplier} />
+            ) : (
+                <button
+                    onClick={() => setIsSidebarOpen(true)}
+                    className="fixed top-4 left-4 z-50 text-blue-600 hover:text-blue-800 transition-colors duration-200"
+                >
+                    <Bars3Icon className="w-6 h-6" />
+                </button>
+            )}
 
-          <AddOrderForm
-            setShowForm={setShowForm}
-            shipmentsData={shipmentsData}
-            setShipmentsData={setShipmentsData}
-            id={param.id}
-            newData={newData}
-            setNewData={setNewData}
-          />
+             {/* Main Content */}
+            <div className="flex-1 p-4">
+              <button
+                onClick={() => setShowForm(true)}
+                className="bg-blue-600 hover:bg-blue-700 mx-10 text-white px-4 py-2 rounded-md mb-4 transition-colors duration-200"
+              >
+                Add New Order
+              </button>
 
-        )}
+              {showForm && (
+                <AddOrderForm
+                  setShowForm={setShowForm}
+                  shipmentsData={shipmentsData}
+                  setShipmentsData={setShipmentsData}
+                  id={param.id}
+                  newData={newData}
+                  setNewData={setNewData}
+                />
+              )}
 
-        {showEditForm && shipmentDataToEdit && ( // Conditionally render EditForm and pass shipmentDataToEdit
-          <EditOrderForm
-            setShowEditForm={setShowEditForm}
-            setShipmentsData={setShipmentsData}
-            id={param.id}
-            shipmentData={shipmentDataToEdit} // Pass shipmentDataToEdit as shipmentData prop
-            setShowForm={setShowForm} // Pass setShowForm if needed to also close AddForm
-          />
-        )}
+              {showEditForm && shipmentDataToEdit && (
+                <EditOrderForm
+                  setShowEditForm={setShowEditForm}
+                  setShipmentsData={setShipmentsData}
+                  id={param.id}
+                  shipmentData={shipmentDataToEdit}
+                  setShowForm={setShowForm}
+                />
+              )}
 
-        {showItemStatusForm && (
-          <EditItemStatusForm
-            setShowItemStatusForm={setShowItemStatusForm}
-            setShipmentsData={setShipmentsData}
-            id={param.id}
-            shipmentData={shipmentDataToEdit}
-          />
-        )}
+                {showItemStatusForm && (
+                    <EditItemStatusForm
+                        setShowItemStatusForm={setShowItemStatusForm}
+                        setShipmentsData={setShipmentsData}
+                        id={param.id}
+                        shipmentData={shipmentDataToEdit}
+                    />
+                )}
 
-        {showStatusForm && (
-          <EditStatusForm
-            setShowStatusForm={setShowStatusForm}
-            setShipmentsData={setShipmentsData}
-            id={param.id}
-            shipmentData={shipmentDataToEdit}
-          />
-        )}
+                {showStatusForm && (
+                    <EditStatusForm
+                        setShowStatusForm={setShowStatusForm}
+                        setShipmentsData={setShipmentsData}
+                        id={param.id}
+                        shipmentData={shipmentDataToEdit}
+                    />
+                )}
 
-        {/* Data List */}
-        <div className="space-y-4">
-
-          {loading && shipmentsData.slice().reverse().map((data, index) => (
-            <DataList
-              key={index}
-              data={data}
-              handleEdit={handleEditShipment}
-              handleDelete={handleDeleteShipment}
-              handleStatusEdit={handleStatusEdit}
-              handleItemStatusEdit={handleItemStatusEdit}
-            />
-          ))}
-
+                {/* Data List - Reverse the order here for display */}
+                <div className="space-y-4">
+                    {shipmentsData.slice().reverse().map((data) => (
+                        <DataList
+                            key={data._id}
+                            data={data}
+                            handleEdit={handleEditShipment}
+                            handleDelete={handleDeleteShipment}
+                            handleStatusEdit={handleStatusEdit}
+                            handleItemStatusEdit={handleItemStatusEdit}
+                        />
+                    ))}
+                </div>
+            </div>
         </div>
-
-      </div>
-    </div>
-  );
+    );
 };
 
 export default Page;
