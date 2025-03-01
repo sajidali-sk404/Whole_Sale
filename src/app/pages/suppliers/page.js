@@ -4,14 +4,17 @@ import AddSupplier from '@/app/components/AddSupplier';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import axios from 'axios';
-import { FaPlus, FaUser, FaBuilding } from 'react-icons/fa'; // Import icons
+import { FaPlus, FaUser, FaBuilding } from 'react-icons/fa';
 import { TrashIcon } from "@heroicons/react/24/outline";
+import DeleteConfirmation from './component/DeleteConfirmation';
 
 function SupplierManagement() {
   const [suppliers, setSuppliers] = useState([]); // Initialize as an empty array
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true); // Add loading state
   const [error, setError] = useState(null); // Add error state
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
   const router = useRouter();
 
   const fetchSuppliers = useCallback(async () => {
@@ -44,13 +47,9 @@ function SupplierManagement() {
     router.push(`/pages/suppliers/supplierDetailPage/${supplierId}`);
   };
 
-  const handleDelete = async (id) => {
-    try {
-      await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/supplier/${id}`);
-      fetchSuppliers();
-    } catch (error) {
-      console.error(error);
-    }
+  const handleDeleteClick = (id) => {
+    setDeleteId(id);
+    setShowDeleteConfirm(true);
   };
 
   if (loading) {
@@ -107,7 +106,7 @@ function SupplierManagement() {
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleDelete(supplier._id)
+                    handleDeleteClick(supplier._id)
                   }}
                   className="text-red-600 hover:text-red-800 transition-colors duration-200 absolute top-2 right-2"
                 >
@@ -134,6 +133,17 @@ function SupplierManagement() {
             <AddSupplier showForm={showForm} setShowForm={handleCloseForm} refreshSuppliers={fetchSuppliers} />
           </div>
         )}
+
+        {/* Delete Confirmation Modal */}
+        {showDeleteConfirm && (
+          <DeleteConfirmation
+            id={deleteId}
+            setShowDeleteConfirm={setShowDeleteConfirm}
+            fetchSuppliers={fetchSuppliers}
+            setSuppliers={setSuppliers}
+          />
+        )}
+
       </div>
     </div>
   );
