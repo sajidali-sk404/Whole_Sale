@@ -4,7 +4,7 @@ import AddShop from '@/app/components/AddShop';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import axios from 'axios';
-import { FaPlus, FaUser, FaBuilding } from 'react-icons/fa';
+import { FaPlus, FaBuilding } from 'react-icons/fa';
 
 function ShopkeeperManagement() {
   const [shopkeepers, setShopkeepers] = useState([]);
@@ -95,13 +95,10 @@ function ShopkeeperManagement() {
                 className="bg-white rounded-lg shadow-lg p-6 flex flex-col items-center text-center cursor-pointer transition-all duration-200"
               >
                 <div className="flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 text-blue-600 mb-4">
-                  {/* Use a building icon, or the first letter if you prefer */}
                    <FaBuilding className="text-2xl" />
-                  {/* {Shopkeeper.shopName.charAt(0)} */}
                 </div>
                 <h2 className="text-xl font-semibold text-gray-800">{Shopkeeper.shopName}</h2>
                 <p className="mt-1 text-gray-600">Owner: {Shopkeeper.shopkeeperName}</p>
-                {/* You could add more details here, like contact info */}
               </motion.div>
             ))
           ) : (
