@@ -1,12 +1,11 @@
-//EditStatusForm.js
 'use client'
 import React, { useState, useEffect } from 'react'
 import { XMarkIcon } from "@heroicons/react/24/outline";
-import { FaTruck } from 'react-icons/fa'; // Correct imports
+import { FaTruck } from 'react-icons/fa';
 
 import axios from 'axios';
 
-const EditStatusForm = ({ setShowStatusForm, setShipmentsData, id, shipmentData }) => {
+const EditStatusForm = ({ setShowStatusForm, setDeliveriesData, id, deliveryData }) => {
 
 
     const [editData, setEditData] = useState({
@@ -24,17 +23,16 @@ const EditStatusForm = ({ setShowStatusForm, setShipmentsData, id, shipmentData 
         }],
     });
 
-    // useEffect to pre-populate form when shipmentData prop changes
     useEffect(() => {
-        if (shipmentData) {
+        if (deliveryData) {
             setEditData({
-                items: shipmentData.items || [{ itemName: "", quantity: 0, price: 0, status: "Pending" }],
-                date: shipmentData.date ? new Date(shipmentData.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-                driver: shipmentData.driver || { name: "", vehicle: "" },
-                status: shipmentData.status || "Pending",
+                items: deliveryData.items || [{ itemName: "", quantity: 0, price: 0, status: "Pending" }],
+                date: deliveryData.date ? new Date(deliveryData.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+                driver: deliveryData.driver || { name: "", vehicle: "" },
+                status: deliveryData.status || "Pending",
             });
         }
-    }, [shipmentData]);
+    }, [deliveryData]);
 
     const handleStatusChange = (status) => {
         setEditData(prev => ({
@@ -83,10 +81,10 @@ const EditStatusForm = ({ setShowStatusForm, setShipmentsData, id, shipmentData 
         };
 
         try {
-            const response = await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/supplier/${id}/shipment/${shipmentData._id}/status`, updatedData);
+            const response = await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/shopkeeper/${id}/delivery/${deliveryData._id}/status`, updatedData);
 
             if (response.status === 200) {
-                setShipmentsData(response.data.supplier.shipments);
+                setDeliveriesData(response.data.shopkeeper.deliveries);
                 setShowStatusForm(false);
                 resetForm();
             } else {

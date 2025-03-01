@@ -4,12 +4,11 @@ import { XMarkIcon } from "@heroicons/react/24/outline";
 import { FaPlus, FaMoneyBillWave, FaFileInvoiceDollar, FaBoxOpen, FaCalendarAlt } from 'react-icons/fa'; // Correct imports
 import axios from 'axios';
 
-const EditOrderForm = ({ setShowEditForm, setShipmentsData, id, shipmentData, setShowForm }) => {
+const EditOrderForm = ({ setShowEditForm, setDeliveriesData, id, deliveryData, setShowForm }) => {
 
     const [editData, setEditData] = useState({
         date: new Date().toISOString().split('T')[0],
         items: [{ itemName: "", quantity: 0, price: 0, status: "Pending", }],
-        // Removed: driver, status
         transactions: {
             paymentDate: new Date().toISOString().split('T')[0],
             partialPayment: 0,
@@ -22,15 +21,13 @@ const EditOrderForm = ({ setShowEditForm, setShipmentsData, id, shipmentData, se
     });
 
     useEffect(() => {
-        if (shipmentData) {
-            const items = shipmentData.items || [];
-            const transactions = shipmentData.transactions || {};
-            // Removed: driver, status
+        if (deliveryData) {
+            const items = deliveryData.items || [];
+            const transactions = deliveryData.transactions || {};
 
             setEditData({
-                date: shipmentData.date ? new Date(shipmentData.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+                date: deliveryData.date ? new Date(deliveryData.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
                 items: items.length > 0 ? items : [{ itemName: "", quantity: 0, price: 0, status: "Pending" }],
-                // Removed: driver, status
                 transactions: {
                     paymentDate: transactions.paymentDate ? new Date(transactions.paymentDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
                     partialPayment: 0,
@@ -42,7 +39,7 @@ const EditOrderForm = ({ setShowEditForm, setShipmentsData, id, shipmentData, se
                 }
             });
         }
-    }, [shipmentData]);
+    }, [deliveryData]);
 
     const handleFileChange = (e) => {
         setEditData(prev => ({ ...prev, transactions: { ...prev.transactions, invoice: e.target.files[0] } }));
@@ -64,10 +61,8 @@ const EditOrderForm = ({ setShowEditForm, setShipmentsData, id, shipmentData, se
         setEditData(prev => ({ ...prev, items: [...prev.items, { itemName: "", quantity: 0, price: 0, status: "Pending" }] }));
     };
 
-    // Removed: handleStatusChange
-    // Removed: handleTransportChange
 
-    const resetForm = () => { // Keep this for consistency
+    const resetForm = () => {
         setEditData({
             date: new Date().toISOString().split('T')[0],
             items: [{ itemName: "", quantity: 0, price: 0, status: "Pending" }],
@@ -122,20 +117,20 @@ const EditOrderForm = ({ setShowEditForm, setShipmentsData, id, shipmentData, se
         }
 
         try {
-            const response = await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/supplier/${id}/shipment/${shipmentData._id}`, formData);
+            const response = await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/shopkeeper/${id}/delivery/${deliveryData._id}`, formData);
 
             if (response.status === 200) {
-                setLoading(false);
-                setShipmentsData(response.data.supplier.shipments);
+                setDeliveriesData(response.data.shopkeeper.deliveries);
                 setShowEditForm(false);
                 setShowForm(false);
-                // resetForm(); No need here.
             } else {
                 throw new Error("Failed to update order");
             }
         } catch (error) {
             console.error("Error updating order:", error);
             alert(`Error updating order: ${error.response?.data?.message || 'Please try again.'}`);
+        } finally {
+            setLoading(false);
         }
     };
 

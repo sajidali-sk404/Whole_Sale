@@ -1,184 +1,157 @@
 'use client'
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { XMarkIcon } from "@heroicons/react/24/outline";
-import { FaPlus, FaMoneyBillWave, FaFileInvoiceDollar, FaBoxOpen, FaCalendarAlt } from 'react-icons/fa'; // Correct imports
+import { FaPlus, FaTruck, FaMoneyBillWave, FaClipboardCheck, FaFileInvoiceDollar, FaBoxOpen, FaCalendarAlt } from 'react-icons/fa';
 import axios from 'axios';
 
-const EditOrderForm = ({ setShowEditForm, setShipmentsData, id, shipmentData, setShowForm }) => {
+const AddOrderForm = ({ setShowForm, newData, setNewData, setDeliveriesData, id }) => {
 
-    const [editData, setEditData] = useState({
-        date: new Date().toISOString().split('T')[0],
-        items: [{ itemName: "", quantity: 0, price: 0, status: "Pending", }],
-        // Removed: driver, status
-        transactions: {
-            paymentDate: new Date().toISOString().split('T')[0],
-            partialPayment: 0,
-            invoice: null,
-            totalAmount: 0,
-            totalDebit: 0,
-            totalCredit: 0,
-            payments: []
-        }
-    });
+  const [loading, setLoading] = useState(false);
 
-    useEffect(() => {
-        if (shipmentData) {
-            const items = shipmentData.items || [];
-            const transactions = shipmentData.transactions || {};
-            // Removed: driver, status
-
-            setEditData({
-                date: shipmentData.date ? new Date(shipmentData.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-                items: items.length > 0 ? items : [{ itemName: "", quantity: 0, price: 0, status: "Pending" }],
-                // Removed: driver, status
-                transactions: {
-                    paymentDate: transactions.paymentDate ? new Date(transactions.paymentDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-                    partialPayment: 0,
-                    invoice: transactions.invoice || null,
-                    totalAmount: transactions.totalAmount || 0,
-                    totalDebit: transactions.totalDebit || 0,
-                    totalCredit: transactions.totalCredit || 0,
-                    payments: transactions.payments || []
-                }
-            });
-        }
-    }, [shipmentData]);
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-24 w-24 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
     const handleFileChange = (e) => {
-        setEditData(prev => ({ ...prev, transactions: { ...prev.transactions, invoice: e.target.files[0] } }));
+        setNewData(prev => ({ ...prev, transactions: { ...prev.transactions, invoice: e.target.files[0] } }));
     }
 
     const handleItemChange = (index, field, value) => {
-        const updatedItems = [...editData.items];
+        const updatedItems = [...newData.items];
         updatedItems[index][field] = field === 'quantity' || field === 'price' ? Number(value) : value;
-        setEditData(prev => ({ ...prev, items: updatedItems }));
+        setNewData(prev => ({ ...prev, items: updatedItems }));
     };
 
     const handleItemStatusChange = (index, status) => {
-        const updatedItems = [...editData.items];
+        const updatedItems = [...newData.items];
         updatedItems[index].status = status;
-        setEditData(prev => ({ ...prev, items: updatedItems }));
+        setNewData(prev => ({ ...prev, items: updatedItems }));
     };
 
     const addNewItem = () => {
-        setEditData(prev => ({ ...prev, items: [...prev.items, { itemName: "", quantity: 0, price: 0, status: "Pending" }] }));
+        setNewData(prev => ({ ...prev, items: [...prev.items, { itemName: "", quantity: 0, price: 0, status: "Pending" }] }));
     };
 
-    // Removed: handleStatusChange
-    // Removed: handleTransportChange
+    const handleStatusChange = (status) => {
+        setNewData(prev => ({ ...prev, status: status }));
+    };
 
-    const resetForm = () => { // Keep this for consistency
-        setEditData({
+    const handleTransportChange = (field, value) => {
+        if (field === 'name' || field === 'vehicle') {
+            setNewData(prev => ({ ...prev, driver: { ...prev.driver, [field]: value } }));
+        }
+        else if (field === 'deliveryDate') {
+            setNewData(prev => ({ ...prev, date: value }));
+        }
+    };
+
+    const resetForm = () => {
+        setNewData({
             date: new Date().toISOString().split('T')[0],
-            items: [{ itemName: "", quantity: 0, price: 0, status: "Pending" }],
+            items: [{ itemName: "", quantity: "", price: "", status: "Pending", }],
+            driver: { name: "", vehicle: "" },
+            status: "Pending",
             transactions: {
                 paymentDate: new Date().toISOString().split('T')[0],
-                partialPayment: 0,
+                partialPayment: "",
                 invoice: null,
-                totalAmount: 0,
-                totalDebit: 0,
-                totalCredit: 0,
+                totalAmount: "",
+                totalDebit: "",
+                totalCredit: "",
                 payments: []
             }
         });
-    }
+    };
 
-    const handleEditData = async (e) => {
+    const handleAddData = async (e) => {
         e.preventDefault();
         setLoading(true);
 
-        const totalAmount = editData.items.reduce((acc, item) => acc + Number((item.price * item.quantity) || 0), 0);
-        const totalPaid = editData.transactions.payments?.reduce((acc, payment) => acc + Number(payment.amount), 0) || 0;
-        const newTotalPaid = totalPaid + Number(editData.transactions.partialPayment || 0);
+        const totalAmount = newData.items.reduce((acc, item) => acc + Number((item.price * item.quantity) || 0), 0);
+        const totalPaid = newData.transactions.payments?.reduce((acc, payment) => acc + Number(payment.amount), 0) || 0;
+        const newTotalPaid = totalPaid + Number(newData.transactions.partialPayment || 0);
         const remainingDebit = totalAmount - newTotalPaid;
 
         const formData = new FormData();
-        formData.append('date', editData.date);
-        formData.append('items', JSON.stringify(editData.items));
-        // Removed: driver, status
-        formData.append('transactions[paymentDate]', editData.transactions.paymentDate);
-        formData.append('transactions[partialPayment]', editData.transactions.partialPayment);
+        formData.append('date', newData.date);
+        formData.append('items', JSON.stringify(newData.items));
+        formData.append('driver[name]', newData.driver.name);
+        formData.append('driver[vehicle]', newData.driver.vehicle);
+        formData.append('status', newData.status);
+        formData.append('transactions[paymentDate]', newData.transactions.paymentDate);
+        formData.append('transactions[partialPayment]', newData.transactions.partialPayment);
         formData.append('transactions[totalAmount]', totalAmount);
         formData.append('transactions[totalDebit]', remainingDebit);
         formData.append('transactions[totalCredit]', newTotalPaid);
-        if (editData.transactions.invoice instanceof File) {
-            formData.append('invoice', editData.transactions.invoice);
+
+        if (newData.transactions.invoice) {
+            formData.append('invoice', newData.transactions.invoice);
         }
 
         const payments = [
-            ...editData.transactions.payments,
+            ...newData.transactions.payments,
             {
-                amount: Number(editData.transactions.partialPayment),
+                amount: Number(newData.transactions.partialPayment),
+                invoice: newData.transactions.invoice,
                 paymentDate: new Date().toISOString(),
                 debit: remainingDebit,
                 credit: newTotalPaid
             }
         ];
-
-        if(editData.transactions.partialPayment){
-          formData.append('transactions[payments]', JSON.stringify(payments));
-        } else {
-          formData.append('transactions[payments]', JSON.stringify(editData.transactions.payments));
-        }
+        formData.append('transactions[payments]', JSON.stringify(payments));
 
         try {
-            const response = await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/supplier/${id}/shipment/${shipmentData._id}`, formData);
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/shopkeeper/${id}/delivery`, formData);
 
-            if (response.status === 200) {
-                setLoading(false);
-                setShipmentsData(response.data.supplier.shipments);
-                setShowEditForm(false);
+            if (response.status === 201) {
+                setDeliveriesData(response.data.shopkeeper.deliveries);
+                resetForm();
                 setShowForm(false);
-                // resetForm(); No need here.
             } else {
-                throw new Error("Failed to update order");
+                throw new Error("Failed to add order");
             }
         } catch (error) {
-            console.error("Error updating order:", error);
-            alert(`Error updating order: ${error.response?.data?.message || 'Please try again.'}`);
+            console.error("Error adding order:", error);
+            alert(`Error adding order: ${error.response?.data?.message || 'Please try again.'}`);
+        } finally {
+            setLoading(false);
         }
     };
-
-    const [loading, setLoading] = useState(false);
-    
-      if (loading) {
-        return (
-          <div className="flex justify-center items-center h-screen">
-            <div className="animate-spin rounded-full h-24 w-24 border-b-2 border-blue-500"></div>
-          </div>
-        );
-      }
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4">
             <div className="relative max-w-4xl w-full bg-white rounded-lg p-6 shadow-lg">
                 <button
-                    onClick={() => setShowEditForm(false)}
+                    onClick={() => setShowForm(false)}
                     className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition-colors duration-200"
                 >
                     <XMarkIcon className="w-6 h-6" />
                 </button>
 
-                <h2 className="text-2xl font-bold text-blue-600 mb-4 text-center">Update Order</h2>
+                <h2 className="text-2xl font-bold text-blue-600 mb-4 text-center">Create New Order</h2>
 
-                <form encType="multipart/form-data" onSubmit={handleEditData} className="space-y-4 overflow-y-auto max-h-[70vh]">
-                    {/* Date input */}
+                <form encType="multipart/form-data" onSubmit={handleAddData} className="space-y-4 overflow-y-auto max-h-[70vh]">
+                   {/* Date input */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-600 items-center">
-                            <FaCalendarAlt className="mr-2 text-blue-600" /> Date
-                        </label>
-                        <input
-                            type="date"
-                            value={editData.date}
-                            onChange={(e) => setEditData(prev => ({ ...prev, date: e.target.value }))}
-                            className="mt-1 block w-full border rounded-md shadow-sm py-1 px-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm border-gray-300"
-                        />
+                      <label className="block text-sm font-medium text-gray-600 items-center">
+                        <FaCalendarAlt className="mr-2 text-blue-600" /> Date
+                      </label>
+                      <input
+                        type="date"
+                        value={newData.date}
+                        onChange={(e) => setNewData(prev => ({ ...prev, date: e.target.value }))}
+                        className="mt-1 block w-full border rounded-md shadow-sm py-1 px-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm border-gray-300"
+                      />
                     </div>
 
                     {/* Items Section */}
                     <div>
                         <h3 className="text-lg font-semibold text-gray-700 mb-2 flex items-center"><FaBoxOpen className="mr-2 text-blue-600" />Items</h3>
-                        {editData.items.map((item, index) => (
+                        {newData.items.map((item, index) => (
                             <div key={index} className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-2">
                                 <div className="md:col-span-1">
                                     <label className="block text-sm font-medium text-gray-600">Item Name*</label>
@@ -257,11 +230,11 @@ const EditOrderForm = ({ setShowEditForm, setShipmentsData, id, shipmentData, se
                         <h3 className="text-lg font-semibold text-gray-700 mb-2 flex items-center"><FaMoneyBillWave className="mr-2 text-blue-600" />Payment</h3>
 
                        {/* Simplified Previous Payments Display */}
-                        {editData.transactions.payments?.length > 0 && (
+                        {newData.transactions.payments?.length > 0 && (
                             <div className="mb-2">
                                 <h4 className="text-sm font-semibold text-gray-600">Previous Payments</h4>
                                 <ul className="space-y-1">
-                                    {editData.transactions.payments.map((payment, index) => (
+                                    {newData.transactions.payments.map((payment, index) => (
                                         <li key={index} className="text-sm text-gray-600">
                                             {new Date(payment.paymentDate).toLocaleDateString()} - Rs {payment.amount}
                                         </li>
@@ -275,8 +248,8 @@ const EditOrderForm = ({ setShowEditForm, setShipmentsData, id, shipmentData, se
                                 <label className="block text-sm font-medium text-gray-600">Partial Payment*</label>
                                 <input
                                     type="number"
-                                    value={editData.transactions.partialPayment || ''}
-                                    onChange={(e) => setEditData(prev => ({
+                                    value={newData.transactions.partialPayment || ''}
+                                    onChange={(e) => setNewData(prev => ({
                                         ...prev,
                                         transactions: {
                                             ...prev.transactions,
@@ -294,7 +267,7 @@ const EditOrderForm = ({ setShowEditForm, setShipmentsData, id, shipmentData, se
                                     name="invoice"
                                     onChange={handleFileChange}
                                     className="mt-1 block w-full border rounded-md shadow-sm py-1 px-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm border-gray-300 file:bg-gray-50 file:border-none file:py-1 file:px-4 file:mr-4 file:rounded-md file:text-sm file:text-blue-700"
-
+                                    required
                                 />
                             </div>
                         </div>
@@ -305,28 +278,91 @@ const EditOrderForm = ({ setShowEditForm, setShipmentsData, id, shipmentData, se
                         <div>
                             <label className="block text-sm font-medium text-gray-600">Debit (Remaining)</label>
                             <div className="mt-1 block w-full py-1 px-2 text-sm text-gray-700 bg-gray-100 rounded-md">
-                                {editData.items.reduce((acc, item) => acc + Number((item.price * item.quantity) || 0), 0) -
-                                (editData.transactions.payments?.reduce((acc, payment) => acc + Number(payment.amount), 0) || 0) -
-                                Number(editData.transactions.partialPayment || 0)}
+                                {newData.items.reduce((acc, item) => acc + Number((item.price * item.quantity) || 0), 0) -
+                                (newData.transactions.payments?.reduce((acc, payment) => acc + Number(payment.amount), 0) || 0) -
+                                Number(newData.transactions.partialPayment || 0)}
                             </div>
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-600">Credit (Paid)</label>
                             <div className="mt-1 block w-full py-1 px-2 text-sm text-gray-700 bg-gray-100 rounded-md">
-                                {(editData.transactions.payments?.reduce((acc, payment) => acc + Number(payment.amount), 0) || 0) +
-                                Number(editData.transactions.partialPayment || 0)}
+                                {(newData.transactions.payments?.reduce((acc, payment) => acc + Number(payment.amount), 0) || 0) +
+                                Number(newData.transactions.partialPayment || 0)}
                             </div>
                         </div>
                     </div>
 
-                  {/* Removed Status Section */}
-                  {/* Removed Transport Section */}
+                    {/* Status Section */}
+                    <div>
+                         <h3 className="text-lg font-semibold text-gray-700 mb-2 flex items-center"><FaClipboardCheck className="mr-2 text-blue-600" />Status</h3>
+                        <div className="flex gap-2">
+                           <button
+                                type="button"
+                                onClick={() => handleStatusChange('Pending')}
+                                className={`px-3 py-1 rounded text-sm transition-colors duration-200 ${newData.status === 'Pending'
+                                    ? 'bg-yellow-100 text-yellow-600'
+                                    : 'text-gray-500 hover:bg-yellow-50'
+                                    }`}
+                            >
+                                Pending
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => handleStatusChange('Delivered')}
+                                className={`px-3 py-1 rounded text-sm transition-colors duration-200 ${newData.status === 'Delivered'
+                                    ? 'bg-green-100 text-green-600'
+                                    : 'text-gray-500 hover:bg-green-50'
+                                    }`}
+                            >
+                                Delivered
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Transport Form */}
+                    {newData.status === 'Delivered' && (
+                        <div>
+                             <h3 className="text-lg font-semibold text-gray-700 mb-2 flex items-center"><FaTruck className="mr-2 text-blue-600" />Transport</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-600">Driver Name*</label>
+                                    <input
+                                        type="text"
+                                        value={newData.driver.name}
+                                        onChange={(e) => handleTransportChange('name', e.target.value)}
+                                        className="mt-1 block w-full border rounded-md shadow-sm py-1 px-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm border-gray-300"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-600">Vehicle*</label>
+                                    <input
+                                        type="text"
+                                        value={newData.driver.vehicle}
+                                        onChange={(e) => handleTransportChange('vehicle', e.target.value)}
+                                        className="mt-1 block w-full border rounded-md shadow-sm py-1 px-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm border-gray-300"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-600">Delivery Date*</label>
+                                    <input
+                                        type="date"
+                                        value={newData.date}
+                                        onChange={(e) => handleTransportChange('deliveryDate', e.target.value)}
+                                        className="mt-1 block w-full border rounded-md shadow-sm py-1 px-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm border-gray-300"
+                                        required
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Form Actions */}
-                    <div className="flex justify-end gap-4 mt-4">
-                        <button
+                    <div className="flex justify-end gap-4">
+                         <button
                             type="button"
-                            onClick={() => setShowEditForm(false)}
+                            onClick={() => setShowForm(false)}
                             className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-md transition-colors duration-200"
                         >
                             Cancel
@@ -335,7 +371,7 @@ const EditOrderForm = ({ setShowEditForm, setShipmentsData, id, shipmentData, se
                             type="submit"
                             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition-colors duration-200"
                         >
-                            Save Changes
+                            Save Order
                         </button>
                     </div>
                 </form>
@@ -344,4 +380,4 @@ const EditOrderForm = ({ setShowEditForm, setShipmentsData, id, shipmentData, se
     )
 }
 
-export default EditOrderForm;
+export default AddOrderForm;

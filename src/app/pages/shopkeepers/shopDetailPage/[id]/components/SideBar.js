@@ -4,12 +4,12 @@ import Link from 'next/link';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { FaHome, FaUsers, FaUsersCog, FaBoxOpen, FaMoneyBillWave, FaChartLine, FaTruck, FaFileInvoiceDollar } from 'react-icons/fa'; // Import relevant icons
 
-const SideBar = ({ setIsSidebarOpen, currentSupplier }) => {
+const SideBar = ({ setIsSidebarOpen, currentShopkeeper }) => {
     return (
         <div className="bg-white shadow-md h-full md:w-64 p-4 rounded-r-lg transition-all duration-300 ease-in-out">
             {/* Close Button */}
             <div className="flex justify-between items-center mb-6">
-                <h2 className="text-lg font-semibold text-blue-600">Supplier Details</h2>
+                <h2 className="text-lg font-semibold text-blue-600">Shopkeeper Details</h2>
                 <button
                     onClick={() => setIsSidebarOpen(false)}
                     className="text-gray-500 hover:text-gray-700 transition-colors duration-200"
@@ -18,12 +18,12 @@ const SideBar = ({ setIsSidebarOpen, currentSupplier }) => {
                 </button>
             </div>
 
-            {/* Supplier Information */}
+            {/* Shopkeeper Information */}
             <div className="bg-gray-100 p-3 rounded-md mb-6">
-                <p className="text-sm font-medium text-gray-900">{currentSupplier?.companyName}</p>
-                <p className="text-sm text-gray-600">Owner: {currentSupplier?.owner}</p>
-                <p className="text-sm text-gray-600">Contact: {currentSupplier?.contact}</p>
-                <p className="text-sm text-gray-600">Address: {currentSupplier?.address}</p>
+                <p className="text-sm font-medium text-gray-900">{currentShopkeeper?.shopName}</p>
+                <p className="text-sm text-gray-600">Owner: {currentShopkeeper?.shopkeeperName}</p>
+                <p className="text-sm text-gray-600">Contact: {currentShopkeeper?.contact}</p>
+                <p className="text-sm text-gray-600">Address: {currentShopkeeper?.address}</p>
             </div>
 
             {/* Navigation Links */}
@@ -32,7 +32,7 @@ const SideBar = ({ setIsSidebarOpen, currentSupplier }) => {
                 <nav className="flex flex-col space-y-2">
                     {[
                         { href: '/', label: 'Home', icon: <FaHome /> },
-                        { href: '/pages/suppliers', label: 'Suppliers', icon: <FaUsers /> },
+                        { href: '/pages/Shopkeepers', label: 'Shopkeepers', icon: <FaUsers /> },
                         { href: '/pages/shopkeepers', label: 'Shopkeepers', icon: <FaUsersCog /> },
                         { href: '/pages/products', label: 'Inventory', icon: <FaBoxOpen /> },
                         { href: '/pages/transactions', label: 'Transactions', icon: <FaMoneyBillWave /> },

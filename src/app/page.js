@@ -55,7 +55,7 @@ export default function Home() {
             </Link>
 
             {/* Card 2: Shopkeepers */}
-            <Link href="/pages/shops" className="group">
+            <Link href="/pages/shopkeepers" className="group">
               <div className="p-6 bg-white rounded-lg shadow-xl transition-all duration-300 hover:shadow-2xl hover:scale-105 cursor-pointer">
                 <div className="flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
                   <FaUsersCog className="text-3xl" />
