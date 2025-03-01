@@ -5,6 +5,7 @@ import { FaUser, FaAddressCard, FaCalendarAlt, FaMoneyBillWave, FaTags, FaHandHo
 import { InventoryContext } from "@/app/ContextApi/inventoryDataApi";
 import { ShopContext } from "@/app/ContextApi/shopkeepersDataApi";
 import axios from 'axios';
+import {  TrashIcon } from "@heroicons/react/24/outline";
 
 const CustomerBilling = () => {
     const [bills, setBills] = useState([]);
@@ -37,13 +38,13 @@ const CustomerBilling = () => {
         const fetchBills = async () => {
             setLoading(true);
             setError(null);
-            console.log("Fetching bills...",process.env.NEXT_PUBLIC_API_URL);
+            console.log("Fetching bills...", process.env.NEXT_PUBLIC_API_URL);
             try {
                 const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/bills`); // Make sure your backend is running on port 5000
                 setBills(response.data);
                 // Set initial invoiceNo based on existing bills
                 if (response.data.length > 0) {
-                    setInvoiceNo(Math.max(...response.data.map(bill => bill.invoiceNo)) + 1);
+                    setInvoiceNo(Math.max(...response.data.map(bills => bills.invoiceNo)) + 1);
                 } else {
                     setInvoiceNo(1); // Start with 1 if no bills exist
                 }
@@ -199,7 +200,7 @@ const CustomerBilling = () => {
 
             try {
                 const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/bills`, newBill); // Your API endpoint
-                setBills([...bills, response.data]); // Add the new bill to the state
+                setBills([...bills, response.data]); // Add the new bills to the state
 
                 //Update your state with inventory Data
                 const updatedInventory = inventoryData.map(item => {
@@ -212,8 +213,8 @@ const CustomerBilling = () => {
 
                 setInventoryData(updatedInventory);
             } catch (error) {
-                console.error("Error generating bill:", error);
-                setError(error.message || "Failed to generate bill");
+                console.error("Error generating bills:", error);
+                setError(error.message || "Failed to generate bills");
             } finally {
                 setLoading(false);
             }
@@ -238,7 +239,7 @@ const CustomerBilling = () => {
         setCart(newCart);
     };
 
-    const handlePrint = (bill) => {
+    const handlePrint = (bills) => {
         const printContent = `
       <html lang="en">
       <head>
@@ -391,14 +392,14 @@ const CustomerBilling = () => {
                 <table class="details">
                     <tr>
                         <td><strong>Code:</strong> 1200</td>
-                        <td><strong>Invoice No:</strong> ${bill.invoiceNo}</td>
+                        <td><strong>Invoice No:</strong> ${bills.invoiceNo}</td>
                     </tr>
                     <tr>
-                        <td><strong>Name:</strong> ${bill.customerName}</td>
-                        <td><strong>Date:</strong> ${bill.date}</td>
+                        <td><strong>Name:</strong> ${bills.customerName}</td>
+                        <td><strong>Date:</strong> ${bills.date}</td>
                     </tr>
                     <tr>
-                        <td><strong>Address:</strong> ${bill.address}</td>
+                        <td><strong>Address:</strong> ${bills.address}</td>
                         <td><strong>Mob#:</strong> </td>
                     </tr>
                     <tr>
@@ -417,7 +418,7 @@ const CustomerBilling = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        ${bill.cart.map((item, index) => `
+                        ${bills.cart.map((item, index) => `
                             <tr key=${index}>
                                 <td>${item.quantity}</td>
                                 <td>${item.itemName}</td>
@@ -430,31 +431,31 @@ const CustomerBilling = () => {
                 <table class="summary-table">
                     <tr>
                         <td><strong>Total Amount</strong></td>
-                        <td>${bill.totalAmount.toFixed(2)} PKR</td>
+                        <td>${bills.totalAmount.toFixed(2)} PKR</td>
                     </tr>
                     <tr>
                         <td><strong>Discount:</strong></td>
-                        <td>${bill.discountAmount.toFixed(2)} PKR</td>
+                        <td>${bills.discountAmount.toFixed(2)} PKR</td>
                     </tr>
                     <tr>
                         <td><strong>Total After Discount:</strong></td>
-                        <td>${bill.totalAfterDiscount.toFixed(2)} PKR</td>
+                        <td>${bills.totalAfterDiscount.toFixed(2)} PKR</td>
                     </tr>
                     <tr>
                         <td><strong>Old Balance:</strong></td>
-                        <td>${bill.oldBalance.toFixed(2)} PKR</td>
+                        <td>${bills.oldBalance.toFixed(2)} PKR</td>
                     </tr>
                     <tr>
                         <td><strong>Net Bill Amount:</strong></td>
-                        <td>${bill.netAmount.toFixed(2)} PKR</td>
+                        <td>${bills.netAmount.toFixed(2)} PKR</td>
                     </tr>
                     <tr>
                         <td><strong>Given Amount</strong></td>
-                        <td>${bill.customerGivenAmount.toFixed(2)} PKR</td>
+                        <td>${bills.customerGivenAmount.toFixed(2)} PKR</td>
                     </tr>
                     <tr>
                         <td><strong>Remaining Amount</strong></td>
-                        <td>${bill.debt.toFixed(2)} PKR</td>
+                        <td>${bills.debt.toFixed(2)} PKR</td>
                     </tr>
                 </table>
 
@@ -494,30 +495,17 @@ const CustomerBilling = () => {
         setFilteredShops([]);
     };
 
-    const handleUpdateBill = async (bill) => {
-        setLoading(true);
-        setError(null);
-        try {
-            await axios.patch(`${process.env.NEXT_PUBLIC_API_URL}/bills/${bill.invoiceNo}`, bill);
-            // Update the bills array in state
-            setBills(bills.map(b => (b.invoiceNo === bill.invoiceNo ? bill : b)));
-        } catch (err) {
-            console.error("Error updating bill:", err);
-            setError(err.message || "Failed to update bill");
-        } finally {
-            setLoading(false);
-        }
-    };
+  
 
     const handleDeleteBill = async (invoiceNo) => {
         setLoading(true);
         setError(null);
         try {
             await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/bills/${invoiceNo}`);
-            setBills(bills.filter(bill => bill.invoiceNo !== invoiceNo));
+            setBills(bills.filter(bills => bills.invoiceNo !== invoiceNo));
         } catch (err) {
-            console.error("Error deleting bill:", err);
-            setError(err.message || "Failed to delete bill");
+            console.error("Error deleting bills:", err);
+            setError(err.message || "Failed to delete bills");
         } finally {
             setLoading(false);
         }
@@ -543,7 +531,95 @@ const CustomerBilling = () => {
         <div className="bg-gray-100 min-h-screen py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-xl p-8">
                 <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">Customer Billing</h1>
+                {/* Add Item Form */}
+                <div className="mb-6">
+                    <h2 className="text-xl font-semibold text-gray-700 mb-4">Add Items</h2>
+                    {errors.newItem && <p className="text-red-500 text-xs mt-1">{errors.newItem}</p>}
+                    <div className="grid grid-cols-3 gap-4">
+                        <div className="relative rounded-md shadow-sm">
+                            <select
+                                id="newItemName"
+                                name="newItemName"
+                                value={newItem.name}
+                                onChange={handleInputChange}
+                                className="focus:ring-blue-500 hover:ring-blue-400 focus:border-blue-500 block w-full pl-3 pr-10 py-2 sm:text-sm border-gray-300 rounded-md"
+                            >
+                                <option value="">Select Item</option>
+                                {inventoryData.map((item, index) => (
+                                    <option key={index} value={item.itemName}>{item.itemName}</option>
+                                ))}
+                            </select>
+                        </div>
 
+                        <div className="relative rounded-md shadow-sm">
+                            <input
+                                type="number"
+                                name="newItemQuantity"
+                                id="newItemQuantity"
+                                placeholder="Quantity"
+                                value={newItem.quantity}
+                                onChange={handleInputChange}
+                                className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-3 pr-10 py-2 sm:text-sm border-gray-300 rounded-md"
+                            />
+                        </div>
+
+                        <div className="relative rounded-md shadow-sm">
+                            <input
+                                type="number"
+                                name="newItemPrice"
+                                id="newItemPrice"
+                                placeholder="Price"
+                                value={newItem.price}
+                                onChange={handleInputChange}
+                                className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-3 pr-10 py-2 sm:text-sm border-gray-300 rounded-md"
+                            />
+                        </div>
+                    </div>
+                    <button
+                        onClick={handleAddToCart}
+                        className="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200 flex items-center"
+                    >
+                        <MdAddShoppingCart className="mr-2" />
+                        Add Item
+                    </button>
+                </div>
+                {/* Cart Table */}
+                <div className="mb-6">
+                    <h2 className="text-xl font-semibold text-gray-700 mb-4">Current Bill</h2>
+                    {errors.cart && <p className="text-red-500 text-xs mt-1">{errors.cart}</p>}
+
+                    <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-gray-200">
+                            <thead className="bg-gray-50">
+                                <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"> Action</th>
+                                </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                                {cart.map((item, index) => (
+                                    <tr key={index}>
+                                        <td className="px-6 py-4 whitespace-nowrap">{item.itemName}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap">{item.quantity}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap">PKR {item.price}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap">PKR {item.total}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <button
+                                                onClick={() => handleRemoveItem(index)}
+                                                className="text-red-600 hover:text-red-800 transition-colors duration-200"
+                                            >
+                                                Remove
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
                 {/* Customer Details Form */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div>
@@ -653,97 +729,6 @@ const CustomerBilling = () => {
                     </div>
                 </div>
 
-                {/* Add Item Form */}
-                <div className="mb-6">
-                    <h2 className="text-xl font-semibold text-gray-700 mb-4">Add Items</h2>
-                    {errors.newItem && <p className="text-red-500 text-xs mt-1">{errors.newItem}</p>}
-                    <div className="grid grid-cols-3 gap-4">
-                        <div className="relative rounded-md shadow-sm">
-                            <select
-                                id="newItemName"
-                                name="newItemName"
-                                value={newItem.name}
-                                onChange={handleInputChange}
-                                className="focus:ring-blue-500 hover:ring-blue-400 focus:border-blue-500 block w-full pl-3 pr-10 py-2 sm:text-sm border-gray-300 rounded-md"
-                            >
-                                <option value="">Select Item</option>
-                                {inventoryData.map((item, index) => (
-                                    <option key={index} value={item.itemName}>{item.itemName}</option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <div className="relative rounded-md shadow-sm">
-                            <input
-                                type="number"
-                                name="newItemQuantity"
-                                id="newItemQuantity"
-                                placeholder="Quantity"
-                                value={newItem.quantity}
-                                onChange={handleInputChange}
-                                className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-3 pr-10 py-2 sm:text-sm border-gray-300 rounded-md"
-                            />
-                        </div>
-
-                        <div className="relative rounded-md shadow-sm">
-                            <input
-                                type="number"
-                                name="newItemPrice"
-                                id="newItemPrice"
-                                placeholder="Price"
-                                value={newItem.price}
-                                onChange={handleInputChange}
-                                className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-3 pr-10 py-2 sm:text-sm border-gray-300 rounded-md"
-                            />
-                        </div>
-                    </div>
-                    <button
-                        onClick={handleAddToCart}
-                        className="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200 flex items-center"
-                    >
-                        <MdAddShoppingCart className="mr-2" />
-                        Add Item
-                    </button>
-                </div>
-
-                {/* Cart Table */}
-                <div className="mb-6">
-                    <h2 className="text-xl font-semibold text-gray-700 mb-4">Current Bill</h2>
-                    {errors.cart && <p className="text-red-500 text-xs mt-1">{errors.cart}</p>}
-
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
-                                <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"> Action</th>
-                                </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
-                                {cart.map((item, index) => (
-                                    <tr key={index}>
-                                        <td className="px-6 py-4 whitespace-nowrap">{item.itemName}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">{item.quantity}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">PKR {item.price}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">PKR {item.total}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <button
-                                                onClick={() => handleRemoveItem(index)}
-                                                className="text-red-600 hover:text-red-800 transition-colors duration-200"
-                                            >
-                                                Remove
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
                 {/* Totals and Generate Bill Button */}
                 <div className="mb-6">
                     <p className="text-lg font-semibold text-gray-700">Total Amount: PKR {cart.reduce((acc, item) => acc + item.total, 0).toFixed(2)}</p>
@@ -765,73 +750,72 @@ const CustomerBilling = () => {
                     <h2 className="text-xl font-semibold text-gray-700 mb-4">Generated Bills</h2>
                     <div className="overflow-x-auto">
                         {bills.length > 0 &&
-                        bills.map((bill) => (
-                            <div key={bill.invoiceNo} className="bg-gray-100 p-4 rounded-md shadow mb-4">
-                                <div className="flex items-center justify-between mb-2">
-                                    <h3 className="text-lg font-semibold text-gray-700">Invoice #{bill.invoiceNo}</h3>
-                                    <div>
-                                        <button onClick={() => handlePrint(bill)} className="text-blue-600 hover:text-blue-800 transition-colors duration-200 mr-4 flex items-center">
-                                            <MdPrint className="mr-1" /> Print
-                                        </button>
-                                        <button onClick={() => toggleDetails(bill.invoiceNo)} className="text-gray-600 hover:text-gray-800 focus:outline-none transition-colors duration-200">
-                                            {showDetails[bill.invoiceNo] ? <MdKeyboardDoubleArrowUp className="h-6 w-6 text-gray-500" /> : <MdKeyboardDoubleArrowDown className="h-6 w-6 text-gray-500" />}
-                                        </button>
-                                        <button
-                                            onClick={() => handleUpdateBill(bill)}
-                                            className="text-green-600 hover:text-green-800 transition-colors duration-200 mr-4 flex items-center"
-                                        >
-                                            Update
-                                        </button>
-                                        <button
-                                            onClick={() => handleDeleteBill(bill.invoiceNo)}
-                                            className="text-red-600 hover:text-red-800 transition-colors duration-200 mr-4 flex items-center"
-                                        >
-                                            Delete
-                                        </button>
-                                    </div>
-                                </div>
-                                {showDetails[bill.invoiceNo] && (
-                                    <>
-                                        <p className="text-gray-600"><strong>Customer:</strong> {bill.customerName}</p>
-                                        <p className="text-gray-600"><strong>Date:</strong> {bill.date}</p>
-                                        <p className="text-gray-600"><strong>Total Amount:</strong> PKR {bill.totalAmount.toFixed(2)}</p>
-                                        <p className="text-gray-600"><strong>Discount:</strong> {bill.discountPercentage}% (PKR {bill.discountAmount.toFixed(2)})</p>
-                                        <p className="text-gray-600"><strong>Total After Discount:</strong> PKR {bill.totalAfterDiscount.toFixed(2)}</p>
-                                        <p className="text-gray-600"><strong>Old Balance:</strong> PKR {bill.oldBalance.toFixed(2)}</p>
-
-                                        <p className="text-gray-600"><strong>Net Amount:</strong> PKR {bill.netAmount.toFixed(2)}</p>
-                                        <p className="text-gray-600"><strong>Given Amount:</strong> PKR {bill.customerGivenAmount.toFixed(2)}</p>
-                                        <p className="text-gray-600"><strong>Remaining Amount:</strong> PKR {bill.debt.toFixed(2)}</p>
-                                        
-                                        {/* Display other bill details */}
-                                        <div className="mt-2">
-                                            <h4 className="text-md font-semibold text-gray-700">Items:</h4>
-                                            <table className="min-w-full divide-y divide-gray-200">
-                                                <thead>
-                                                    <tr>
-                                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
-                                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
-                                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody className="bg-white divide-y divide-gray-200">
-
-                                                    {bill.cart.map((item, index) => (
-                                                        <tr key={index}>
-                                                            <td className="px-6 py-4 whitespace-nowrap">{item.itemName}</td>
-                                                            <td className="px-6 py-4 whitespace-nowrap">{item.quantity}</td>
-                                                            <td className="px-6 py-4 whitespace-nowrap">PKR {item.price}</td>
-                                                            <td className="px-6 py-4 whitespace-nowrap">PKR {item.total}</td>
-                                                        </tr>
-                                                    ))}
-                                                </tbody>
-                                            </table>
+                            bills.map((bills) => (
+                                <div key={bills.invoiceNo} className="bg-gray-100 p-4 rounded-md shadow mb-4">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <h3 className="text-lg font-semibold text-gray-700">Invoice #{bills.invoiceNo}</h3>
+                                        <div className="flex items-center">
+                                        <div>
+                                            <button
+                                                onClick={() => handleDeleteBill(bills.invoiceNo)}
+                                                className="text-red-600 hover:text-red-800 transition-colors duration-200 mr-4 flex items-center"
+                                            >
+                                               <TrashIcon className="w-5 h-5" />
+                                            </button>
+                                            </div>
+                                            <div>
+                                            <button onClick={() => handlePrint(bills)} className="text-blue-600 hover:text-blue-800 transition-colors duration-200 mr-4 flex items-center">
+                                                <MdPrint className="mr-1" /> Print
+                                            </button>
+                                            <button onClick={() => toggleDetails(bills.invoiceNo)} className="text-gray-600 hover:text-gray-800 focus:outline-none transition-colors duration-200">
+                                                {showDetails[bills.invoiceNo] ? <MdKeyboardDoubleArrowUp className="h-6 w-6 text-gray-500" /> : <MdKeyboardDoubleArrowDown className="h-6 w-6 text-gray-500" />}
+                                            </button>
+                                            </div>
+                                            
                                         </div>
-                                    </>
-                                )}
-                            </div>
-                        ))}
+                                    </div>
+                                    {showDetails[bills.invoiceNo] && (
+                                        <>
+                                            <p className="text-gray-600"><strong>Customer:</strong> {bills.customerName}</p>
+                                            <p className="text-gray-600"><strong>Date:</strong> {bills.date}</p>
+                                            <p className="text-gray-600"><strong>Total Amount:</strong> PKR {bills.totalAmount.toFixed(2)}</p>
+                                            <p className="text-gray-600"><strong>Discount:</strong> {bills.discountPercentage}% (PKR {bills.discountAmount.toFixed(2)})</p>
+                                            <p className="text-gray-600"><strong>Total After Discount:</strong> PKR {bills.totalAfterDiscount.toFixed(2)}</p>
+                                            <p className="text-gray-600"><strong>Old Balance:</strong> PKR {bills.oldBalance.toFixed(2)}</p>
+
+                                            <p className="text-gray-600"><strong>Net Amount:</strong> PKR {bills.netAmount.toFixed(2)}</p>
+                                            <p className="text-gray-600"><strong>Given Amount:</strong> PKR {bills.customerGivenAmount.toFixed(2)}</p>
+                                            <p className="text-gray-600"><strong>Remaining Amount:</strong> PKR {bills.debt.toFixed(2)}</p>
+
+                                            {/* Display other bills details */}
+                                            <div className="mt-2">
+                                                <h4 className="text-md font-semibold text-gray-700">Items:</h4>
+                                                <table className="min-w-full divide-y divide-gray-200">
+                                                    <thead>
+                                                        <tr>
+                                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
+                                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody className="bg-white divide-y divide-gray-200">
+
+                                                        {bills.cart.map((item, index) => (
+                                                            <tr key={index}>
+                                                                <td className="px-6 py-4 whitespace-nowrap">{item.itemName}</td>
+                                                                <td className="px-6 py-4 whitespace-nowrap">{item.quantity}</td>
+                                                                <td className="px-6 py-4 whitespace-nowrap">PKR {item.price}</td>
+                                                                <td className="px-6 py-4 whitespace-nowrap">PKR {item.total}</td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+                            ))}
                     </div>
                 </div>
             </div>
