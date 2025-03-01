@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import { FaPlus, FaBuilding } from 'react-icons/fa';
+import { TrashIcon } from "@heroicons/react/24/outline";
 
 function ShopkeeperManagement() {
   const [shopkeepers, setShopkeepers] = useState([]);
@@ -41,6 +42,15 @@ function ShopkeeperManagement() {
 
   const handleShopkeeperClick = (shopkeeperId) => {
     router.push(`/pages/shopkeepers/shopDetailPage/${shopkeeperId}`);
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/shopkeeper/${id}`);
+      fetchShopkeepers();
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   if (loading) {
@@ -92,8 +102,17 @@ function ShopkeeperManagement() {
                 whileHover={{ scale: 1.05, y: -5 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => handleShopkeeperClick(Shopkeeper._id)}
-                className="bg-white rounded-lg shadow-lg p-6 flex flex-col items-center text-center cursor-pointer transition-all duration-200"
+                className="bg-white relative rounded-lg shadow-lg p-6 flex flex-col items-center text-center cursor-pointer transition-all duration-200"
               >
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDelete(Shopkeeper._id)
+                  }}
+                  className="text-red-600 hover:text-red-800 transition-colors duration-200 absolute top-2 right-2"
+                >
+                  <TrashIcon className="w-5 h-5" />
+                </button>
                 <div className="flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 text-blue-600 mb-4">
                    <FaBuilding className="text-2xl" />
                 </div>
