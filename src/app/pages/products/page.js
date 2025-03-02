@@ -2,10 +2,13 @@
 import { useState, useContext, useEffect } from 'react';
 import { InventoryContext } from '@/app/ContextApi/inventoryDataApi';
 import { FaBoxOpen, FaSort } from 'react-icons/fa';
+import SideBar from './component/sidebar';
+import { Bars3Icon } from "@heroicons/react/24/outline";
 
 export default function Inventory() {
   const { inventoryData } = useContext(InventoryContext);
   const [loading, setLoading] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [error, setError] = useState(null);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' }); // Add sorting state
 
@@ -101,7 +104,21 @@ console.log(inventoryData)
 
 
   return (
+    <>
+    {/* Sidebar */}
+    {isSidebarOpen ? (
+        <SideBar setIsSidebarOpen={setIsSidebarOpen} />
+      ) : (
+        <button
+          onClick={() => setIsSidebarOpen(true)}
+          className="fixed top-4 left-4 z-50 text-blue-600 hover:text-blue-800 transition-colors duration-200"
+        >
+          <Bars3Icon className="w-6 h-6" />
+        </button>
+      )}
+   
     <div className="bg-gray-100 min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+       
       <div className="max-w-6xl mx-auto">
         <h1 className="text-4xl font-bold text-blue-600 mb-4 text-center">Inventory Management</h1>
         <p className="text-gray-600 mb-8 text-center">View and manage your current stock levels.</p>
@@ -173,5 +190,6 @@ console.log(inventoryData)
         </div>
       </div>
     </div>
+    </>
   );
 }
