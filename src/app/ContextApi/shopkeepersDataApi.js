@@ -6,11 +6,13 @@ export const ShopContext = createContext()
 
 export const ShopProvider = ({ children }) => {
   const [shops, setShops] = useState([])
+  const [totalShop, setTotalShop] = useState();
 
   const fetchShops = useCallback(async () => {
     try {
       const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/shopkeeper`)
       setShops(response.data)
+      setTotalShop(response.data.lentgh)
     } catch (error) {
       console.error(error)
     }
@@ -41,7 +43,8 @@ export const ShopProvider = ({ children }) => {
   const value = {
     shops,
     setShops,
-    fetchShops
+    fetchShops,
+    totalShop,
     
   }
 
