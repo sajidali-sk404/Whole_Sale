@@ -31,7 +31,7 @@ const CustomerBilling = () => {
 
     const { inventoryData, setInventoryData } = useContext(InventoryContext); // Access setInventoryData
     const { shops, setShops } = useContext(ShopContext);
-    const watermarkImageUrl = '/watermark_p.png';
+    const watermarkImageUrl = '/watermark_p.PNG';
 
     // Fetch Bills from Backend (useEffect)
     useEffect(() => {
