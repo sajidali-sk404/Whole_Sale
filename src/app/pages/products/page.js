@@ -59,7 +59,6 @@ export default function Inventory() {
     setSortConfig({ key, direction });
   };
 
-
 console.log(inventoryData)
   useEffect(() => {
     if (sortConfig.key !== null && sortedInventory) {
