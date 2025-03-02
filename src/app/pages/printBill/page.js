@@ -70,7 +70,7 @@ const CustomerBilling = () => {
             setSelectedShop(null);
         }
     }, [customerName, shops]);
-    console.log(shops);
+    // console.log(shops);
 
     useEffect(() => {
         if (selectedShop) {
@@ -177,12 +177,56 @@ const CustomerBilling = () => {
         }
     };
 
+    const handleAddData = async (bill) => {
+        setLoading(true);
+
+        const formData = new FormData();
+        formData.append('date', bill.date);
+        formData.append('items', JSON.stringify(bill.cart));
+        formData.append('driver[name]', "");
+        formData.append('driver[vehicle]', "");
+        formData.append('status', "Delivered");
+        formData.append('transactions[paymentDate]', bill.date);
+        formData.append('transactions[partialPayment]', bill.customerGivenAmount);
+        formData.append('transactions[totalAmount]', bill.totalAmount);
+        formData.append('transactions[totalDebit]', (bill.totalAmount - bill.customerGivenAmount) > 0 ? (bill.totalAmount - bill.customerGivenAmount) : 0);
+        formData.append('transactions[totalCredit]', bill.customerGivenAmount);
+
+        const payments = [
+            {
+                amount: Number(bill.customerGivenAmount),
+                paymentDate: bill.date,
+                debit: bill.debt,
+                credit: bill.customerGivenAmount
+            }
+        ];
+        formData.append('transactions[payments]', JSON.stringify(payments));
+
+        try {
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/shopkeeper/${selectedShop._id}/delivery`, formData);
+
+            if (response.status === 201) {
+                console.log("Order added successfully");
+            } else {
+                throw new Error("Failed to add order");
+            }
+        } catch (error) {
+            console.error("Error adding order:", error);
+            alert(`Error adding order: ${error.response?.data?.message || 'Please try again.'}`);
+        } finally {
+            setLoading(false);
+        }
+    };
+
    const handleGenerateBill = async () => {
         if (!validateForm()) {
             return;
         }
         setLoading(true);
         setError(null);
+        console.log("cart",cart)
+        console.log("shops",shops)
+        console.log("bills",bills)
 
         if (customerName && cart.length > 0) {
             const totalAmount = cart.reduce((acc, item) => acc + parseFloat(item.total), 0);
@@ -214,6 +258,8 @@ const CustomerBilling = () => {
 
             try {
                 const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/bills`, newBill); // Your API endpoint
+
+                await handleAddData(newBill);
 
                 // -- Updated Logic to modify shop state --
                 if(selectedShop) {
@@ -571,6 +617,10 @@ const CustomerBilling = () => {
         setFilteredShops([]);
     };
 
+    const handleDebitSelect = (balance) => {
+        setOldBalance(balance)
+    }
+
   
 
     const handleDeleteBill = async (invoiceNo) => {
@@ -716,14 +766,16 @@ const CustomerBilling = () => {
 
                         {/* Shop Dropdown */}
                         {filteredShops.length > 0 && (
-                            <ul className="absolute z-10 w-[32vw] bg-white border border-gray-300 rounded-md shadow-md mt-1 ">
+                            <ul className="absolute z-10 w-[32vw] bg-white border border-gray-300 rounded-md shadow-md mt-1">
                                 {filteredShops.map((shop) => (
                                     <li
                                         key={shop._id}
-                                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                                        className="px-4 py-2 flex flex-col hover:bg-gray-100 cursor-pointer"
                                         onClick={() => handleShopSelect(shop)}
-                                    >
-                                        {shop.shopkeeperName}
+                                    >   
+                                        <p>{shop.shopkeeperName}</p>
+                                        <p className="text-xs text-gray-500">{shop.shopName}</p>
+                                        
                                     </li>
                                 ))}
                             </ul>
@@ -772,6 +824,22 @@ const CustomerBilling = () => {
                             onChange={handleInputChange}
                             className="mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm border-gray-300"
                         />
+                        {/* Shop Dropdown */}
+                        {selectedShop && (
+                            <ul className="absolute z-10 w-[32vw] bg-white border border-gray-300 rounded-md shadow-md mt-1">
+                                {selectedShop.deliveries?.map((delivery) => (
+                                    <li
+                                        key={delivery._id}
+                                        className="px-4 py-2 flex flex-col hover:bg-gray-100 cursor-pointer"
+                                        onClick={() => handleDebitSelect(delivery.transactions.totalDebit)}
+                                    >   
+                                        <p>{delivery?.transactions?.totalDebit}</p>
+                                        <p className="text-xs text-gray-500">{selectedShop.shopName}</p>
+                                        
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
                     </div>
                     <div>
                         <label htmlFor="customerGivenAmount" className="block text-sm font-medium text-gray-700">
