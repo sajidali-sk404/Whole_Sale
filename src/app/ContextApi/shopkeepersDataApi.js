@@ -41,6 +41,7 @@ export const ShopProvider = ({ children }) => {
   const value = {
     shops,
     setShops,
+    fetchShops
     
   }
 

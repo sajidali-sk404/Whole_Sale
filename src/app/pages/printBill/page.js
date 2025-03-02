@@ -70,15 +70,27 @@ const CustomerBilling = () => {
             setSelectedShop(null);
         }
     }, [customerName, shops]);
+    console.log(shops);
 
     useEffect(() => {
         if (selectedShop) {
-            setOldBalance(selectedShop.totalDebit || 0);
+            // Calculate total debit for the selected shop
+            let totalDebit = 0;
+            if (selectedShop.deliveries && Array.isArray(selectedShop.deliveries)) {
+                selectedShop.deliveries.forEach((delivery) => {
+                    if (delivery.transactions && delivery.transactions.totalDebit) {
+                        totalDebit += parseFloat(delivery.transactions.totalDebit); // Ensure parsing to a number
+                    }
+                });
+            }
+            setOldBalance(totalDebit);  // Set the total debit as oldBalance
+
+            setCustomerName(selectedShop.shopkeeperName);
             setAddress(selectedShop.address || "")
         } else {
             setOldBalance(0);
         }
-    }, [selectedShop]);
+    }, [selectedShop]); //customer name and selected shop
 
 
     const validateForm = () => {
@@ -165,7 +177,7 @@ const CustomerBilling = () => {
         }
     };
 
-    const handleGenerateBill = async () => {
+   const handleGenerateBill = async () => {
         if (!validateForm()) {
             return;
         }
@@ -176,8 +188,10 @@ const CustomerBilling = () => {
             const totalAmount = cart.reduce((acc, item) => acc + parseFloat(item.total), 0);
             const discountAmount = (discountPercentage / 100) * totalAmount;
             const totalAfterDiscount = totalAmount - discountAmount;
-            const netAmount = totalAfterDiscount + parseFloat(oldBalance || 0);
-            const calculatedDebt = netAmount - parseFloat(customerGivenAmount || 0);
+            const oldBalanceNum = parseFloat(oldBalance || 0); // Ensure oldBalance is parsed correctly
+            const netAmount = totalAfterDiscount + oldBalanceNum;
+            const customerGivenAmountNum = parseFloat(customerGivenAmount || 0);
+            const calculatedDebt = netAmount - customerGivenAmountNum;
 
             setDebt(calculatedDebt);
 
@@ -191,16 +205,43 @@ const CustomerBilling = () => {
                 discountPercentage,
                 discountAmount,
                 totalAfterDiscount,
-                oldBalance: parseFloat(oldBalance || 0),
+                oldBalance: oldBalanceNum,
                 netAmount,
-                customerGivenAmount: parseFloat(customerGivenAmount || 0),
+                customerGivenAmount: customerGivenAmountNum,
                 debt: calculatedDebt,
                 shopkeeper: selectedShop ? selectedShop._id : null // Set the shopkeeper ID
             };
 
             try {
                 const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/bills`, newBill); // Your API endpoint
-                setBills([...bills, response.data]); // Add the new bills to the state
+
+                // -- Updated Logic to modify shop state --
+                if(selectedShop) {
+                    const updatedShops = shops.map(shop => {
+                        if(shop._id === selectedShop._id) {
+                            // Update the shop's deliveries (add the new transaction)
+                            const newDelivery = {
+                                _id: response.data._id, // assuming your bill API returns the id
+                                date: new Date().toISOString(),
+                                transactions: {
+                                    totalDebit: calculatedDebt > 0 ? calculatedDebt : 0, // Only debt is added in debit
+                                    totalCredit: customerGivenAmountNum ? customerGivenAmountNum : 0
+                                }
+                            }
+
+                            // Return the updated Shop
+                            return {
+                                ...shop,
+                                deliveries: [...shop.deliveries, newDelivery]
+                            };
+                        }
+                        return shop;
+                    });
+                    setShops(updatedShops);
+                }
+                //-- End Update Shop State Logic --
+
+                setBills([...bills, response.data]);
 
                 //Update your state with inventory Data
                 const updatedInventory = inventoryData.map(item => {
@@ -241,7 +282,7 @@ const CustomerBilling = () => {
 
     const handlePrint = (bills) => {
         const printContent = `
-      <html lang="en">
+           <html lang="en">
       <head>
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -252,7 +293,6 @@ const CustomerBilling = () => {
              margin: 0;
              padding: 0;
              box-sizing: border-box;
-
            }
             .invoice-container {
                 width: 95%;
@@ -260,19 +300,35 @@ const CustomerBilling = () => {
                 margin: 20px auto;
                 background: white;
                 padding: 20px;
-                position: relative; /* Needed for absolute positioning */
-                overflow: hidden; /* Clip content if it overflows the container */
+                position: relative;
+                overflow: hidden;
              }
 
-             .watermark {
+            /* Watermark: Repeat */
+            .watermark-repeat {
                 position: absolute;
-                top: 60%;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-image: url(${watermarkImageUrl});
+                background-repeat: repeat;
+                background-position: center;
+                opacity: 0.1; /* Reduced opacity for subtle repeat effect */
+                z-index: 0;
+                pointer-events: none; /* Make it non-interactive */
+            }
+
+            /* Watermark: Centered Single */
+            .watermark-center {
+                position: absolute;
+                top: 50%;
                 left: 50%;
                 transform: translate(-50%, -50%);
-                width: 85%; 
-                height: auto;
-                opacity: 0.2; 
-                z-index: 0; 
+                width: 50%; /* Adjust as needed */
+                opacity: 0.15;
+                z-index: 0;
+                pointer-events: none;
             }
 
               .header {
@@ -293,7 +349,6 @@ const CustomerBilling = () => {
                   margin-bottom: 20px;
                   table-layout: fixed;
                   position:relative;
-
               }
               .details td {
                   padding: 5px;
@@ -306,7 +361,6 @@ const CustomerBilling = () => {
                   border-collapse: collapse;
                   margin-bottom: 20px;
                   position:relative;
-
               }
               .table-container th, .table-container td {
                   border: 1px solid #ddd;
@@ -322,7 +376,6 @@ const CustomerBilling = () => {
                   margin-left: auto;
                   border-collapse: collapse;
                   position:relative;
-
               }
               .summary-table td {
                   padding: 5px;
@@ -344,7 +397,6 @@ const CustomerBilling = () => {
                   padding-top: 10px;
                   position:relative;
                   z-index: 1;
-
               }
               .signature span {
                     font-size: 11px;
@@ -352,13 +404,22 @@ const CustomerBilling = () => {
                   margin-top: 30px;
                   color: #333;
                   position:relative;
-
               }
                   .gen span {
                       text-align: right;
                       }
 
+            /* New Styling */
+            .header h1 {
+                font-size: 24px;
+                font-weight: bold;
+            }
 
+            .details td strong {
+                font-weight: 600;
+            }
+
+            /* Improved Responsiveness */
               @media (max-width: 768px) {
                   .invoice-container {
                       width: 95%;
@@ -378,108 +439,112 @@ const CustomerBilling = () => {
                   .header p {
                       font-size: 11px;
                   }
-                    
-                
-    
+               
+                /* Adjust Watermark Position for Mobile */
+                .watermark-center {
+                    width: 70%; /* Make watermark larger on smaller screens */
+                }
               }
           </style>
       </head>
       <body>
         <div class="invoice-container ">
-            <img src="${watermarkImageUrl}" alt="Watermark" class="watermark">
-                <div class="header">
-                    <h1>M.Amir Traders</h1>
-                    <p>Whole Sale Distributor Sugar, Ghee, Wheat etc</p>
-                    <p>Watkay Chowk Shadara Mingora Swat</p>
-                    <p>Ph#: 0341-6120696, 0946-818811</p>
-                </div>
-                
+            <div class="watermark-repeat"></div>
+            <img src="${watermarkImageUrl}" alt="Watermark" class="watermark-center">
 
-                <table class="details">
-                    <tr>
-                        <td><strong>Code:</strong> 1200</td>
-                        <td><strong>Invoice No:</strong> ${bills.invoiceNo}</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Name:</strong> ${bills.customerName}</td>
-                        <td><strong>Date:</strong> ${bills.date}</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Address:</strong> ${bills.address}</td>
-                        <td><strong>Mob#:</strong> </td>
-                    </tr>
-                    <tr>
-                        <td><strong>Ref. Name:</strong> SWAT</td>
-                        <td><strong>CNIC#:</strong> </td>
-                    </tr>
-                </table>
-
-                <table class="table-container">
-                    <thead>
-                        <tr>
-                            <th>Qty</th>
-                            <th>Product Name</th>
-                            <th>Price</th>
-                            <th>Net Amount</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${bills.cart.map((item, index) => `
-                            <tr key=${index}>
-                                <td>${item.quantity}</td>
-                                <td>${item.itemName}</td>
-                                <td>${item.price} PKR</td>
-                                <td>${item.total} PKR</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-                <table class="summary-table">
-                    <tr>
-                        <td><strong>Total Amount</strong></td>
-                        <td>${bills.totalAmount.toFixed(2)} PKR</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Discount:</strong></td>
-                        <td>${bills.discountAmount.toFixed(2)} PKR</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Total After Discount:</strong></td>
-                        <td>${bills.totalAfterDiscount.toFixed(2)} PKR</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Old Balance:</strong></td>
-                        <td>${bills.oldBalance.toFixed(2)} PKR</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Net Bill Amount:</strong></td>
-                        <td>${bills.netAmount.toFixed(2)} PKR</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Given Amount</strong></td>
-                        <td>${bills.customerGivenAmount.toFixed(2)} PKR</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Remaining Amount</strong></td>
-                        <td>${bills.debt.toFixed(2)} PKR</td>
-                    </tr>
-                </table>
-
-                <div class="signature">
-                <br><br><br><br>
-                    <span style="margin-left:30px;" ><strong>Generated By: ___________________</strong></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <span><strong>Store Manager: ___________________</strong> </span>
-                </div>
-                <div class="gen">
-                <p>مال وصول کرتے وقت اچھی طرح چیک کرلیں بعد میں کمپنی لیکیج کو کمی کی ذمہ دار نہ ہوگی</p>
-                <p>نیز فرم کے موجودہ اور سابقہ ملازمین کو ادھار سودا یا مال کے لیے پیشگی رقم نہ دیں جس کے لیے ہم ذمہ دار نہ ہوں گے</p>
-                </div>
-                <div class="footer">
-                    <p>Note: This is a computer-generated invoice and does not require a signature.</p>
-                </div>
+            <div class="header">
+                <h1>M.Amir Traders</h1>
+                <p>Whole Sale Distributor Sugar, Ghee, Wheat etc</p>
+                <p>Watkay Chowk Shadara Mingora Swat</p>
+                <p>Ph#: 0341-6120696, 0946-818811</p>
             </div>
-        </body>
-        </html>
+            
+
+            <table class="details">
+                <tr>
+                    <td><strong>Code:</strong> 1200</td>
+                    <td><strong>Invoice No:</strong> ${bills.invoiceNo}</td>
+                </tr>
+                <tr>
+                    <td><strong>Name:</strong> ${bills.customerName}</td>
+                    <td><strong>Date:</strong> ${new Date(bills.date).toISOString().split('T')[0]}</td>
+                </tr>
+                <tr>
+                    <td><strong>Address:</strong> ${bills.address}</td>
+                    <td><strong>Mob#:</strong> </td>
+                </tr>
+                <tr>
+                    <td><strong>Ref. Name:</strong> SWAT</td>
+                    <td><strong>CNIC#:</strong> </td>
+                </tr>
+            </table>
+
+            <table class="table-container">
+                <thead>
+                    <tr>
+                        <th>Qty</th>
+                        <th>Product Name</th>
+                        <th>Price</th>
+                        <th>Net Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${bills.cart.map((item, index) => `
+                        <tr key=${index}>
+                            <td>${item.quantity}</td>
+                            <td>${item.itemName}</td>
+                            <td>${item.price} PKR</td>
+                            <td>${item.total} PKR</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+            <table class="summary-table">
+                <tr>
+                    <td><strong>Total Amount</strong></td>
+                    <td>${bills.totalAmount.toFixed(2)} PKR</td>
+                </tr>
+                <tr>
+                    <td><strong>Discount:</strong></td>
+                    <td>${bills.discountAmount.toFixed(2)} PKR</td>
+                </tr>
+                <tr>
+                    <td><strong>Total After Discount:</strong></td>
+                    <td>${bills.totalAfterDiscount.toFixed(2)} PKR</td>
+                </tr>
+                <tr>
+                    <td><strong>Old Balance:</strong></td>
+                    <td>${bills.oldBalance.toFixed(2)} PKR</td>
+                </tr>
+                <tr>
+                    <td><strong>Net Bill Amount:</strong></td>
+                    <td>${bills.netAmount.toFixed(2)} PKR</td>
+                </tr>
+                <tr>
+                    <td><strong>Given Amount</strong></td>
+                    <td>${bills.customerGivenAmount.toFixed(2)} PKR</td>
+                </tr>
+                <tr>
+                    <td><strong>Remaining Amount</strong></td>
+                    <td>${bills.debt.toFixed(2)} PKR</td>
+                </tr>
+            </table>
+
+            <div class="signature">
+            <br><br><br><br>
+                <span style="margin-left:30px;" ><strong>Generated By: ___________________</strong></span>               
+                <span><strong>Store Manager: ___________________</strong> </span>
+            </div>
+            <div class="gen">
+            <p>مال وصول کرتے وقت اچھی طرح چیک کرلیں بعد میں کمپنی لیکیج کو کمی کی ذمہ دار نہ ہوگی</p>
+            <p>نیز فرم کے موجودہ اور سابقہ ملازمین کو ادھار سودا یا مال کے لیے پیشگی رقم نہ دیں جس کے لیے ہم ذمہ دار نہ ہوں گے</p>
+            </div>
+            <div class="footer">
+                <p>Note: This is a computer-generated invoice and does not require a signature.</p>
+            </div>
+        </div>
+    </body>
+    </html>
     `;
 
         const printWindow = window.open('', '', 'width=800,height=600');
