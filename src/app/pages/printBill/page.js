@@ -31,7 +31,7 @@ const CustomerBilling = () => {
 
     const { inventoryData, setInventoryData } = useContext(InventoryContext); // Access setInventoryData
     const { shops, setShops } = useContext(ShopContext);
-    const watermarkImageUrl = '/watermark_p.PNG';
+    const watermarkImageUrl = '/watermark_p.png';
 
     // Fetch Bills from Backend (useEffect)
     useEffect(() => {
@@ -353,14 +353,17 @@ const CustomerBilling = () => {
             /* Watermark: Repeat */
             .watermark-repeat {
                 position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
+                top: -300;
+                left: -130;
+                width: 150%;
+                height: 150%;
                 background-image: url(${watermarkImageUrl});
+                background-size: 100%;
                 background-repeat: repeat;
+                transform: rotate(-20deg);
+                transform-origin: center;
                 background-position: center;
-                opacity: 0.1; /* Reduced opacity for subtle repeat effect */
+                opacity: 0.2; /* Reduced opacity for subtle repeat effect */
                 z-index: 0;
                 pointer-events: none; /* Make it non-interactive */
             }
@@ -506,7 +509,6 @@ const CustomerBilling = () => {
       <body>
         <div class="invoice-container ">
             <div class="watermark-repeat"></div>
-            <img src="${watermarkImageUrl}" alt="Watermark" class="watermark-center">
 
             <div class="header">
                 <h1>M.Amir Traders</h1>
