@@ -5,12 +5,16 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import { FaPlus, FaBuilding } from 'react-icons/fa';
+import { TrashIcon } from "@heroicons/react/24/outline";
+import DeleteConfirmation from './component/DeleteConfirmation';
 
 function ShopkeeperManagement() {
   const [shopkeepers, setShopkeepers] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
   const router = useRouter();
 
   const fetchShopkeepers = useCallback(async () => {
@@ -43,6 +47,11 @@ function ShopkeeperManagement() {
     router.push(`/pages/shopkeepers/shopDetailPage/${shopkeeperId}`);
   };
 
+  const handleDeleteClick = (id) => {
+    setDeleteId(id); // Set the ID to be deleted
+    setShowDeleteConfirm(true); // Show the confirmation modal
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -54,7 +63,7 @@ function ShopkeeperManagement() {
   if (error) {
     return (
       <div className="flex justify-center items-center h-screen">
-         <div className="text-red-500 text-xl">Error: {error}</div>
+        <div className="text-red-500 text-xl">Error: {error}</div>
       </div>
     );
   }
@@ -92,10 +101,19 @@ function ShopkeeperManagement() {
                 whileHover={{ scale: 1.05, y: -5 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => handleShopkeeperClick(Shopkeeper._id)}
-                className="bg-white rounded-lg shadow-lg p-6 flex flex-col items-center text-center cursor-pointer transition-all duration-200"
+                className="bg-white relative rounded-lg shadow-lg p-6 flex flex-col items-center text-center cursor-pointer transition-all duration-200"
               >
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteClick(Shopkeeper._id)
+                  }}
+                  className="text-red-600 hover:text-red-800 transition-colors duration-200 absolute top-2 right-2"
+                >
+                  <TrashIcon className="w-5 h-5" />
+                </button>
                 <div className="flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 text-blue-600 mb-4">
-                   <FaBuilding className="text-2xl" />
+                  <FaBuilding className="text-2xl" />
                 </div>
                 <h2 className="text-xl font-semibold text-gray-800">{Shopkeeper.shopName}</h2>
                 <p className="mt-1 text-gray-600">Owner: {Shopkeeper.shopkeeperName}</p>
@@ -112,6 +130,17 @@ function ShopkeeperManagement() {
             <AddShop showForm={showForm} setShowForm={handleCloseForm} refreshShopkeepers={fetchShopkeepers} />
           </div>
         )}
+
+        {/* Delete Confirmation Modal */}
+        {showDeleteConfirm && (
+          <DeleteConfirmation
+            id={deleteId}
+            setShowDeleteConfirm={setShowDeleteConfirm}
+            fetchShopkeepers={fetchShopkeepers} //Pass fetchShopkeepers
+            setShopkeepers={setShopkeepers} // Pass setShopkeepers
+          />
+        )}
+
       </div>
     </div>
   );
