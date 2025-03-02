@@ -12,7 +12,7 @@ export const ShopProvider = ({ children }) => {
     try {
       const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/shopkeeper`)
       setShops(response.data)
-      setTotalShop(response.data.lentgh)
+      setTotalShop(response.data.length)
     } catch (error) {
       console.error(error)
     }

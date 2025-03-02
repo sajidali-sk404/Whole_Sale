@@ -18,7 +18,7 @@ const Card = ({ title, value, icon: Icon }) => ( // Receive icon as a prop
 const Navbar = () => {
   const { totalInventory } = useContext(InventoryContext);
   const { totalSupplier } = useContext(SupplierContext);
-  const { totalShop } = useContext(totalShop);
+  const { totalShop } = useContext(ShopContext);
 
   // Handle null or undefined values, provide default
   const inventoryValue = totalInventory !== null && totalInventory !== undefined ? totalInventory : 0;
