@@ -3,6 +3,7 @@ import React from "react";
 import { useContext } from "react";
 import { InventoryContext } from "../ContextApi/inventoryDataApi";
 import { SupplierContext } from "../ContextApi/SupplierDataApi";
+import { ShopContext } from "../ContextApi/shopkeepersDataApi";
 import { FaShoppingCart, FaChartLine, FaBuilding, FaUserFriends } from 'react-icons/fa'; // Import icons
 import Link from "next/link";
 
@@ -17,6 +18,7 @@ const Card = ({ title, value, icon: Icon }) => ( // Receive icon as a prop
 const Navbar = () => {
   const { totalInventory } = useContext(InventoryContext);
   const { totalSupplier } = useContext(SupplierContext);
+  const { totalShop } = useContext(ShopContext);
 
   // Handle null or undefined values, provide default
   const inventoryValue = totalInventory !== null && totalInventory !== undefined ? totalInventory : 0;
@@ -30,7 +32,7 @@ const Navbar = () => {
           <Link href="/pages/products"><Card title="Total Stock" value={inventoryValue} icon={FaShoppingCart} /></Link>
          <Card title="Daily Profit" value="0" icon={FaChartLine} />
          <Link href="/pages/suppliers"><Card title="Total Suppliers" value={supplierValue} icon={FaBuilding} /></Link>
-          <Card title="Local Customers" value="0" icon={FaUserFriends} />
+          <Link href="/pages/shopkeepers"><Card title="Local Customers" value={totalShop} icon={FaUserFriends} /></Link>
         </div>
       </div>
     </nav>

@@ -6,10 +6,10 @@ import { FaHome, FaUsers, FaUsersCog, FaBoxOpen, FaMoneyBillWave, FaChartLine, F
 
 const SideBar = ({ setIsSidebarOpen }) => {
     return (
-        <div className="bg-white shadow-md h-full md:w-64 p-4 rounded-r-lg transition-all duration-300 ease-in-out">
+        <div className="bg-white shadow-md h-full md:w-64 p-4 absolute rounded-r-lg transition-all duration-300 ease-in-out">
             {/* Close Button */}
             <div className="flex justify-between items-center mb-6">
-                <h2 className="text-lg font-semibold text-blue-600">Supplier Details</h2>
+                <h2 className="text-lg font-semibold text-blue-600">Inventory</h2>
                 <button
                     onClick={() => setIsSidebarOpen(false)}
                     className="text-gray-500 hover:text-gray-700 transition-colors duration-200"
@@ -18,8 +18,8 @@ const SideBar = ({ setIsSidebarOpen }) => {
                 </button>
             </div>
 
-            {/* Supplier Information */}
-     
+        
+
             {/* Navigation Links */}
             <div>
                 <h3 className="text-lg font-semibold text-gray-700 mb-3">Navigation</h3>
