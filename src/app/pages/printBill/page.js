@@ -166,7 +166,7 @@ const CustomerBilling = () => {
 
     }, []);
 
-    const handleAddToCart = useCallback(() => {
+    const handleAddToCart = () => {
         if (!validateItemForm()) {
             return;
         }
@@ -175,9 +175,10 @@ const CustomerBilling = () => {
             setNewItem({ name: "", quantity: "", price: "" });
             setErrors({})
         }
-    }, [newItem]);
+    };
 
-    const handleAddData = useCallback(async (bill) => {
+    const handleAddData = async (bill) => {
+        console.log("handle add data called")
         setLoading(true);
 
         const totalAmount = bill.totalAmount;
@@ -209,9 +210,21 @@ const CustomerBilling = () => {
         }
         console.log(formData)
 
+        const updateQuantity = bill.cart.map(async (item) => {
+            const product = inventoryData.find(product => product.itemName === item.itemName);
+            if (product) {
+                const newQuantity = product.quantity - item.quantity;
+                const newProduct = { ...product, quantity: newQuantity };
+                try {
+                    await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/inventory/${product._id}`, newProduct);
+                } catch (error) {
+                    console.error("Error updating product quantity:", error);
+                }
+            }
+        })
+
         try {
             const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/shopkeeper/${selectedShop._id}/delivery`, formData);
-
             if (response.status === 201) {
                 console.log("Order added successfully");
             } else {
@@ -219,13 +232,13 @@ const CustomerBilling = () => {
             }
         } catch (error) {
             console.error("Error adding order:", error);
-            alert(`Error adding order: ${error.response?.data?.message || 'Please try again.'}`);
         } finally {
             setLoading(false);
         }
-    }, [selectedShop]);
+    };
 
-   const handleGenerateBill = useCallback(async () => {
+   const handleGenerateBill = async () => {
+    console.log("handleGenerateBill called")
         if (!validateForm()) {
             return;
         }
@@ -288,7 +301,7 @@ const CustomerBilling = () => {
             setErrors({});
             setSelectedShop(null);
         }
-    }, [validateForm, cart, customerName, discountPercentage, oldBalance, customerGivenAmount, selectedShop, handleAddData, invoiceNo, bills]);
+    };
 
     const handleRemoveItem = useCallback((index) => {
         setCart(prevCart => {
@@ -615,7 +628,7 @@ const CustomerBilling = () => {
         }
     }, []);
 
-    const FilteredShopsList = React.memo(({ filteredShops, handleShopSelect }) => (
+    const FilteredShopsList = ({ filteredShops, handleShopSelect }) => (
         filteredShops.length > 0 && (
             <ul className="absolute z-10 w-[32vw] bg-white border border-gray-300 rounded-md shadow-md mt-1">
                 {filteredShops.map((shop) => (
@@ -630,9 +643,9 @@ const CustomerBilling = () => {
                 ))}
             </ul>
         )
-    ));
+    );
 
-    const CartTable = React.memo(({ cart, handleRemoveItem }) => (
+    const CartTable = ({ cart, handleRemoveItem }) => (
         <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
@@ -664,9 +677,9 @@ const CustomerBilling = () => {
                 </tbody>
             </table>
         </div>
-    ));
+    );
 
-    const BillDetails = React.memo(({ bill, showDetails, toggleDetails, handleDeleteBill, handlePrint }) => (
+    const BillDetails = ({ bill, showDetails, toggleDetails, handleDeleteBill, handlePrint }) => (
         <div key={bill.invoiceNo} className="bg-gray-100 p-4 rounded-md shadow mb-4">
             <div className="flex items-center justify-between mb-2">
                 <h3 className="text-lg font-semibold text-gray-700">Invoice #{bill.invoiceNo}</h3>
@@ -731,7 +744,7 @@ const CustomerBilling = () => {
             </>
         )}
     </div>
-));
+);
 
 if (loading) {
     return (
