@@ -68,14 +68,6 @@ const DataList = ({ data, handleEdit, handleDelete, handleStatusEdit, handleItem
                                 <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
                                 {item.price && <p className="text-sm text-gray-600">Price: Rs.{item.price}</p>}
                                 {item.price && <p className="text-sm text-gray-600">Total: Rs.{item.price * item.quantity}</p>}
-                                 <span className={`inline-block px-2 py-1 rounded-full text-xs  ${item.status === 'Delivered'
-                                    ? 'bg-green-100 text-green-800 hover:bg-green-200'
-                                    : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
-                                    }`}>
-                                    <button onClick={() => handleItemStatusEdit(data, index)}>
-                                        {item.status}
-                                    </button>
-                                </span>
                             </div>
                         ))}
                     </div>
@@ -89,41 +81,11 @@ const DataList = ({ data, handleEdit, handleDelete, handleStatusEdit, handleItem
                         <FaMoneyBillWave className="mr-2 text-blue-600" />Payments
                     </h4>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                        {data?.transactions?.payments?.map((payment, index) => (
-                            <div key={index} className="bg-gray-50 p-3 rounded-md">
-                                <p className="text-sm text-gray-600">Amount: Rs.{payment.amount}</p>
-                                <p className="text-sm text-gray-600">Date: {new Date(payment.paymentDate).toLocaleDateString()}</p>
-                                <p className="text-sm text-gray-600">Debit: Rs.{payment.debit}</p>
-                                <p className="text-sm text-gray-600">Credit: Rs.{payment.credit}</p>
-                               {payment.invoice && payment.invoice !== "N/A" && (
-                                    <p className="text-sm text-gray-600 flex items-center">
-                                        <FaFileInvoice className="mr-1 text-blue-600" />
-                                        <a
-                                            href={`${process.env.NEXT_PUBLIC_API_URL}/uploads/${payment.invoice}`}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="text-blue-600 hover:text-blue-800 transition-colors duration-200"
-                                        >
-                                            View Invoice
-                                        </a>
-                                    </p>
-                                )}
+                            <div className="bg-gray-50 p-3 rounded-md">
+                                <p className="text-sm text-gray-600">Total Amount: Rs.{data.payment.totalAmount}</p>
+                                <p className="text-sm text-gray-600">Given Amount: Rs.{data.payment.givenAmount}</p>
+                                <p className="text-sm text-gray-600">Date: {new Date(data.payment.paymentDate).toLocaleDateString()}</p>
                             </div>
-                        ))}
-                    </div>
-                </div>
-            )}
-
-            {/* Transport Details */}
-            {showDetails && data.status === 'Delivered' && (
-                <div className="mt-4">
-                    <h4 className="text-lg font-semibold text-gray-700 mb-2 flex items-center">
-                        <FaTruck className="mr-2 text-blue-600" />Transport Details
-                    </h4>
-                    <div className="bg-gray-50 p-3 rounded-md">
-                        <p className="text-sm text-gray-600">Driver: {data.driver.name}</p>
-                        <p className="text-sm text-gray-600">Vehicle: {data.driver.vehicle}</p>
-                         <p className="text-sm text-gray-600 flex items-center"> <FaCalendarAlt className="mr-1 text-gray-500" /> Delivered: {new Date(data.date).toLocaleDateString()}</p>
                     </div>
                 </div>
             )}

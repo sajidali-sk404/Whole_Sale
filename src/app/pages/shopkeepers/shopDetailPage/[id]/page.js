@@ -27,18 +27,13 @@ const Page = ({ params }) => {
 
   const [newData, setNewData] = useState({
     date: new Date().toISOString().split('T')[0],
-    items: [{ itemName: "", quantity: 0, price: 0, status: "Pending", }],
-    driver: { name: "", vehicle: "" },
+    items: [{ itemName: "", quantity: "", price: "" }],
     status: "Pending",
-    transactions: {
+    payment: {
       paymentDate: new Date().toISOString().split('T')[0],
-      partialPayment: 0,
-      invoice: null,
-      totalAmount: 0,
-      totalDebit: 0,
-      totalCredit: 0,
-      payments: []
-    }
+      totalAmount: "",
+      givenAmount: "",
+  }
   });
 
   useEffect(() => {
@@ -48,7 +43,7 @@ const Page = ({ params }) => {
       try {
         const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/shopkeeper/${param.id}`);
         setCurrentShopkeeper(response.data);
-        setDeliveriesData(response.data.deliveries);
+        setDeliveriesData(response.data.orders);
       } catch (err) {
         setError(err.message || "An error occurred while fetching data."); // Set error message
         console.error(err);
@@ -119,6 +114,10 @@ const Page = ({ params }) => {
           Add New Order
         </button>
 
+        <h1>Sub-Total: {currentShopkeeper?.subTotal}</h1>
+        <h1>Total Debit: {currentShopkeeper?.totalDebit}</h1>
+        <h1>Total Credit: {currentShopkeeper?.totalCredit}</h1>
+
         {showForm && (
           <AddOrderForm
             setShowForm={setShowForm}
@@ -127,6 +126,7 @@ const Page = ({ params }) => {
             id={param.id}
             newData={newData}
             setNewData={setNewData}
+            currentShopkeeper={currentShopkeeper}
           />
         )}
 

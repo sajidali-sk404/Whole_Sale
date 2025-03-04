@@ -156,7 +156,7 @@ const AddOrderForm = ({ setShowForm, newData, setNewData, setShipmentsData, id }
                                     <label className="block text-sm font-medium text-gray-600">Item Name*</label>
                                     <input
                                         type="text"
-                                        value={item.itemName || ''}
+                                        value={(item.itemName || '').toLowerCase()}
                                         onChange={(e) => handleItemChange(index, 'itemName', e.target.value)}
                                         className="mt-1 block w-full border rounded-md shadow-sm py-1 px-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm border-gray-300"
                                         required

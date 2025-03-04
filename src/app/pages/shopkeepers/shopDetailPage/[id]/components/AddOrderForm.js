@@ -4,31 +4,21 @@ import { XMarkIcon } from "@heroicons/react/24/outline";
 import { FaPlus, FaTruck, FaMoneyBillWave, FaClipboardCheck, FaFileInvoiceDollar, FaBoxOpen, FaCalendarAlt } from 'react-icons/fa';
 import axios from 'axios';
 
-const AddOrderForm = ({ setShowForm, newData, setNewData, setDeliveriesData, id }) => {
+const AddOrderForm = ({ setShowForm, newData, setNewData, setDeliveriesData, id, currentShopkeeper }) => {
 
-  const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(false);
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-24 w-24 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
-
-    const handleFileChange = (e) => {
-        setNewData(prev => ({ ...prev, transactions: { ...prev.transactions, invoice: e.target.files[0] } }));
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center h-screen">
+                <div className="animate-spin rounded-full h-24 w-24 border-b-2 border-blue-500"></div>
+            </div>
+        );
     }
 
     const handleItemChange = (index, field, value) => {
         const updatedItems = [...newData.items];
         updatedItems[index][field] = field === 'quantity' || field === 'price' ? Number(value) : value;
-        setNewData(prev => ({ ...prev, items: updatedItems }));
-    };
-
-    const handleItemStatusChange = (index, status) => {
-        const updatedItems = [...newData.items];
-        updatedItems[index].status = status;
         setNewData(prev => ({ ...prev, items: updatedItems }));
     };
 
@@ -40,29 +30,15 @@ const AddOrderForm = ({ setShowForm, newData, setNewData, setDeliveriesData, id 
         setNewData(prev => ({ ...prev, status: status }));
     };
 
-    const handleTransportChange = (field, value) => {
-        if (field === 'name' || field === 'vehicle') {
-            setNewData(prev => ({ ...prev, driver: { ...prev.driver, [field]: value } }));
-        }
-        else if (field === 'deliveryDate') {
-            setNewData(prev => ({ ...prev, date: value }));
-        }
-    };
-
     const resetForm = () => {
         setNewData({
             date: new Date().toISOString().split('T')[0],
-            items: [{ itemName: "", quantity: "", price: "", status: "Pending", }],
-            driver: { name: "", vehicle: "" },
+            items: [{ itemName: "", quantity: "", price: "" }],
             status: "Pending",
-            transactions: {
+            payment: {
                 paymentDate: new Date().toISOString().split('T')[0],
-                partialPayment: "",
-                invoice: null,
                 totalAmount: "",
-                totalDebit: "",
-                totalCredit: "",
-                payments: []
+                givenAmount: "",
             }
         });
     };
@@ -72,43 +48,35 @@ const AddOrderForm = ({ setShowForm, newData, setNewData, setDeliveriesData, id 
         setLoading(true);
 
         const totalAmount = newData.items.reduce((acc, item) => acc + Number((item.price * item.quantity) || 0), 0);
-        const totalPaid = newData.transactions.payments?.reduce((acc, payment) => acc + Number(payment.amount), 0) || 0;
-        const newTotalPaid = totalPaid + Number(newData.transactions.partialPayment || 0);
-        const remainingDebit = totalAmount - newTotalPaid;
+        const totalPaid = Number(newData.payment.givenAmount);
 
-        const formData = new FormData();
-        formData.append('date', newData.date);
-        formData.append('items', JSON.stringify(newData.items));
-        formData.append('driver[name]', newData.driver.name);
-        formData.append('driver[vehicle]', newData.driver.vehicle);
-        formData.append('status', newData.status);
-        formData.append('transactions[paymentDate]', newData.transactions.paymentDate);
-        formData.append('transactions[partialPayment]', newData.transactions.partialPayment);
-        formData.append('transactions[totalAmount]', totalAmount);
-        formData.append('transactions[totalDebit]', remainingDebit);
-        formData.append('transactions[totalCredit]', newTotalPaid);
+        const totalDebit = currentShopkeeper?.totalDebit? currentShopkeeper?.totalDebit + totalAmount - totalPaid : totalAmount - totalPaid;
+        const totalCredit = currentShopkeeper?.totalCredit? currentShopkeeper?.totalCredit + totalPaid : totalPaid;
+        const subTotal = currentShopkeeper?.subTotal? currentShopkeeper?.subTotal + totalAmount : totalAmount;
 
-        if (newData.transactions.invoice) {
-            formData.append('invoice', newData.transactions.invoice);
-        }
+        const formData = {
+            totalDebit: totalDebit,
+            totalCredit: totalCredit,
+            subTotal: subTotal,
+            order: {
+                date: newData.date,
+                items: newData.items,
+                status: "Delivered",
+                payment: {
+                    paymentDate: newData.payment.date,
+                    totalAmount: totalAmount,
+                    givenAmount: totalPaid,
+                }
 
-        const payments = [
-            ...newData.transactions.payments,
-            {
-                amount: Number(newData.transactions.partialPayment),
-                invoice: newData.transactions.invoice,
-                paymentDate: new Date().toISOString(),
-                debit: remainingDebit,
-                credit: newTotalPaid
             }
-        ];
-        formData.append('transactions[payments]', JSON.stringify(payments));
+        }
+        console.log(formData)
 
         try {
             const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/shopkeeper/${id}/delivery`, formData);
 
             if (response.status === 201) {
-                setDeliveriesData(response.data.shopkeeper.deliveries);
+                setDeliveriesData(response.data.shopkeeper.orders);
                 resetForm();
                 setShowForm(false);
             } else {
@@ -135,17 +103,17 @@ const AddOrderForm = ({ setShowForm, newData, setNewData, setDeliveriesData, id 
                 <h2 className="text-2xl font-bold text-blue-600 mb-4 text-center">Create New Order</h2>
 
                 <form encType="multipart/form-data" onSubmit={handleAddData} className="space-y-4 overflow-y-auto max-h-[70vh]">
-                   {/* Date input */}
+                    {/* Date input */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-600 items-center">
-                        <FaCalendarAlt className="mr-2 text-blue-600" /> Date
-                      </label>
-                      <input
-                        type="date"
-                        value={newData.date}
-                        onChange={(e) => setNewData(prev => ({ ...prev, date: e.target.value }))}
-                        className="mt-1 block w-full border rounded-md shadow-sm py-1 px-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm border-gray-300"
-                      />
+                        <label className="block text-sm font-medium text-gray-600 items-center">
+                            <FaCalendarAlt className="mr-2 text-blue-600" /> Date
+                        </label>
+                        <input
+                            type="date"
+                            value={newData.date}
+                            onChange={(e) => setNewData(prev => ({ ...prev, date: e.target.value }))}
+                            className="mt-1 block w-full border rounded-md shadow-sm py-1 px-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm border-gray-300"
+                        />
                     </div>
 
                     {/* Items Section */}
@@ -191,29 +159,6 @@ const AddOrderForm = ({ setShowForm, newData, setNewData, setDeliveriesData, id 
                                         disabled
                                     />
                                 </div>
-                                 {/* Status Buttons - Simpler Styling */}
-                                <div className="md:col-span-4 flex gap-2">
-                                    <button
-                                        type="button"
-                                        onClick={() => handleItemStatusChange(index, 'Pending')}
-                                        className={`px-3 py-1 rounded text-sm transition-colors duration-200 ${item.status === 'Pending'
-                                            ? 'bg-yellow-100 text-yellow-600'
-                                            : 'text-gray-500 hover:bg-yellow-50'
-                                            }`}
-                                    >
-                                        Pending
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => handleItemStatusChange(index, 'Delivered')}
-                                        className={`px-3 py-1 rounded text-sm transition-colors duration-200 ${item.status === 'Delivered'
-                                            ? 'bg-green-100 text-green-600'
-                                            : 'text-gray-500 hover:bg-green-50'
-                                            }`}
-                                    >
-                                        Delivered
-                                    </button>
-                                </div>
                             </div>
                         ))}
                         <button
@@ -229,74 +174,48 @@ const AddOrderForm = ({ setShowForm, newData, setNewData, setDeliveriesData, id 
                     <div>
                         <h3 className="text-lg font-semibold text-gray-700 mb-2 flex items-center"><FaMoneyBillWave className="mr-2 text-blue-600" />Payment</h3>
 
-                       {/* Simplified Previous Payments Display */}
-                        {newData.transactions.payments?.length > 0 && (
-                            <div className="mb-2">
-                                <h4 className="text-sm font-semibold text-gray-600">Previous Payments</h4>
-                                <ul className="space-y-1">
-                                    {newData.transactions.payments.map((payment, index) => (
-                                        <li key={index} className="text-sm text-gray-600">
-                                            {new Date(payment.paymentDate).toLocaleDateString()} - Rs {payment.amount}
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                        )}
-
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-600">Partial Payment*</label>
+                                <label className="block text-sm font-medium text-gray-600">Given Amount</label>
                                 <input
                                     type="number"
-                                    value={newData.transactions.partialPayment || ''}
+                                    value={newData.payment.givenAmount || ''}
                                     onChange={(e) => setNewData(prev => ({
                                         ...prev,
-                                        transactions: {
-                                            ...prev.transactions,
-                                            partialPayment: e.target.value
+                                        payment: {
+                                            givenAmount: e.target.value
                                         }
                                     }))}
                                     className="mt-1 block w-full border rounded-md shadow-sm py-1 px-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm border-gray-300"
                                 />
                             </div>
-
-                            <div>
-                                 <label className="block text-sm font-medium text-gray-600 items-center"><FaFileInvoiceDollar className="mr-2 text-blue-600" />Invoice*</label>
-                                <input
-                                    type="file"
-                                    name="invoice"
-                                    onChange={handleFileChange}
-                                    className="mt-1 block w-full border rounded-md shadow-sm py-1 px-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm border-gray-300 file:bg-gray-50 file:border-none file:py-1 file:px-4 file:mr-4 file:rounded-md file:text-sm file:text-blue-700"
-                                    required
-                                />
-                            </div>
                         </div>
                     </div>
 
-                     {/* Debit and Credit - Simplified Display */}
-                    <div className="grid grid-cols-2 gap-4">
+                    {/* Debit and Credit - Simplified Display */}
+                    {/* <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-600">Debit (Remaining)</label>
                             <div className="mt-1 block w-full py-1 px-2 text-sm text-gray-700 bg-gray-100 rounded-md">
                                 {newData.items.reduce((acc, item) => acc + Number((item.price * item.quantity) || 0), 0) -
-                                (newData.transactions.payments?.reduce((acc, payment) => acc + Number(payment.amount), 0) || 0) -
-                                Number(newData.transactions.partialPayment || 0)}
+                                    (newData.transactions.payments?.reduce((acc, payment) => acc + Number(payment.amount), 0) || 0) -
+                                    Number(newData.transactions.partialPayment || 0)}
                             </div>
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-600">Credit (Paid)</label>
                             <div className="mt-1 block w-full py-1 px-2 text-sm text-gray-700 bg-gray-100 rounded-md">
                                 {(newData.transactions.payments?.reduce((acc, payment) => acc + Number(payment.amount), 0) || 0) +
-                                Number(newData.transactions.partialPayment || 0)}
+                                    Number(newData.transactions.partialPayment || 0)}
                             </div>
                         </div>
-                    </div>
+                    </div> */}
 
                     {/* Status Section */}
-                    <div>
-                         <h3 className="text-lg font-semibold text-gray-700 mb-2 flex items-center"><FaClipboardCheck className="mr-2 text-blue-600" />Status</h3>
+                    {/* <div>
+                        <h3 className="text-lg font-semibold text-gray-700 mb-2 flex items-center"><FaClipboardCheck className="mr-2 text-blue-600" />Status</h3>
                         <div className="flex gap-2">
-                           <button
+                            <button
                                 type="button"
                                 onClick={() => handleStatusChange('Pending')}
                                 className={`px-3 py-1 rounded text-sm transition-colors duration-200 ${newData.status === 'Pending'
@@ -317,12 +236,12 @@ const AddOrderForm = ({ setShowForm, newData, setNewData, setDeliveriesData, id 
                                 Delivered
                             </button>
                         </div>
-                    </div>
+                    </div> */}
 
                     {/* Transport Form */}
-                    {newData.status === 'Delivered' && (
+                    {/* {newData.status === 'Delivered' && (
                         <div>
-                             <h3 className="text-lg font-semibold text-gray-700 mb-2 flex items-center"><FaTruck className="mr-2 text-blue-600" />Transport</h3>
+                            <h3 className="text-lg font-semibold text-gray-700 mb-2 flex items-center"><FaTruck className="mr-2 text-blue-600" />Transport</h3>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-600">Driver Name*</label>
@@ -356,11 +275,11 @@ const AddOrderForm = ({ setShowForm, newData, setNewData, setDeliveriesData, id 
                                 </div>
                             </div>
                         </div>
-                    )}
+                    )} */}
 
                     {/* Form Actions */}
                     <div className="flex justify-end gap-4">
-                         <button
+                        <button
                             type="button"
                             onClick={() => setShowForm(false)}
                             className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-md transition-colors duration-200"

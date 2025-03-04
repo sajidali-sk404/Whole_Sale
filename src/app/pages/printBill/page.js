@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useRef, useEffect, useContext } from "react";
+import React, { useState, useRef, useEffect, useCallback, useContext } from "react";
 import { MdKeyboardDoubleArrowDown, MdKeyboardDoubleArrowUp, MdPrint, MdAddShoppingCart, MdReceipt } from "react-icons/md";
 import { FaUser, FaAddressCard, FaCalendarAlt, FaMoneyBillWave, FaTags, FaHandHoldingUsd } from 'react-icons/fa';
 import { InventoryContext } from "@/app/ContextApi/inventoryDataApi";
@@ -29,7 +29,7 @@ const CustomerBilling = () => {
 
 
 
-    const { inventoryData, setInventoryData } = useContext(InventoryContext); // Access setInventoryData
+    const { inventoryData } = useContext(InventoryContext); // Access setInventoryData
     const { shops, setShops } = useContext(ShopContext);
     const watermarkImageUrl = '/watermark_p.PNG';
 
@@ -76,12 +76,8 @@ const CustomerBilling = () => {
         if (selectedShop) {
             // Calculate total debit for the selected shop
             let totalDebit = 0;
-            if (selectedShop.deliveries && Array.isArray(selectedShop.deliveries)) {
-                selectedShop.deliveries.forEach((delivery) => {
-                    if (delivery.transactions && delivery.transactions.totalDebit) {
-                        totalDebit += parseFloat(delivery.transactions.totalDebit); // Ensure parsing to a number
-                    }
-                });
+            if (selectedShop) {
+                totalDebit = selectedShop.totalDebit;
             }
             setOldBalance(totalDebit);  // Set the total debit as oldBalance
 
@@ -120,87 +116,98 @@ const CustomerBilling = () => {
         return Object.keys(itemErrors).length === 0;
     }
 
-    const handleInputChange = (e) => {
+    const handleInputChange = useCallback((e) => {
         const { name, value } = e.target;
 
-        if (name === 'customerName') {
-            setCustomerName(value);
-            setSelectedShop(null);
-        }
-        else if (name === 'address') {
-            setAddress(value)
-        }
-        else if (name === 'date') {
-            setDate(value)
-        }
-        else if (name === 'oldBalance') {
-            if (value === '' || /^[0-9]*$/.test(value)) {
-                setOldBalance(value === '' ? '' : parseFloat(value));
-            }
-        }
-        else if (name === 'customerGivenAmount') {
-            if (value === '' || /^[0-9]*$/.test(value)) {
-                setCustomerGivenAmount(value === '' ? '' : parseFloat(value))
-            }
-        }
-        else if (name === 'discountPercentage') {
-            if (value === '' || /^[0-9]*$/.test(value)) {
-                setDiscountPercentage(value === '' ? '' : parseFloat(value))
-            }
-        }
-        //For adding a new Item.
-        else if (name === "newItemName") {
-            setNewItem({ ...newItem, name: value })
-        }
-        else if (name === "newItemQuantity") {
-            if (/^[0-9]*$/.test(value)) {
-                setNewItem({ ...newItem, quantity: value });
-            }
-        }
-        else if (name === "newItemPrice") {
-            if (/^[0-9]*$/.test(value)) {
-                setNewItem({ ...newItem, price: value });
-            }
-        }
-
         setErrors(prevErrors => ({ ...prevErrors, [name]: null }));
-    };
 
-    const handleAddToCart = () => {
+        switch (name) {
+            case 'customerName':
+                setCustomerName(value);
+                setSelectedShop(null);
+                break;
+            case 'address':
+                setAddress(value);
+                break;
+            case 'date':
+                setDate(value);
+                break;
+            case 'oldBalance':
+                if (value === '' || /^[0-9]*$/.test(value)) {
+                    setOldBalance(value === '' ? '' : parseFloat(value));
+                }
+                break;
+            case 'customerGivenAmount':
+                if (value === '' || /^[0-9]*$/.test(value)) {
+                    setCustomerGivenAmount(value === '' ? '' : parseFloat(value))
+                }
+                break;
+            case 'discountPercentage':
+                if (value === '' || /^[0-9]*$/.test(value)) {
+                    setDiscountPercentage(value === '' ? '' : parseFloat(value))
+                }
+                break;
+            case "newItemName":
+                setNewItem(prev => ({ ...prev, name: value }))
+                break;
+            case "newItemQuantity":
+                if (/^[0-9]*$/.test(value)) {
+                    setNewItem(prev => ({ ...prev, quantity: value }));
+                }
+                break;
+            case "newItemPrice":
+                if (/^[0-9]*$/.test(value)) {
+                    setNewItem(prev => ({ ...prev, price: value }));
+                }
+                break;
+            default:
+                break;
+        }
+
+    }, []);
+
+    const handleAddToCart = useCallback(() => {
         if (!validateItemForm()) {
             return;
         }
         if (newItem.name && newItem.quantity && newItem.price) {
-            setCart([...cart, { ...newItem, itemName: newItem.name, total: newItem.quantity * newItem.price }]);
+            setCart(prevCart => [...prevCart, { ...newItem, itemName: newItem.name, total: newItem.quantity * newItem.price }]);
             setNewItem({ name: "", quantity: "", price: "" });
             setErrors({})
         }
-    };
+    }, [newItem]);
 
-    const handleAddData = async (bill) => {
+    const handleAddData = useCallback(async (bill) => {
         setLoading(true);
 
-        const formData = new FormData();
-        formData.append('date', bill.date);
-        formData.append('items', JSON.stringify(bill.cart));
-        formData.append('driver[name]', "");
-        formData.append('driver[vehicle]', "");
-        formData.append('status', "Delivered");
-        formData.append('transactions[paymentDate]', bill.date);
-        formData.append('transactions[partialPayment]', bill.customerGivenAmount);
-        formData.append('transactions[totalAmount]', bill.totalAmount);
-        formData.append('transactions[totalDebit]', (bill.totalAmount - bill.customerGivenAmount) > 0 ? (bill.totalAmount - bill.customerGivenAmount) : 0);
-        formData.append('transactions[totalCredit]', bill.customerGivenAmount);
+        const totalAmount = bill.totalAmount;
+        // const selectedShop = shops.find(shop => shop._id === selectedShop._id);
 
-        const payments = [
-            {
-                amount: Number(bill.customerGivenAmount),
-                paymentDate: bill.date,
-                debit: bill.debt,
-                credit: bill.customerGivenAmount
+        const totalPaid = bill.customerGivenAmount;
+
+        const totalDebit = selectedShop?.totalDebit ? selectedShop?.totalDebit + totalAmount - totalPaid : totalAmount - totalPaid;
+
+        const totalCredit = selectedShop?.totalCredit ? selectedShop?.totalCredit + totalPaid : totalPaid;
+
+        const subTotal = selectedShop?.subTotal ? selectedShop?.subTotal + totalAmount : totalAmount;
+
+        const formData = {
+            totalDebit: totalDebit,
+            totalCredit: totalCredit,
+            subTotal: subTotal,
+            order: {
+                date: bill.date,
+                items: bill.cart,
+                status: "Delivered",
+                payment: {
+                    paymentDate: bill.date,
+                    totalAmount: totalAmount,
+                    givenAmount: totalPaid,
+                }
+
             }
-        ];
-        formData.append('transactions[payments]', JSON.stringify(payments));
+        }
+        console.log(formData)
 
         try {
             const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/shopkeeper/${selectedShop._id}/delivery`, formData);
@@ -216,9 +223,9 @@ const CustomerBilling = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [selectedShop]);
 
-   const handleGenerateBill = async () => {
+   const handleGenerateBill = useCallback(async () => {
         if (!validateForm()) {
             return;
         }
@@ -261,44 +268,7 @@ const CustomerBilling = () => {
 
                 await handleAddData(newBill);
 
-                // -- Updated Logic to modify shop state --
-                if(selectedShop) {
-                    const updatedShops = shops.map(shop => {
-                        if(shop._id === selectedShop._id) {
-                            // Update the shop's deliveries (add the new transaction)
-                            const newDelivery = {
-                                _id: response.data._id, // assuming your bill API returns the id
-                                date: new Date().toISOString(),
-                                transactions: {
-                                    totalDebit: calculatedDebt > 0 ? calculatedDebt : 0, // Only debt is added in debit
-                                    totalCredit: customerGivenAmountNum ? customerGivenAmountNum : 0
-                                }
-                            }
-
-                            // Return the updated Shop
-                            return {
-                                ...shop,
-                                deliveries: [...shop.deliveries, newDelivery]
-                            };
-                        }
-                        return shop;
-                    });
-                    setShops(updatedShops);
-                }
-                //-- End Update Shop State Logic --
-
-                setBills([...bills, response.data]);
-
-                //Update your state with inventory Data
-                const updatedInventory = inventoryData.map(item => {
-                    const cartItem = cart.find(cartItem => cartItem.itemName === item.itemName);
-                    if (cartItem) {
-                        return { ...item, quantity: item.quantity - parseInt(cartItem.quantity) };
-                    }
-                    return item;
-                });
-
-                setInventoryData(updatedInventory);
+                setBills(prevBills => [...prevBills, response.data]);
             } catch (error) {
                 console.error("Error generating bills:", error);
                 setError(error.message || "Failed to generate bills");
@@ -306,27 +276,29 @@ const CustomerBilling = () => {
                 setLoading(false);
             }
 
-            setShowDetails({ ...showDetails, [invoiceNo]: false });
+            setShowDetails(prevShowDetails => ({ ...prevShowDetails, [invoiceNo]: false }));
             setCustomerName("");
             setAddress("");
             setCart([]);
             setDiscountPercentage(0);
             setOldBalance(0);
             setCustomerGivenAmount(0);
-            setInvoiceNo(invoiceNo + 1);
+            setInvoiceNo(prevInvoiceNo => prevInvoiceNo + 1);
             setDate(new Date().toISOString().split('T')[0]);
             setErrors({});
             setSelectedShop(null);
         }
-    };
+    }, [validateForm, cart, customerName, discountPercentage, oldBalance, customerGivenAmount, selectedShop, handleAddData, invoiceNo, bills]);
 
-    const handleRemoveItem = (index) => {
-        const newCart = [...cart];
-        newCart.splice(index, 1);
-        setCart(newCart);
-    };
+    const handleRemoveItem = useCallback((index) => {
+        setCart(prevCart => {
+            const newCart = [...prevCart];
+            newCart.splice(index, 1);
+            return newCart;
+        });
+    }, []);
 
-    const handlePrint = (bills) => {
+    const handlePrint = useCallback((bills) => {
         const printContent = `
            <html lang="en">
       <head>
@@ -610,369 +582,368 @@ const CustomerBilling = () => {
         } else {
             alert('Failed to open print window. Please check your browser settings.');
         }
-    };
+    }, [watermarkImageUrl]);
 
-    const toggleDetails = (invoiceNo) => {
+    const toggleDetails = useCallback((invoiceNo) => {
         setShowDetails(prevState => ({
             ...prevState,
             [invoiceNo]: !prevState[invoiceNo]
         }));
-    };
+    }, []);
 
-    const handleShopSelect = (shop) => {
+    const handleShopSelect = useCallback((shop) => {
         setSelectedShop(shop);
         setCustomerName(shop.shopkeeperName);
         setFilteredShops([]);
-    };
+    }, []);
 
-    const handleDebitSelect = (balance) => {
+    const handleDebitSelect = useCallback((balance) => {
         setOldBalance(balance)
-    }
+    }, []);
 
-  
-
-    const handleDeleteBill = async (invoiceNo) => {
+    const handleDeleteBill = useCallback(async (invoiceNo) => {
         setLoading(true);
         setError(null);
         try {
             await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/bills/${invoiceNo}`);
-            setBills(bills.filter(bills => bills.invoiceNo !== invoiceNo));
+            setBills(prevBills => prevBills.filter(bills => bills.invoiceNo !== invoiceNo));
         } catch (err) {
             console.error("Error deleting bills:", err);
             setError(err.message || "Failed to delete bills");
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
 
-    if (loading) {
-        return (
-            <div className="flex justify-center items-center h-screen">
-                <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
-            </div>
-        );
-    }
-
-    if (error) {
-        return (
-            <div className="flex justify-center items-center h-screen">
-                <div className="text-red-500 text-xl">Error: {error}</div>
-            </div>
-        );
-    }
-
-    return (
-        <div className="bg-gray-100 min-h-screen py-12 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-xl p-8">
-                <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">Customer Billing</h1>
-                {/* Add Item Form */}
-                <div className="mb-6">
-                    <h2 className="text-xl font-semibold text-gray-700 mb-4">Add Items</h2>
-                    {errors.newItem && <p className="text-red-500 text-xs mt-1">{errors.newItem}</p>}
-                    <div className="grid grid-cols-3 gap-4">
-                        <div className="relative rounded-md shadow-sm">
-                            <select
-                                id="newItemName"
-                                name="newItemName"
-                                value={newItem.name}
-                                onChange={handleInputChange}
-                                className="focus:ring-blue-500 hover:ring-blue-400 focus:border-blue-500 block w-full pl-3 pr-10 py-2 sm:text-sm border-gray-300 rounded-md"
-                            >
-                                <option value="">Select Item</option>
-                                {inventoryData.map((item, index) => (
-                                    <option key={index} value={item.itemName}>{item.itemName}</option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <div className="relative rounded-md shadow-sm">
-                            <input
-                                type="number"
-                                name="newItemQuantity"
-                                id="newItemQuantity"
-                                placeholder="Quantity"
-                                value={newItem.quantity}
-                                onChange={handleInputChange}
-                                className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-3 pr-10 py-2 sm:text-sm border-gray-300 rounded-md"
-                            />
-                        </div>
-
-                        <div className="relative rounded-md shadow-sm">
-                            <input
-                                type="number"
-                                name="newItemPrice"
-                                id="newItemPrice"
-                                placeholder="Price"
-                                value={newItem.price}
-                                onChange={handleInputChange}
-                                className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-3 pr-10 py-2 sm:text-sm border-gray-300 rounded-md"
-                            />
-                        </div>
-                    </div>
-                    <button
-                        onClick={handleAddToCart}
-                        className="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200 flex items-center"
+    const FilteredShopsList = React.memo(({ filteredShops, handleShopSelect }) => (
+        filteredShops.length > 0 && (
+            <ul className="absolute z-10 w-[32vw] bg-white border border-gray-300 rounded-md shadow-md mt-1">
+                {filteredShops.map((shop) => (
+                    <li
+                        key={shop._id}
+                        className="px-4 py-2 flex flex-col hover:bg-gray-100 cursor-pointer"
+                        onClick={() => handleShopSelect(shop)}
                     >
-                        <MdAddShoppingCart className="mr-2" />
-                        Add Item
-                    </button>
-                </div>
-                {/* Cart Table */}
-                <div className="mb-6">
-                    <h2 className="text-xl font-semibold text-gray-700 mb-4">Current Bill</h2>
-                    {errors.cart && <p className="text-red-500 text-xs mt-1">{errors.cart}</p>}
+                        <p>{shop.shopkeeperName}</p>
+                        <p className="text-xs text-gray-500">{shop.shopName}</p>
+                    </li>
+                ))}
+            </ul>
+        )
+    ));
 
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
-                                <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"> Action</th>
+    const CartTable = React.memo(({ cart, handleRemoveItem }) => (
+        <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                    <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"> Action</th>
+                    </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                    {cart.map((item, index) => (
+                        <tr key={index}>
+                            <td className="px-6 py-4 whitespace-nowrap">{item.itemName}</td>
+                            <td className="px-6 py-4 whitespace-nowrap">{item.quantity}</td>
+                            <td className="px-6 py-4 whitespace-nowrap">PKR {item.price}</td>
+                            <td className="px-6 py-4 whitespace-nowrap">PKR {item.total}</td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                                <button
+                                    onClick={() => handleRemoveItem(index)}
+                                    className="text-red-600 hover:text-red-800 transition-colors duration-200"
+                                >
+                                    Remove
+                                </button>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    ));
+
+    const BillDetails = React.memo(({ bill, showDetails, toggleDetails, handleDeleteBill, handlePrint }) => (
+        <div key={bill.invoiceNo} className="bg-gray-100 p-4 rounded-md shadow mb-4">
+            <div className="flex items-center justify-between mb-2">
+                <h3 className="text-lg font-semibold text-gray-700">Invoice #{bill.invoiceNo}</h3>
+                <div className="flex items-center">
+                    <div>
+                        <button
+                            onClick={() => handleDeleteBill(bill.invoiceNo)}
+                            className="text-red-600 hover:text-red-800 transition-colors duration-200 mr-4 flex items-center"
+                        >
+                            <TrashIcon className="w-5 h-5" />
+                        </button>
+                    </div>
+                    <div>
+                        <button onClick={() => handlePrint(bill)} className="text-blue-600 hover:text-blue-800 transition-colors duration-200 mr-4 flex items-center">
+                            <MdPrint className="mr-1" /> Print
+                        </button>
+                        <button onClick={() => toggleDetails(bill.invoiceNo)} className="text-gray-600 hover:text-gray-800 focus:outline-none transition-colors duration-200">
+                            {showDetails[bill.invoiceNo] ? <MdKeyboardDoubleArrowUp className="h-6 w-6 text-gray-500" /> : <MdKeyboardDoubleArrowDown className="h-6 w-6 text-gray-500" />}
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+            {showDetails[bill.invoiceNo] && (
+                <>
+                <p className="text-gray-600"><strong>Customer:</strong> {bill.customerName}</p>
+                <p className="text-gray-600"><strong>Date:</strong> {bill.date}</p>
+                <p className="text-gray-600"><strong>Total Amount:</strong> PKR {bill.totalAmount.toFixed(2)}</p>
+                <p className="text-gray-600"><strong>Discount:</strong> {bill.discountPercentage}% (PKR {bill.discountAmount.toFixed(2)})</p>
+                <p className="text-gray-600"><strong>Total After Discount:</strong> PKR {bill.totalAfterDiscount.toFixed(2)}</p>
+                <p className="text-gray-600"><strong>Old Balance:</strong> PKR {bill.oldBalance.toFixed(2)}</p>
+
+                <p className="text-gray-600"><strong>Net Amount:</strong> PKR {bill.netAmount.toFixed(2)}</p>
+                <p className="text-gray-600"><strong>Given Amount:</strong> PKR {bill.customerGivenAmount.toFixed(2)}</p>
+                <p className="text-gray-600"><strong>Remaining Amount:</strong> PKR {bill.debt.toFixed(2)}</p>
+
+                {/* Display other bills details */}
+                <div className="mt-2">
+                    <h4 className="text-md font-semibold text-gray-700">Items:</h4>
+                    <table className="min-w-full divide-y divide-gray-200">
+                        <thead>
+                            <tr>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+
+                            {bill.cart.map((item, index) => (
+                                <tr key={index}>
+                                    <td className="px-6 py-4 whitespace-nowrap">{item.itemName}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap">{item.quantity}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap">PKR {item.price}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap">PKR {item.total}</td>
                                 </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
-                                {cart.map((item, index) => (
-                                    <tr key={index}>
-                                        <td className="px-6 py-4 whitespace-nowrap">{item.itemName}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">{item.quantity}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">PKR {item.price}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">PKR {item.total}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <button
-                                                onClick={() => handleRemoveItem(index)}
-                                                className="text-red-600 hover:text-red-800 transition-colors duration-200"
-                                            >
-                                                Remove
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                {/* Customer Details Form */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <div>
-                        <label htmlFor="customerName" className="block text-sm font-medium text-gray-700">
-                            <FaUser className="inline-block mr-2 text-gray-400" />
-                            Customer Name <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                            type="text"
-                            id="customerName"
-                            name="customerName"
-                            placeholder="Enter customer name"
-                            value={customerName}
-                            onChange={handleInputChange}
-                            className={`mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${errors.customerName ? 'border-red-500' : 'border-gray-300'}`}
-                        />
-                        {errors.customerName && <p className="text-red-500 text-xs mt-1">{errors.customerName}</p>}
-
-                        {/* Shop Dropdown */}
-                        {filteredShops.length > 0 && (
-                            <ul className="absolute z-10 w-[32vw] bg-white border border-gray-300 rounded-md shadow-md mt-1">
-                                {filteredShops.map((shop) => (
-                                    <li
-                                        key={shop._id}
-                                        className="px-4 py-2 flex flex-col hover:bg-gray-100 cursor-pointer"
-                                        onClick={() => handleShopSelect(shop)}
-                                    >   
-                                        <p>{shop.shopkeeperName}</p>
-                                        <p className="text-xs text-gray-500">{shop.shopName}</p>
-                                        
-                                    </li>
-                                ))}
-                            </ul>
-                        )}
-                    </div>
-                    <div>
-                        <label htmlFor="address" className="block text-sm font-medium text-gray-700">
-                            <FaAddressCard className="inline-block mr-2 text-gray-400" />
-                            Address
-                        </label>
-                        <input
-                            type="text"
-                            id="address"
-                            name="address"
-                            placeholder="Enter address"
-                            value={address}
-                            onChange={handleInputChange}
-                            className="mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm border-gray-300"
-                        />
-                    </div>
-                    <div>
-                        <label htmlFor="date" className="block text-sm font-medium text-gray-700">
-                            <FaCalendarAlt className="inline-block mr-2 text-gray-400" />
-                            Date
-                        </label>
-                        <input
-                            type="date"
-                            id="date"
-                            name="date"
-                            value={date}
-                            onChange={handleInputChange}
-                            className="mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm border-gray-300"
-                        />
-                    </div>
-                    <div>
-                        <label htmlFor="oldBalance" className="block text-sm font-medium text-gray-700">
-                            <FaMoneyBillWave className="inline-block mr-2 text-gray-400" />
-                            Old Balance
-                        </label>
-                        <input
-                            type="number"
-                            name="oldBalance"
-                            id="oldBalance"
-                            placeholder="Enter old balance"
-                            value={oldBalance}
-                            onChange={handleInputChange}
-                            className="mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm border-gray-300"
-                        />
-                        {/* Shop Dropdown */}
-                        {selectedShop && (
-                            <ul className="absolute z-10 w-[32vw] bg-white border border-gray-300 rounded-md shadow-md mt-1">
-                                {selectedShop.deliveries?.map((delivery) => (
-                                    <li
-                                        key={delivery._id}
-                                        className="px-4 py-2 flex flex-col hover:bg-gray-100 cursor-pointer"
-                                        onClick={() => handleDebitSelect(delivery.transactions.totalDebit)}
-                                    >   
-                                        <p>{delivery?.transactions?.totalDebit}</p>
-                                        <p className="text-xs text-gray-500">{selectedShop.shopName}</p>
-                                        
-                                    </li>
-                                ))}
-                            </ul>
-                        )}
-                    </div>
-                    <div>
-                        <label htmlFor="customerGivenAmount" className="block text-sm font-medium text-gray-700">
-                            <FaHandHoldingUsd className="inline-block mr-2 text-gray-400" />
-                            Given Amount
-                        </label>
-                        <input
-                            type="number"
-                            name="customerGivenAmount"
-                            id="customerGivenAmount"
-                            placeholder="Enter amount given by customer"
-                            value={customerGivenAmount}
-                            onChange={handleInputChange}
-                            className="mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm border-gray-300"
-                        />
-                    </div>
-                    <div>
-                        <label htmlFor="discountPercentage" className="block text-sm font-medium text-gray-700">
-                            <FaTags className="inline-block mr-2 text-gray-400" />
-                            Discount (%)
-                        </label>
-                        <input
-                            type="number"
-                            name="discountPercentage"
-                            id="discountPercentage"
-                            placeholder="Enter discount percentage"
-                            value={discountPercentage}
-                            onChange={handleInputChange}
-                            className="mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm border-gray-300"
-                        />
-                    </div>
-                </div>
-
-                {/* Totals and Generate Bill Button */}
-                <div className="mb-6">
-                    <p className="text-lg font-semibold text-gray-700">Total Amount: PKR {cart.reduce((acc, item) => acc + item.total, 0).toFixed(2)}</p>
-                    <p className="text-lg font-semibold text-gray-700">Total After Discount: PKR {(cart.reduce((acc, item) => acc + item.total, 0) - ((discountPercentage / 100) * cart.reduce((acc, item) => acc + item.total, 0))).toFixed(2)}</p>
-                    <p className="text-lg font-semibold text-gray-700">Net Amount: PKR {((cart.reduce((acc, item) => acc + item.total, 0) - ((discountPercentage / 100) * cart.reduce((acc, item) => acc + item.total, 0))) + parseFloat(oldBalance || 0)).toFixed(2)}</p>
-
-                    <p className="text-lg font-semibold text-gray-700">Remaining: PKR {(((cart.reduce((acc, item) => acc + item.total, 0) - ((discountPercentage / 100) * cart.reduce((acc, item) => acc + item.total, 0))) + parseFloat(oldBalance || 0)) - parseFloat(customerGivenAmount || 0)).toFixed(2)}</p>
-                    <button
-                        onClick={handleGenerateBill}
-                        className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200 flex items-center"
-                    >
-                        <MdReceipt className="mr-2" />
-                        Generate Bill
-                    </button>
-                </div>
-
-                {/* Bills List */}
-                <div>
-                    <h2 className="text-xl font-semibold text-gray-700 mb-4">Generated Bills</h2>
-                    <div className="overflow-x-auto">
-                        {bills.length > 0 &&
-                            bills.map((bills) => (
-                                <div key={bills.invoiceNo} className="bg-gray-100 p-4 rounded-md shadow mb-4">
-                                    <div className="flex items-center justify-between mb-2">
-                                        <h3 className="text-lg font-semibold text-gray-700">Invoice #{bills.invoiceNo}</h3>
-                                        <div className="flex items-center">
-                                        <div>
-                                            <button
-                                                onClick={() => handleDeleteBill(bills.invoiceNo)}
-                                                className="text-red-600 hover:text-red-800 transition-colors duration-200 mr-4 flex items-center"
-                                            >
-                                               <TrashIcon className="w-5 h-5" />
-                                            </button>
-                                            </div>
-                                            <div>
-                                            <button onClick={() => handlePrint(bills)} className="text-blue-600 hover:text-blue-800 transition-colors duration-200 mr-4 flex items-center">
-                                                <MdPrint className="mr-1" /> Print
-                                            </button>
-                                            <button onClick={() => toggleDetails(bills.invoiceNo)} className="text-gray-600 hover:text-gray-800 focus:outline-none transition-colors duration-200">
-                                                {showDetails[bills.invoiceNo] ? <MdKeyboardDoubleArrowUp className="h-6 w-6 text-gray-500" /> : <MdKeyboardDoubleArrowDown className="h-6 w-6 text-gray-500" />}
-                                            </button>
-                                            </div>
-                                            
-                                        </div>
-                                    </div>
-                                    {showDetails[bills.invoiceNo] && (
-                                        <>
-                                            <p className="text-gray-600"><strong>Customer:</strong> {bills.customerName}</p>
-                                            <p className="text-gray-600"><strong>Date:</strong> {bills.date}</p>
-                                            <p className="text-gray-600"><strong>Total Amount:</strong> PKR {bills.totalAmount.toFixed(2)}</p>
-                                            <p className="text-gray-600"><strong>Discount:</strong> {bills.discountPercentage}% (PKR {bills.discountAmount.toFixed(2)})</p>
-                                            <p className="text-gray-600"><strong>Total After Discount:</strong> PKR {bills.totalAfterDiscount.toFixed(2)}</p>
-                                            <p className="text-gray-600"><strong>Old Balance:</strong> PKR {bills.oldBalance.toFixed(2)}</p>
-
-                                            <p className="text-gray-600"><strong>Net Amount:</strong> PKR {bills.netAmount.toFixed(2)}</p>
-                                            <p className="text-gray-600"><strong>Given Amount:</strong> PKR {bills.customerGivenAmount.toFixed(2)}</p>
-                                            <p className="text-gray-600"><strong>Remaining Amount:</strong> PKR {bills.debt.toFixed(2)}</p>
-
-                                            {/* Display other bills details */}
-                                            <div className="mt-2">
-                                                <h4 className="text-md font-semibold text-gray-700">Items:</h4>
-                                                <table className="min-w-full divide-y divide-gray-200">
-                                                    <thead>
-                                                        <tr>
-                                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
-                                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
-                                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody className="bg-white divide-y divide-gray-200">
-
-                                                        {bills.cart.map((item, index) => (
-                                                            <tr key={index}>
-                                                                <td className="px-6 py-4 whitespace-nowrap">{item.itemName}</td>
-                                                                <td className="px-6 py-4 whitespace-nowrap">{item.quantity}</td>
-                                                                <td className="px-6 py-4 whitespace-nowrap">PKR {item.price}</td>
-                                                                <td className="px-6 py-4 whitespace-nowrap">PKR {item.total}</td>
-                                                            </tr>
-                                                        ))}
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </>
-                                    )}
-                                </div>
                             ))}
+                        </tbody>
+                    </table>
+                </div>
+            </>
+        )}
+    </div>
+));
+
+if (loading) {
+    return (
+        <div className="flex justify-center items-center h-screen">
+            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
+        </div>
+    );
+}
+
+if (error) {
+    return (
+        <div className="flex justify-center items-center h-screen">
+            <div className="text-red-500 text-xl">Error: {error}</div>
+        </div>
+    );
+}
+
+return (
+    <div className="bg-gray-100 min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-xl p-8">
+            <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">Customer Billing</h1>
+            {/* Add Item Form */}
+            <div className="mb-6">
+                <h2 className="text-xl font-semibold text-gray-700 mb-4">Add Items</h2>
+                {errors.newItem && <p className="text-red-500 text-xs mt-1">{errors.newItem}</p>}
+                <div className="grid grid-cols-3 gap-4">
+                    <div className="relative rounded-md shadow-sm">
+                        <select
+                            id="newItemName"
+                            name="newItemName"
+                            value={newItem.name}
+                            onChange={handleInputChange}
+                            className="focus:ring-blue-500 hover:ring-blue-400 focus:border-blue-500 block w-full pl-3 pr-10 py-2 sm:text-sm border-gray-300 rounded-md"
+                        >
+                            <option value="">Select Item</option>
+                            {inventoryData.map((item, index) => (
+                                <option key={index} value={item.itemName}>{item.itemName}</option>
+                            ))}
+                        </select>
                     </div>
+
+                    <div className="relative rounded-md shadow-sm">
+                        <input
+                            type="number"
+                            name="newItemQuantity"
+                            id="newItemQuantity"
+                            placeholder="Quantity"
+                            value={newItem.quantity}
+                            onChange={handleInputChange}
+                            className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-3 pr-10 py-2 sm:text-sm border-gray-300 rounded-md"
+                        />
+                    </div>
+
+                    <div className="relative rounded-md shadow-sm">
+                        <input
+                            type="number"
+                            name="newItemPrice"
+                            id="newItemPrice"
+                            placeholder="Price"
+                            value={newItem.price}
+                            onChange={handleInputChange}
+                            className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-3 pr-10 py-2 sm:text-sm border-gray-300 rounded-md"
+                        />
+                    </div>
+                </div>
+                <button
+                    onClick={handleAddToCart}
+                    className="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200 flex items-center"
+                >
+                    <MdAddShoppingCart className="mr-2" />
+                    Add Item
+                </button>
+            </div>
+            {/* Cart Table */}
+            <div className="mb-6">
+                <h2 className="text-xl font-semibold text-gray-700 mb-4">Current Bill</h2>
+                {errors.cart && <p className="text-red-500 text-xs mt-1">{errors.cart}</p>}
+
+                <CartTable cart={cart} handleRemoveItem={handleRemoveItem} />
+            </div>
+            {/* Customer Details Form */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                    <label htmlFor="customerName" className="block text-sm font-medium text-gray-700">
+                        <FaUser className="inline-block mr-2 text-gray-400" />
+                        Customer Name <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                        type="text"
+                        id="customerName"
+                        name="customerName"
+                        placeholder="Enter customer name"
+                        value={customerName}
+                        onChange={handleInputChange}
+                        className={`mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${errors.customerName ? 'border-red-500' : 'border-gray-300'}`}
+                    />
+                    {errors.customerName && <p className="text-red-500 text-xs mt-1">{errors.customerName}</p>}
+
+                    {/* Shop Dropdown */}
+                    <FilteredShopsList filteredShops={filteredShops} handleShopSelect={handleShopSelect} />
+                </div>
+                <div>
+                    <label htmlFor="address" className="block text-sm font-medium text-gray-700">
+                        <FaAddressCard className="inline-block mr-2 text-gray-400" />
+                        Address
+                    </label>
+                    <input
+                        type="text"
+                        id="address"
+                        name="address"
+                        placeholder="Enter address"
+                        value={address}
+                        onChange={handleInputChange}
+                        className="mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm border-gray-300"
+                    />
+                </div>
+                <div>
+                    <label htmlFor="date" className="block text-sm font-medium text-gray-700">
+                        <FaCalendarAlt className="inline-block mr-2 text-gray-400" />
+                        Date
+                    </label>
+                    <input
+                        type="date"
+                        id="date"
+                        name="date"
+                        value={date}
+                        onChange={handleInputChange}
+                        className="mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm border-gray-300"
+                    />
+                </div>
+                <div>
+                    <label htmlFor="oldBalance" className="block text-sm font-medium text-gray-700">
+                        <FaMoneyBillWave className="inline-block mr-2 text-gray-400" />
+                        Old Balance
+                    </label>
+                    <input
+                        type="number"
+                        name="oldBalance"
+                        id="oldBalance"
+                        placeholder="Enter old balance"
+                        value={oldBalance}
+                        onChange={handleInputChange}
+                        className="mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm border-gray-300"
+                    />
+                </div>
+                <div>
+                    <label htmlFor="customerGivenAmount" className="block text-sm font-medium text-gray-700">
+                        <FaHandHoldingUsd className="inline-block mr-2 text-gray-400" />
+                        Given Amount
+                    </label>
+                    <input
+                        type="number"
+                        name="customerGivenAmount"
+                        id="customerGivenAmount"
+                        placeholder="Enter amount given by customer"
+                        value={customerGivenAmount}
+                        onChange={handleInputChange}
+                        className="mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm border-gray-300"
+                    />
+                </div>
+                <div>
+                    <label htmlFor="discountPercentage" className="block text-sm font-medium text-gray-700">
+                        <FaTags className="inline-block mr-2 text-gray-400" />
+                        Discount (%)
+                    </label>
+                    <input
+                        type="number"
+                        name="discountPercentage"
+                        id="discountPercentage"
+                        placeholder="Enter discount percentage"
+                        value={discountPercentage}
+                        onChange={handleInputChange}
+                        className="mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm border-gray-300"
+                    />
+                </div>
+            </div>
+
+            {/* Totals and Generate Bill Button */}
+            <div className="mb-6">
+                <p className="text-lg font-semibold text-gray-700">Total Amount: PKR {cart.reduce((acc, item) => acc + item.total, 0).toFixed(2)}</p>
+                <p className="text-lg font-semibold text-gray-700">Total After Discount: PKR {(cart.reduce((acc, item) => acc + item.total, 0) - ((discountPercentage / 100) * cart.reduce((acc, item) => acc + item.total, 0))).toFixed(2)}</p>
+                <p className="text-lg font-semibold text-gray-700">Net Amount: PKR {((cart.reduce((acc, item) => acc + item.total, 0) - ((discountPercentage / 100) * cart.reduce((acc, item) => acc + item.total, 0))) + parseFloat(oldBalance || 0)).toFixed(2)}</p>
+
+                <p className="text-lg font-semibold text-gray-700">Remaining: PKR {(((cart.reduce((acc, item) => acc + item.total, 0) - ((discountPercentage / 100) * cart.reduce((acc, item) => acc + item.total, 0))) + parseFloat(oldBalance || 0)) - parseFloat(customerGivenAmount || 0)).toFixed(2)}</p>
+                <button
+                    onClick={handleGenerateBill}
+                    className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200 flex items-center"
+                >
+                    <MdReceipt className="mr-2" />
+                    Generate Bill
+                </button>
+            </div>
+
+            {/* Bills List */}
+            <div>
+                <h2 className="text-xl font-semibold text-gray-700 mb-4">Generated Bills</h2>
+                <div className="overflow-x-auto">
+                    {bills.map((bill) => (
+                        <BillDetails
+                            key={bill.invoiceNo}
+                            bill={bill}
+                            showDetails={showDetails}
+                            toggleDetails={toggleDetails}
+                            handleDeleteBill={handleDeleteBill}
+                            handlePrint={handlePrint}
+                        />
+                    ))}
                 </div>
             </div>
         </div>
-    );
+    </div>
+);
 };
 
 export default CustomerBilling;
