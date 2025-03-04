@@ -1,6 +1,7 @@
 'use client'
 import React, { useState, useContext, useEffect, use } from "react";
 import { Bars3Icon } from "@heroicons/react/24/outline";
+import { FaMoneyBillWave, FaChartLine } from 'react-icons/fa'; // Icons
 import SideBar from "./components/SideBar";
 import AddOrderForm from "./components/AddOrderForm";
 import DataList from "./components/DataList";
@@ -114,9 +115,21 @@ const Page = ({ params }) => {
           Add New Order
         </button>
 
-        <h1>Sub-Total: {currentShopkeeper?.subTotal}</h1>
-        <h1>Total Debit: {currentShopkeeper?.totalDebit}</h1>
-        <h1>Total Credit: {currentShopkeeper?.totalCredit}</h1>
+        {/* Redesigned Summary Section */}
+        <div className="mx-10 grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          <div className="bg-white rounded-lg shadow-sm p-4">
+            <h2 className="text-lg font-semibold text-gray-700 flex items-center"><FaChartLine className="mr-2 text-blue-600" />Sub-Total</h2>
+            <p className="text-xl font-bold text-gray-900">{currentShopkeeper?.subTotal}</p>
+          </div>
+          <div className="bg-white rounded-lg shadow-sm p-4">
+            <h2 className="text-lg font-semibold text-gray-700 flex items-center"><FaMoneyBillWave className="mr-2 text-blue-600" />Total Debit</h2>
+            <p className="text-xl font-bold text-gray-900">{currentShopkeeper?.totalDebit}</p>
+          </div>
+          <div className="bg-white rounded-lg shadow-sm p-4">
+            <h2 className="text-lg font-semibold text-gray-700 flex items-center"><FaMoneyBillWave className="mr-2 text-blue-600" />Total Credit</h2>
+            <p className="text-xl font-bold text-gray-900">{currentShopkeeper?.totalCredit}</p>
+          </div>
+        </div>
 
         {showForm && (
           <AddOrderForm

@@ -26,7 +26,7 @@ const CustomerBilling = () => {
     const printRef = useRef();
     const [filteredShops, setFilteredShops] = useState([]);
     const [selectedShop, setSelectedShop] = useState(null);
-
+    const [showShopkeepers, setShowShopkeepers] = useState(false);
 
 
     const { inventoryData } = useContext(InventoryContext); // Access setInventoryData
@@ -123,6 +123,7 @@ const CustomerBilling = () => {
 
         switch (name) {
             case 'customerName':
+                setShowShopkeepers(true);
                 setCustomerName(value);
                 setSelectedShop(null);
                 break;
@@ -608,6 +609,7 @@ const CustomerBilling = () => {
         setSelectedShop(shop);
         setCustomerName(shop.shopkeeperName);
         setFilteredShops([]);
+        setShowShopkeepers(false);
     }, []);
 
     const handleDebitSelect = useCallback((balance) => {
@@ -844,7 +846,9 @@ return (
                     {errors.customerName && <p className="text-red-500 text-xs mt-1">{errors.customerName}</p>}
 
                     {/* Shop Dropdown */}
-                    <FilteredShopsList filteredShops={filteredShops} handleShopSelect={handleShopSelect} />
+                    {showShopkeepers && (
+                        <FilteredShopsList filteredShops={filteredShops} handleShopSelect={handleShopSelect} />
+                    )}
                 </div>
                 <div>
                     <label htmlFor="address" className="block text-sm font-medium text-gray-700">
