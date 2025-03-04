@@ -5,7 +5,7 @@ import { FaChartBar, FaChartLine, FaTruck, FaStore } from 'react-icons/fa';
 import { InventoryContext } from "@/app/ContextApi/inventoryDataApi";  // Import InventoryContext
 import { ShopContext } from "@/app/ContextApi/shopkeepersDataApi";      // Import ShopContext
 
-export default function Analytics() {
+export default function Analytics({bills}) {
     const { inventoryData } = useContext(InventoryContext);    // Access bills from InventoryContext
     const { shops } = useContext(ShopContext);                  // Access shops from ShopContext
     const [dailySales, setDailySales] = useState([]);
@@ -24,18 +24,22 @@ export default function Analytics() {
                 date.setDate(today.getDate() - i);
                 return date.toISOString().split('T')[0];
             }).reverse();
+            
 
             const dailySalesData = last7Days.map(date => {
-                const dailySalesForDate = inventoryData.reduce((total, bill) => {
+                const dailySalesForDate = bills.reduce((total, bill) => {
                     if (bill.date === date) {
                         return total + bill.totalAmount;  // Sum totalAmount of bills for that day
                     }
                     return total;
                 }, 0);
 
-                return { day: date.substring(5, 10), sales: dailySalesForDate };  // Get month and day
+            
+                return { day: date.substring(5, 10), sales: dailySalesForDate }; 
+                // Get month and day
             });
             setDailySales(dailySalesData);
+            
         };
 
         // Monthly Revenue Calculation
@@ -46,7 +50,7 @@ export default function Analytics() {
             });
 
             const monthlyRevenueData = months.map((month, index) => {
-                const monthlyRevenueForMonth = inventoryData.reduce((total, bill) => {
+                const monthlyRevenueForMonth = bills.reduce((total, bill) => {
                     const billMonth = new Date(bill.date).getMonth();
                     if (billMonth === index) {
                         return total + bill.totalAmount;   // Sum totalAmount of bills for that month
