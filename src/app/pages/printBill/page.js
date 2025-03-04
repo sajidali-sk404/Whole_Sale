@@ -28,6 +28,8 @@ const CustomerBilling = () => {
     const [selectedShop, setSelectedShop] = useState(null);
     const [showShopkeepers, setShowShopkeepers] = useState(false);
 
+    
+
 
     const { inventoryData } = useContext(InventoryContext); // Access setInventoryData
     const { shops, setShops } = useContext(ShopContext);
@@ -38,7 +40,6 @@ const CustomerBilling = () => {
         const fetchBills = async () => {
             setLoading(true);
             setError(null);
-            console.log("Fetching bills...", process.env.NEXT_PUBLIC_API_URL);
             try {
                 const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/bills`); // Make sure your backend is running on port 5000
                 setBills(response.data);
@@ -708,7 +709,7 @@ const CustomerBilling = () => {
             {showDetails[bill.invoiceNo] && (
                 <>
                 <p className="text-gray-600"><strong>Customer:</strong> {bill.customerName}</p>
-                <p className="text-gray-600"><strong>Date:</strong> {bill.date}</p>
+                <p className="text-gray-600"><strong>Date:</strong> {new Date(bill.date).toISOString().split('T')[0]}</p>
                 <p className="text-gray-600"><strong>Total Amount:</strong> PKR {bill.totalAmount.toFixed(2)}</p>
                 <p className="text-gray-600"><strong>Discount:</strong> {bill.discountPercentage}% (PKR {bill.discountAmount.toFixed(2)})</p>
                 <p className="text-gray-600"><strong>Total After Discount:</strong> PKR {bill.totalAfterDiscount.toFixed(2)}</p>

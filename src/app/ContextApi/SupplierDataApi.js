@@ -13,6 +13,7 @@ export const SupplierProvider = ({ children }) => {
       const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/supplier`)
       setSuppliers(response.data)
       setTotalSupplier(response.data.length)
+
     } catch (error) {
       console.error(error)
     }

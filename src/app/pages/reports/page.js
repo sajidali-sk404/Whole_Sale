@@ -1,73 +1,86 @@
+
 'use client';
 import { useState, useEffect, useContext } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, LineChart, Line } from "recharts";
 import { FaChartBar, FaChartLine, FaTruck, FaStore } from 'react-icons/fa';
-import { InventoryContext } from "@/app/ContextApi/inventoryDataApi";  // Import InventoryContext
-import { ShopContext } from "@/app/ContextApi/shopkeepersDataApi";      // Import ShopContext
+import { BillContext } from "@/app/ContextApi/billsDataApi";      // Import BillContext
+import { SupplierContext } from "@/app/ContextApi/SupplierDataApi";
 
-export default function Analytics({bills}) {
-    const { inventoryData } = useContext(InventoryContext);    // Access bills from InventoryContext
-    const { shops } = useContext(ShopContext);                  // Access shops from ShopContext
+export default function Analytics() {
+    const { Bills } = useContext(BillContext);  // Get Bills from BillContext
+    const { suppliers } = useContext(SupplierContext);
     const [dailySales, setDailySales] = useState([]);
     const [monthlySales, setMonthlySales] = useState([]);
     const [topSuppliers, setTopSuppliers] = useState([]);
     const [topShopkeepers, setTopShopkeepers] = useState([]);
-
-
+    console.log(suppliers)
 
     useEffect(() => {
         // Daily Sales Calculation
-        const calculateDailySales = () => {
+        const calculateDailySales = (billsData) => { // Take billsData as input
+            if (!billsData) {
+              console.warn("billsData is null or undefined in calculateDailySales");
+              return; // Exit the function if billsData is missing
+            }
+          
             const today = new Date();
             const last7Days = Array.from({ length: 7 }, (_, i) => {
-                const date = new Date(today);
-                date.setDate(today.getDate() - i);
-                return date.toISOString().split('T')[0];
+              const date = new Date(today);
+              date.setDate(today.getDate() - i);
+              return date.toISOString().split('T')[0];
             }).reverse();
-            
-
+          
+            console.log("Last 7 Days:", last7Days);
+          
             const dailySalesData = last7Days.map(date => {
-                const dailySalesForDate = bills.reduce((total, bill) => {
-                    if (bill.date === date) {
-                        return total + bill.totalAmount;  // Sum totalAmount of bills for that day
-                    }
-                    return total;
-                }, 0);
-
-            
-                return { day: date.substring(5, 10), sales: dailySalesForDate }; 
-                // Get month and day
+              const dailySalesForDate = billsData?.reduce((total, bill) => {
+                const billDateFormatted = new Date(bill.date).toISOString().split('T')[0];
+                if (billDateFormatted === date) {
+                  return total + bill.totalAmount;
+                }
+                return total;
+              }, 0);
+          
+              console.log("Daily Sales for", date, "is", dailySalesForDate);
+          
+              return { day: date.substring(0, 10), sales: Number(dailySalesForDate) };
             });
+          
+            console.log("dailySalesData", dailySalesData);  // Add this line
+          
             setDailySales(dailySalesData);
-            
-        };
-
+          };
+          
+          console.log("DAilySAle",dailySales); // Check outside the useEffect
+        
+       
         // Monthly Revenue Calculation
-        const calculateMonthlyRevenue = () => {
+        const calculateMonthlyRevenue = (billsData) => { // Take billsData as input
             const currentYear = new Date().getFullYear();
             const months = Array.from({ length: 12 }, (_, i) => {
                 return new Date(currentYear, i, 1).toLocaleString('default', { month: 'short' });
             });
 
             const monthlyRevenueData = months.map((month, index) => {
-                const monthlyRevenueForMonth = bills.reduce((total, bill) => {
+                const monthlyRevenueForMonth = billsData?.reduce((total, bill) => { // Use billsData here
                     const billMonth = new Date(bill.date).getMonth();
                     if (billMonth === index) {
-                        return total + bill.totalAmount;   // Sum totalAmount of bills for that month
+                        return total + bill.totalAmount;   // Sum totalAmount of Bills for that month
                     }
                     return total;
                 }, 0);
-                return { month: month, revenue: monthlyRevenueForMonth };
+                console.log("Daily Sales for", month, "is", monthlyRevenueForMonth);
+                return { month: month, revenue: Number(monthlyRevenueForMonth) };
             });
             setMonthlySales(monthlyRevenueData);
         };
 
 
         // Top Suppliers Calculation (example - adapt to your data structure)
-        const calculateTopSuppliers = () => {
-            // Assuming `inventoryData` contains supplier information
+        const calculateTopSuppliers = (billsData) => {  // Take billsData as input
+
             const supplierTransactions = {};
-            inventoryData.forEach(bill => {
+            billsData?.forEach(bill => { // Use billsData here
                 if (bill.suppliers) {
                     supplierTransactions[bill.supplier] = (supplierTransactions[bill.supplier] || 0) + 1;
                 }
@@ -80,14 +93,15 @@ export default function Analytics({bills}) {
 
             setTopSuppliers(sortedSuppliers);
         };
+        
 
 
 
         // Top Shopkeepers Calculation (adapt based on how your data is structured)
-        const calculateTopShopkeepers = () => {
+        const calculateTopShopkeepers = (billsData) => { // Take billsData as input
 
             const shopkeeperPurchases = {};
-            inventoryData.forEach(bill => {
+            billsData?.forEach(bill => { // Use billsData here
                 if (bill.customerName) {
                     shopkeeperPurchases[bill.customerName] = (shopkeeperPurchases[bill.customerName] || 0) + 1;
                 }
@@ -101,18 +115,18 @@ export default function Analytics({bills}) {
             setTopShopkeepers(sortedShopkeepers);
         };
 
-
-
-
-        if (inventoryData) {  // Only run calculations when inventoryData is available
-            calculateDailySales();
-            calculateMonthlyRevenue();
-            calculateTopSuppliers();
-            calculateTopShopkeepers();
+        // Check if Bills is defined before running calculations
+        if (Bills) {
+            calculateDailySales(Bills);  // Run calculations
+            calculateMonthlyRevenue(Bills);
+            calculateTopShopkeepers(Bills);
+        } else {
+            console.warn("Bills data is not available yet.");
         }
-
-    }, [inventoryData, shops]); // Dependency on bills and shops (if they affect calculations)
-
+        
+        
+    }, [Bills]); // Dependency on Bills and BillsData
+    
 
 
     // Colors for the charts
