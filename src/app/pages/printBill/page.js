@@ -523,9 +523,10 @@ const CustomerBilling = () => {
 @media print {
   body {
     margin: 0;
-    padding: 0;
+    padding: 20px;
     -webkit-print-color-adjust: exact; /* Ensure colors are printed correctly */
     print-color-adjust: exact;
+    
   }
 
   .watermark-repeat, .watermark-center {
