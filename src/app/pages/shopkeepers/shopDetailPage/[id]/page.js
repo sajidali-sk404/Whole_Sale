@@ -57,6 +57,7 @@ const Page = ({ params }) => {
 
   const handleDeleteClick = (deliveryId) => {
     setDeleteDeliveryId(deliveryId);
+    console.log(deliveryId)
     setShowDeleteConfirm(true);
   };
 
@@ -191,7 +192,7 @@ const Page = ({ params }) => {
 
         {showDeleteConfirm && (
           <DeliveryDeleteConfirmation
-            // deliveryId={deleteDeliveryId}
+            deliveryId={deleteDeliveryId}
             shopkeeperId={param.id} // Pass the shopkeeper ID!
             setShowDeleteConfirm={setShowDeleteConfirm}
             setDeliveriesData={setDeliveriesData}
