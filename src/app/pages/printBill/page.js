@@ -5,6 +5,7 @@ import { FaUser, FaAddressCard, FaCalendarAlt, FaMoneyBillWave, FaTags, FaHandHo
 import { InventoryContext } from "@/app/ContextApi/inventoryDataApi";
 import { ShopContext } from "@/app/ContextApi/shopkeepersDataApi";
 import axios from 'axios';
+import Link from "next/link";
 
 import FilteredShopsList from "./component/FilteredShopsList";
 import CartTable from "./component/CartTable";
@@ -41,7 +42,7 @@ const CustomerBilling = () => {
       setLoading(true);
       setError(null);
       try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/bills`); // Make sure your backend is running on port 5000
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/billslatest`); // Make sure your backend is running on port 5000
         setBills(response.data);
         // Set initial invoiceNo based on existing bills
         if (response.data.length > 0) {
@@ -210,7 +211,7 @@ const CustomerBilling = () => {
 
       }
     }
-    console.log(formData)
+   
 
     const updateQuantity = bill.cart.map(async (item) => {
       console.log("Processing cart item:", item.itemName, "Quantity:", item.quantity);
@@ -895,6 +896,7 @@ const CustomerBilling = () => {
           <p className="text-lg font-semibold text-gray-700">Net Amount: PKR {((cart.reduce((acc, item) => acc + item.total, 0) - ((discountPercentage / 100) * cart.reduce((acc, item) => acc + item.total, 0))) + parseFloat(oldBalance || 0)).toFixed(2)}</p>
 
           <p className="text-lg font-semibold text-gray-700">Remaining: PKR {(((cart.reduce((acc, item) => acc + item.total, 0) - ((discountPercentage / 100) * cart.reduce((acc, item) => acc + item.total, 0))) + parseFloat(oldBalance || 0)) - parseFloat(customerGivenAmount || 0)).toFixed(2)}</p>
+          <div className="flex justify-between">
           <button
             onClick={handleGenerateBill}
             className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200 flex items-center"
@@ -902,6 +904,10 @@ const CustomerBilling = () => {
             <MdReceipt className="mr-2" />
             Generate Bill
           </button>
+          <div className="border bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200 flex items-center">
+          <Link href="/pages/getAllBills">All Bills</Link>
+          </div>
+          </div>
         </div>
 
         {/* Bills List */}
