@@ -146,13 +146,25 @@ export default function Analytics() {
                             <FaChartBar className="mr-2" />
                             Daily Sales Overview
                         </h2>
-                        <BarChart data={dailySales} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+
+                        {dailySales.length === 0 ? (
+                    <p>Loading chart...</p>
+                    ) : (
+                    <BarChart width={600} height={300} data={dailySales} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="day" tick={{ fill: '#6B7280' }} />
+                        <YAxis tick={{ fill: '#6B7280' }} />
+                        <Tooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #ddd' }} />
+                        <Bar dataKey="sales" fill="#8884d8" />
+                    </BarChart>
+                )}
+                        {/* <BarChart data={dailySales} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                             <CartesianGrid strokeDasharray="3 3" />
                             <XAxis dataKey="day" tick={{ fill: '#6B7280' }} />
                             <YAxis tick={{ fill: '#6B7280' }} />
                             <Tooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #ddd' }} />
                             <Bar dataKey="sales" fill="#8884d8" />
-                        </BarChart>
+                        </BarChart> */}
                     </div>
 
                     {/* Monthly Revenue Chart */}

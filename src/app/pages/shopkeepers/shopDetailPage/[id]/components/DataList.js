@@ -64,10 +64,10 @@ const DataList = ({ data, handleEdit, handleDelete, handleStatusEdit, handleItem
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                         {data?.items?.map((item, index) => (
                             <div key={index} className="bg-gray-50 p-3 rounded-md">
-                                <p className="text-sm font-medium text-gray-700">{item.itemName}</p>
-                                <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
-                                {item.price && <p className="text-sm text-gray-600">Price: Rs.{item.price}</p>}
-                                {item.price && <p className="text-sm text-gray-600">Total: Rs.{item.price * item.quantity}</p>}
+                                <p className="text-sm font-medium text-gray-700">{item?.itemName}</p>
+                                <p className="text-sm text-gray-600">Qty: {item?.quantity}</p>
+                                {item.price && <p className="text-sm text-gray-600">Price: Rs.{item?.price}</p>}
+                                {item.price && <p className="text-sm text-gray-600">Total: Rs.{item?.price * item.quantity}</p>}
                             </div>
                         ))}
                     </div>

@@ -34,7 +34,7 @@ const Page = ({ params }) => {
       paymentDate: new Date().toISOString().split('T')[0],
       totalAmount: "",
       givenAmount: "",
-  }
+    }
   });
 
   useEffect(() => {
@@ -173,16 +173,20 @@ const Page = ({ params }) => {
 
         {/* Data List - Reverse the order here for display */}
         <div className="space-y-4">
-          {deliveriesData.slice().reverse().map((data) => (
-            <DataList
-              key={data._id}
-              data={data}
-              handleEdit={handleEditDelivery}
-              handleDelete={handleDeleteClick}
-              handleStatusEdit={handleStatusEdit}
-              handleItemStatusEdit={handleItemStatusEdit}
-            />
-          ))}
+          {deliveriesData
+            .slice()
+            .reverse()
+            .filter(data => data && data._id) // Filter out null/undefined data and those without _id
+            .map((data) => (
+              <DataList
+                key={data._id} // Now you can be sure _id exists
+                data={data}
+                handleEdit={handleEditDelivery}
+                handleDelete={handleDeleteClick}
+                handleStatusEdit={handleStatusEdit}
+                handleItemStatusEdit={handleItemStatusEdit}
+              />
+            ))}
         </div>
 
         {showDeleteConfirm && (
