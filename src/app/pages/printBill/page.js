@@ -173,6 +173,12 @@ const CustomerBilling = () => {
     if (!validateItemForm()) {
       return;
     }
+    const item = inventoryData.find(item => item.itemName === newItem.name);
+    if (item.quantity < newItem.quantity) {
+    alert("Quantity is greater than available stock")
+    return;
+    }
+      
     if (newItem.name && newItem.quantity && newItem.price) {
       setCart(prevCart => [...prevCart, { ...newItem, itemName: newItem.name, total: newItem.quantity * newItem.price }]);
       setNewItem({ name: "", quantity: "", price: "" });
@@ -746,7 +752,7 @@ const CustomerBilling = () => {
               >
                 <option value="">Select Item</option>
                 {inventoryData.map((item, index) => (
-                  <option key={index} value={item.itemName}>{item.itemName}</option>
+                  <option key={index} value={item.itemName}>{item.itemName} /{item.quantity}</option>
                 ))}
               </select>
             </div>
