@@ -217,15 +217,16 @@ const CustomerBilling = () => {
         console.log(formData)
 
         const updateQuantity = bill.cart.map(async (item) => {
+            console.log("Processing cart item:", item.itemName, "Quantity:", item.quantity);
             const product = inventoryData.find(product => product.itemName === item.itemName);
-            console.log("product", product)
+            console.log("Found product in inventory:", product);
             if (product) {
                 const newQuantity = product.quantity - item.quantity;
                 const newProduct = { ...product, quantity: newQuantity };
-                console.log("newQuantity", newQuantity)
-                console.log("newProduct", newProduct)
+                console.log("Updating product:", newProduct.itemName, "New Quantity:", newQuantity, "Product ID:", newProduct._id);
                 try {
-                    await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/inventory/${product._id}`, newProduct);
+                    const response = await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/inventory/${product._id}`, newProduct);
+                    console.log("Inventory update response:", response.status, response.data);
                 } catch (error) {
                     console.error("Error updating product quantity:", error);
                 }
