@@ -56,6 +56,10 @@ export default function Analytics() {
        
         // Monthly Revenue Calculation
         const calculateMonthlyRevenue = (billsData) => { // Take billsData as input
+            if (!billsData) {
+                console.warn("billsData is null or undefined in calculateMonthlyRevenue");
+                return; // Exit the function if billsData is missing
+              }
             const currentYear = new Date().getFullYear();
             const months = Array.from({ length: 12 }, (_, i) => {
                 return new Date(currentYear, i, 1).toLocaleString('default', { month: 'short' });
@@ -150,7 +154,7 @@ export default function Analytics() {
                         {dailySales.length === 0 ? (
                     <p>Loading chart...</p>
                     ) : (
-                    <BarChart width={600} height={300} data={dailySales} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                    <BarChart width={580} height={300} data={dailySales} margin={{ top: 20, right: 40, left: 20, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="day" tick={{ fill: '#6B7280' }} />
                         <YAxis tick={{ fill: '#6B7280' }} />
@@ -173,13 +177,18 @@ export default function Analytics() {
                             <FaChartLine className="mr-2" />
                             Monthly Revenue
                         </h2>
-                        <LineChart data={monthlySales} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+
+                        {monthlySales.length === 0 ? (
+                    <p>Loading chart...</p>
+                    ) : (
+                        <LineChart width={580} height={300}  data={monthlySales} margin={{ top: 20, right: 40, left: 20, bottom: 5 }}>
                             <CartesianGrid strokeDasharray="3 3" />
                             <XAxis dataKey="month" tick={{ fill: '#6B7280' }} />
                             <YAxis tick={{ fill: '#6B7280' }} />
                             <Tooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #ddd' }} />
                             <Line type="monotone" dataKey="revenue" stroke="#82ca9d" strokeWidth={2} />
                         </LineChart>
+                    )}
                     </div>
 
                     {/* Top Suppliers */}

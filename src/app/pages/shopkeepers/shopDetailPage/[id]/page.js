@@ -176,10 +176,10 @@ const Page = ({ params }) => {
           {deliveriesData
             .slice()
             .reverse()
-            .filter(data => data && data._id) // Filter out null/undefined data and those without _id
+            .filter(data => data && data._id) 
             .map((data) => (
               <DataList
-                key={data._id} // Now you can be sure _id exists
+                key={data._id} 
                 data={data}
                 handleEdit={handleEditDelivery}
                 handleDelete={handleDeleteClick}
@@ -191,7 +191,7 @@ const Page = ({ params }) => {
 
         {showDeleteConfirm && (
           <DeliveryDeleteConfirmation
-            deliveryId={deleteDeliveryId}
+            // deliveryId={deleteDeliveryId}
             shopkeeperId={param.id} // Pass the shopkeeper ID!
             setShowDeleteConfirm={setShowDeleteConfirm}
             setDeliveriesData={setDeliveriesData}
