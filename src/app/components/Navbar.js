@@ -1,5 +1,5 @@
 "use client";
-import React,{useState,useEffect} from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useContext } from "react";
 import { InventoryContext } from "../ContextApi/inventoryDataApi";
 import { SupplierContext } from "../ContextApi/SupplierDataApi";
@@ -26,29 +26,33 @@ const Navbar = () => {
 
   const { Bills } = useContext(BillContext);
 
-const [dailyProfit, setDailyProfit] = useState(0);
+  const [dailyProfit, setDailyProfit] = useState(0);
 
-useEffect(() => {
+  const calculatingDailyProfit = useCallback(() => {
     if (Bills) {
-        // Calculate Daily Profit
-        const today = new Date().toISOString().split('T')[0];
-        let profit = 0;
+      // Calculate Daily Profit
+      const today = new Date().toISOString().split('T')[0];
+      let profit = 0;
 
-        Bills.forEach(bill => {
-            const billDate = new Date(bill.date).toISOString().split('T')[0];
-            if (billDate === today) {
-                profit += bill.totalAmount;  // Assuming bill.totalAmount is the profit for now.
-            }
-        });
+      Bills.forEach(bill => {
+        const billDate = new Date(bill.date).toISOString().split('T')[0];
+        if (billDate === today) {
+          profit += bill.totalAmount;  // Assuming bill.totalAmount is the profit for now.
+        }
+      });
 
-        setDailyProfit(profit);
+      setDailyProfit(profit);
     }
-}, [Bills]);
+  }, [Bills]);
 
-console.log(dailyProfit);
+  useEffect(() => {
+    calculatingDailyProfit();
+  }, [calculatingDailyProfit]);
+
+  console.log(dailyProfit);
   // Handle null or undefined values, provide default
   const inventoryValue = totalInventory !== null && totalInventory !== undefined ? totalInventory : 0;
-    const supplierValue = totalSupplier !== null && totalSupplier !== undefined ? totalSupplier : 0;
+  const supplierValue = totalSupplier !== null && totalSupplier !== undefined ? totalSupplier : 0;
 
 
   return (
@@ -56,8 +60,8 @@ console.log(dailyProfit);
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
           <Link href="/pages/products"><Card title="Total Stock" value={inventoryValue} icon={FaShoppingCart} /></Link>
-         <Link href="/pages/reports"><Card title="Daily Profit" value={dailyProfit} icon={FaChartLine} /></Link> 
-         <Link href="/pages/suppliers"><Card title="Total Suppliers" value={supplierValue} icon={FaBuilding} /></Link>
+          <Link href="/pages/reports"><Card title="Daily Profit" value={dailyProfit} icon={FaChartLine} /></Link>
+          <Link href="/pages/suppliers"><Card title="Total Suppliers" value={supplierValue} icon={FaBuilding} /></Link>
           <Link href="/pages/shopkeepers"><Card title="Local Customers" value={totalShop} icon={FaUserFriends} /></Link>
         </div>
       </div>

@@ -31,10 +31,20 @@ const CustomerBilling = () => {
   const [filteredShops, setFilteredShops] = useState([]);
   const [selectedShop, setSelectedShop] = useState(null);
   const [showShopkeepers, setShowShopkeepers] = useState(false);
+  const [itemPrice, setItemPrice] = useState();
 
   const { inventoryData } = useContext(InventoryContext); // Access setInventoryData
   const { shops, setShops } = useContext(ShopContext);
   const watermarkImageUrl = '/watermark_p.PNG';
+
+  useEffect(() => {
+    if (newItem.name) {
+      const selectedItem = inventoryData.find(item => item.itemName === newItem.name);
+      if (selectedItem) {
+        setNewItem(prev => ({ ...prev, price: selectedItem.purchasePrice }));
+      }
+    }
+  }, [newItem.name, inventoryData]);
 
   // Fetch Bills from Backend (useEffect)
   useEffect(() => {
