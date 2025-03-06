@@ -6,7 +6,7 @@ import { FaHome, FaUsers, FaUsersCog, FaBoxOpen, FaMoneyBillWave, FaChartLine, F
 
 const SideBar = ({ setIsSidebarOpen, currentShopkeeper }) => {
     return (
-        <div className="bg-white shadow-md h-full md:w-64 p-4 rounded-r-lg transition-all duration-300 ease-in-out">
+        <div className="bg-white shadow-md h-full w-[70%] md:w-64 p-4 max-sm:fixed rounded-r-lg transition-all duration-300 ease-in-out">
             {/* Close Button */}
             <div className="flex justify-between items-center mb-6">
                 <h2 className="text-lg font-semibold text-blue-600">Shopkeeper Details</h2>

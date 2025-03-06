@@ -138,15 +138,15 @@ export default function Analytics() {
 
     return (
         <div className="bg-gray-100 min-h-screen py-12 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-7xl mx-auto">
-                <h1 className="text-4xl font-bold text-blue-600 mb-8 text-center">Analytics Dashboard</h1>
+            <div className="w-full md:max-w-7xl  mx-auto">
+                <h1 className="text-xl md:text-4xl font-bold text-blue-600 mb-8 text-center">Analytics Dashboard</h1>
 
                 {/* Dashboard Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
 
                     {/* Daily Sales Chart */}
-                    <div className="bg-white rounded-lg shadow-xl p-6">
-                        <h2 className="text-2xl font-semibold text-gray-700 mb-4 flex items-center">
+                    <div className="bg-white max-sm:w-full max-sm:text-sm rounded-lg shadow-xl p-1 md:p-6">
+                        <h2 className="text-lg md:text-2xl font-semibold text-gray-700 mb-4 flex items-center">
                             <FaChartBar className="mr-2" />
                             Daily Sales Overview
                         </h2>
@@ -154,21 +154,16 @@ export default function Analytics() {
                         {dailySales.length === 0 ? (
                     <p>Loading chart...</p>
                     ) : (
-                    <BarChart width={580} height={300} data={dailySales} margin={{ top: 20, right: 40, left: 20, bottom: 5 }}>
+                        <div className="max-lg:overflow-x-auto">
+                    <BarChart width={575} height={300} data={dailySales} margin={{ top: 20, right: 40, left: 20, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="day" tick={{ fill: '#6B7280' }} />
                         <YAxis tick={{ fill: '#6B7280' }} />
                         <Tooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #ddd' }} />
                         <Bar dataKey="sales" fill="#8884d8" />
                     </BarChart>
+                    </div>
                 )}
-                        {/* <BarChart data={dailySales} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="day" tick={{ fill: '#6B7280' }} />
-                            <YAxis tick={{ fill: '#6B7280' }} />
-                            <Tooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #ddd' }} />
-                            <Bar dataKey="sales" fill="#8884d8" />
-                        </BarChart> */}
                     </div>
 
                     {/* Monthly Revenue Chart */}
@@ -181,13 +176,15 @@ export default function Analytics() {
                         {monthlySales.length === 0 ? (
                     <p>Loading chart...</p>
                     ) : (
-                        <LineChart width={580} height={300}  data={monthlySales} margin={{ top: 20, right: 40, left: 20, bottom: 5 }}>
+                        <div className="max-lg:overflow-x-auto">
+                        <LineChart width={575} height={300}  data={monthlySales} margin={{ top: 20, right: 40, left: 20, bottom: 5 }}>
                             <CartesianGrid strokeDasharray="3 3" />
                             <XAxis dataKey="month" tick={{ fill: '#6B7280' }} />
                             <YAxis tick={{ fill: '#6B7280' }} />
                             <Tooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #ddd' }} />
                             <Line type="monotone" dataKey="revenue" stroke="#82ca9d" strokeWidth={2} />
                         </LineChart>
+                        </div>
                     )}
                     </div>
 
