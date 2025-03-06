@@ -96,7 +96,7 @@ const Page = ({ params }) => {
           onClick={() => setShowForm(true)}
           className="bg-blue-600 hover:bg-blue-700 mx-10 text-white px-4 py-2 rounded-md mb-4 transition-colors duration-200"
         >
-          Add New Order
+          Add Credit
         </button>
 
         {/* Redesigned Summary Section */}
