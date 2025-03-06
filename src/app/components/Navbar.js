@@ -82,8 +82,8 @@ const Navbar = () => {
           <Link href="/pages/products">
             <div className="p-6 bg-white flex flex-col items-center h-full rounded-lg shadow-xl transition-all duration-300 hover:shadow-2xl hover:scale-105 cursor-pointer">
               {FaShoppingCart && <FaShoppingCart className="text-4xl text-blue-600 mb-4" />} {/* Render the icon */}
-              <h3 className="text-lg font-semibold text-gray-700 text-center">Total Stock</h3>
-              <p className="text-2xl font-bold text-gray-900 mt-2">
+              <h3 className="text-lg font-semibold text-gray-700 text-center">Total Stock - {inventoryValue}</h3>
+              <p className="text-xl font-bold text-gray-900 mt-2">
                 {!loading ? (
                   <TypeAnimation
                     sequence={[...sequence, "", 1000]}
