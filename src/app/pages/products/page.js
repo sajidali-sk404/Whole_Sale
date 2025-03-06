@@ -158,6 +158,16 @@ export default function Inventory() {
                                                 <FaSort className="inline-block ml-1" />
                                             )}
                                         </th>
+                                        <th
+                                            scope="col"
+                                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                                             onClick={() => requestSort('lastUpdated')}
+                                        >
+                                            Purchase Price
+                                            {sortConfig.key === 'PurchasedPrice' && (
+                                                <FaSort className="inline-block ml-1" />
+                                            )}
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
@@ -176,7 +186,7 @@ export default function Inventory() {
                                                     {item.lastUpdated ? new Date(item.lastUpdated).toISOString().split('T')[0] : 'N/A'}
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
-                                                    {item.price}
+                                                    {item.purchasePrice}
                                                 </td>
                                             </tr>
                                         ))
