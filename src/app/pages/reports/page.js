@@ -4,54 +4,61 @@ import { useState, useEffect, useContext } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, LineChart, Line } from "recharts";
 import { FaChartBar, FaChartLine, FaTruck, FaStore } from 'react-icons/fa';
 import { BillContext } from "@/app/ContextApi/billsDataApi";      // Import BillContext
-import { SupplierContext } from "@/app/ContextApi/SupplierDataApi";
+import { InventoryContext } from "@/app/ContextApi/inventoryDataApi";
+// import { SupplierContext } from "@/app/ContextApi/SupplierDataApi";
 
 export default function Analytics() {
     const { Bills } = useContext(BillContext);  // Get Bills from BillContext
-    const { suppliers } = useContext(SupplierContext);
     const [dailySales, setDailySales] = useState([]);
     const [monthlySales, setMonthlySales] = useState([]);
-    const [topSuppliers, setTopSuppliers] = useState([]);
     const [topShopkeepers, setTopShopkeepers] = useState([]);
-    console.log(suppliers)
+    const { inventoryData } = useContext(InventoryContext);
+ console.log("Inventory", inventoryData);
 
     useEffect(() => {
         // Daily Sales Calculation
-        const calculateDailySales = (billsData) => { // Take billsData as input
-            if (!billsData) {
-              console.warn("billsData is null or undefined in calculateDailySales");
-              return; // Exit the function if billsData is missing
+const calculateDailySales = (billsData, inventoryData) => { // Take billsData as input, and also inventoryData
+    if (!billsData || !inventoryData) {
+        console.warn("billsData or inventoryData is null or undefined in calculateDailySales");
+        return; // Exit the function if data is missing
+    }
+
+    const today = new Date();
+    const last7Days = Array.from({ length: 7 }, (_, i) => {
+        const date = new Date(today);
+        date.setDate(today.getDate() - i);
+        return date.toISOString().split('T')[0];
+    }).reverse();
+
+    const dailySalesData = last7Days.map(date => {
+        let dailyProfitForDate = 0; // Changed to profit
+
+        billsData?.forEach(bill => {
+            const billDateFormatted = new Date(bill.date).toISOString().split('T')[0];
+            if (billDateFormatted === date) {
+                bill.items?.forEach(item => { // Iterate through items in each bill
+                    const purchaseInfo = inventoryData[item.name]; // Look up the purchase price
+                        console.log("Purchase Info", purchaseInfo);
+                    if (purchaseInfo && purchaseInfo.purchasePrice !== undefined) {
+                        const profitPerItem = (item.salePrice * item.quantity) - (purchaseInfo.purchasePrice * item.quantity); // Calculate profit
+                        dailyProfitForDate += profitPerItem;
+                    } else {
+                        console.warn(`Purchase price not found for item: ${item.name}`);
+                        // Optionally, handle items with missing purchase prices (e.g., exclude from profit)
+                    }
+                });
             }
+        });
+
+        console.log("Daily Profit for", date, "is", dailyProfitForDate);
+
+        return { day: date.substring(0, 10), sales: Number(dailyProfitForDate) }; // Return profit
+    });
+
+    setDailySales(dailySalesData);
+    console.log("Daily Sales", dailySalesData);
+};
           
-            const today = new Date();
-            const last7Days = Array.from({ length: 7 }, (_, i) => {
-              const date = new Date(today);
-              date.setDate(today.getDate() - i);
-              return date.toISOString().split('T')[0];
-            }).reverse();
-          
-            console.log("Last 7 Days:", last7Days);
-          
-            const dailySalesData = last7Days.map(date => {
-              const dailySalesForDate = billsData?.reduce((total, bill) => {
-                const billDateFormatted = new Date(bill.date).toISOString().split('T')[0];
-                if (billDateFormatted === date) {
-                  return total + bill.totalAmount;
-                }
-                return total;
-              }, 0);
-          
-              console.log("Daily Sales for", date, "is", dailySalesForDate);
-          
-              return { day: date.substring(0, 10), sales: Number(dailySalesForDate) };
-            });
-          
-            console.log("dailySalesData", dailySalesData);  // Add this line
-          
-            setDailySales(dailySalesData);
-          };
-          
-          console.log("DAilySAle",dailySales); // Check outside the useEffect
         
        
         // Monthly Revenue Calculation
@@ -73,33 +80,10 @@ export default function Analytics() {
                     }
                     return total;
                 }, 0);
-                console.log("Daily Sales for", month, "is", monthlyRevenueForMonth);
                 return { month: month, revenue: Number(monthlyRevenueForMonth) };
             });
             setMonthlySales(monthlyRevenueData);
         };
-
-
-        // Top Suppliers Calculation (example - adapt to your data structure)
-        const calculateTopSuppliers = (billsData) => {  // Take billsData as input
-
-            const supplierTransactions = {};
-            billsData?.forEach(bill => { // Use billsData here
-                if (bill.suppliers) {
-                    supplierTransactions[bill.supplier] = (supplierTransactions[bill.supplier] || 0) + 1;
-                }
-            });
-
-            const sortedSuppliers = Object.entries(supplierTransactions)
-                .sort(([, a], [, b]) => b - a)
-                .slice(0, 5)  // Get top 5
-                .map(([name, transactions]) => ({ name, transactions }));
-
-            setTopSuppliers(sortedSuppliers);
-        };
-        
-
-
 
         // Top Shopkeepers Calculation (adapt based on how your data is structured)
         const calculateTopShopkeepers = (billsData) => { // Take billsData as input
@@ -120,17 +104,50 @@ export default function Analytics() {
         };
 
         // Check if Bills is defined before running calculations
-        if (Bills) {
-            calculateDailySales(Bills);  // Run calculations
+        if (Bills && inventoryData) {
+            calculateDailySales(Bills,inventoryData);  // Run calculations
             calculateMonthlyRevenue(Bills);
             calculateTopShopkeepers(Bills);
         } else {
             console.warn("Bills data is not available yet.");
         }
+
         
         
     }, [Bills]); // Dependency on Bills and BillsData
     
+
+    
+ 
+// const { suppliers } = useContext(SupplierContext);
+//     const [topSuppliers, setTopSuppliers] = useState([]);
+
+//     const calculateTopSuppliers = (suppliersArray) => {
+//         const supplierTransactions = {};
+
+//         suppliersArray?.forEach(supplier => {
+//             if (supplier.CompanyNmae) {
+//                 supplierTransactions[supplier.CompanyNmae] = (supplierTransactions[supplier.shipments.transactions] || 0) + 1;
+//             }
+//         });
+
+//         const sortedSuppliers = Object.entries(supplierTransactions)
+//             .sort(([, a], [, b]) => b - a)
+//             .slice(0, 5)
+//             .map(([CompanyNmae, transactions]) => ({ CompanyNmae, transactions }));
+
+//         setTopSuppliers(sortedSuppliers);
+//     };
+
+//     console.log("Top Suppliers", topSuppliers);
+
+//     useEffect(() => {
+//         if (suppliers) {
+//             calculateTopSuppliers(suppliers);
+//         } else {
+//             console.warn("Suppliers data is not available yet.");
+//         }
+//     }, [suppliers]); // useEffect dependency on suppliers
 
 
     // Colors for the charts
@@ -139,14 +156,14 @@ export default function Analytics() {
     return (
         <div className="bg-gray-100 min-h-screen py-12 px-4 sm:px-6 lg:px-8">
             <div className="w-full md:max-w-7xl  mx-auto">
-                <h1 className="text-xl md:text-4xl font-bold text-blue-600 mb-8 text-center">Analytics Dashboard</h1>
+                <h1 className="text-3xl md:text-4xl font-bold text-blue-600 mb-8 text-center">Analytics Dashboard</h1>
 
                 {/* Dashboard Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
 
                     {/* Daily Sales Chart */}
                     <div className="bg-white max-sm:w-full max-sm:text-sm rounded-lg shadow-xl p-1 md:p-6">
-                        <h2 className="text-lg md:text-2xl font-semibold text-gray-700 mb-4 flex items-center">
+                        <h2 className="text-2xl font-semibold text-gray-700 mb-4 flex items-center">
                             <FaChartBar className="mr-2" />
                             Daily Sales Overview
                         </h2>
@@ -188,7 +205,7 @@ export default function Analytics() {
                     )}
                     </div>
 
-                    {/* Top Suppliers */}
+                    {/* Top Suppliers
                     <div className="bg-white rounded-lg shadow-xl p-6">
                         <h2 className="text-2xl font-semibold text-gray-700 mb-4 flex items-center">
                             <FaTruck className="mr-2" />
@@ -211,7 +228,7 @@ export default function Analytics() {
                                         <tr key={index} className="hover:bg-gray-50">
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="text-sm font-medium text-gray-900">
-                                                    {supplier.name}
+                                                    {supplier.CompanyNmae}
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
@@ -224,7 +241,7 @@ export default function Analytics() {
                                 </tbody>
                             </table>
                         </div>
-                    </div>
+                    </div> */}
 
                     {/* Top Shopkeepers */}
                     <div className="bg-white rounded-lg shadow-xl p-6">
