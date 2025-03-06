@@ -29,7 +29,7 @@ export default function Inventory() {
                 consolidated[itemNameLower].lastUpdated = item.lastUpdated;
                 consolidated[itemNameLower]._id = item._id;
                 consolidated[itemNameLower.purchasePrice] = item.price;
-                console.log(item.price);
+                
             } else {
                 // New item
                 consolidated[itemNameLower] = { ...item };
