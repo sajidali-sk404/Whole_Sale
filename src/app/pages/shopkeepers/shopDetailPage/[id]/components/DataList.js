@@ -13,7 +13,7 @@ const DataList = ({ data, handleDelete }) => {
 
     return (
         <div className="bg-white rounded-lg shadow-sm p-4">
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center cursor-pointer" onClick={toggleDetails}>
                 <div className='flex items-center'>
                     <span className="text-sm text-gray-600 ml-2 flex items-center">
                          <FaCalendarAlt className="mr-1 text-gray-500" />
