@@ -4,7 +4,17 @@ import { XMarkIcon } from "@heroicons/react/24/outline";
 import { FaExclamationTriangle } from 'react-icons/fa';
 import axios from 'axios';
 
-const DeliveryDeleteConfirmation = ({ deliveryId, shopkeeperId, setShowDeleteConfirm, setDeliveriesData, setLoading, setError }) => {
+const DeliveryDeleteConfirmation = ({ deliveryId, shopkeeperId, setShowDeleteConfirm, setDeliveriesData, setError, fetchShopkeeperData }) => {
+
+    const [loading, setLoading] = useState(false);
+
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center h-auto">
+                <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
+            </div>
+        );
+    }
 
     const confirmDelete = async () => {
         setLoading(true);
@@ -13,6 +23,7 @@ const DeliveryDeleteConfirmation = ({ deliveryId, shopkeeperId, setShowDeleteCon
             if (response.status === 200) {
                 setDeliveriesData(prevDeliveries => prevDeliveries.filter(delivery => delivery._id !== deliveryId));
                 setShowDeleteConfirm(false);
+                fetchShopkeeperData();
             } else {
                 console.error("Delete failed:", response);
                 setError(`Failed to delete delivery: ${response.data?.message || 'Unknown error'}`);

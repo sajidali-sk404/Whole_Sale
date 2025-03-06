@@ -13,7 +13,7 @@ const DataList = ({ data, handleEdit, handleDelete, handleStatusEdit, handleItem
 
     return (
         <div className="bg-white rounded-lg shadow-sm p-4">
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center cursor-pointer" onClick={toggleDetails}>
                 <div className='flex items-center'>
                     <span className={`px-3 py-1 rounded-full text-sm transition-colors duration-200 ${data.status === 'Delivered'
                         ? 'bg-green-100 text-green-800 hover:bg-green-200'

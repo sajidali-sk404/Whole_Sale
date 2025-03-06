@@ -1,24 +1,17 @@
 'use client'
-import React, { useState, useContext, useEffect, use } from "react";
+import React, { useState, useCallback, useEffect, use } from "react";
 import { Bars3Icon } from "@heroicons/react/24/outline";
 import { FaMoneyBillWave, FaChartLine } from 'react-icons/fa'; // Icons
 import SideBar from "./components/SideBar";
 import AddOrderForm from "./components/AddOrderForm";
 import DataList from "./components/DataList";
-import EditOrderForm from "./components/EditOrderForm";
-import EditStatusForm from "./components/EditStatusForm";
-import EditItemStatusForm from "./components/EditItemStatusForm";
 import axios from "axios";
 import DeliveryDeleteConfirmation from "./components/DeliveryDeleteConfirmation";
 
 const Page = ({ params }) => {
   const param = use(params);
   const [currentShopkeeper, setCurrentShopkeeper] = useState(null);
-  const [showItemStatusForm, setShowItemStatusForm] = useState(false);
-  const [showStatusForm, setShowStatusForm] = useState(false);
   const [showForm, setShowForm] = useState(false);
-  const [showEditForm, setShowEditForm] = useState(false);
-  const [deliveryDataToEdit, setDeliveryDataToEdit] = useState(null);
   const [deliveriesData, setDeliveriesData] = useState([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [loading, setLoading] = useState(true);
@@ -37,44 +30,34 @@ const Page = ({ params }) => {
     }
   });
 
-  useEffect(() => {
-    const fetchShopkeeperData = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/shopkeeper/${param.id}`);
-        setCurrentShopkeeper(response.data);
-        setDeliveriesData(response.data.orders);
-      } catch (err) {
-        setError(err.message || "An error occurred while fetching data."); // Set error message
-        console.error(err);
-      } finally {
-        setLoading(false); // Stop loading
-      }
-    };
-    fetchShopkeeperData();
+  const fetchShopkeeperData = useCallback(async () => {
+    setError(null);
+    try {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/shopkeeper/${param.id}`);
+      setCurrentShopkeeper(response.data);
+      setDeliveriesData(response.data.orders);
+    } catch (err) {
+      setError(err.message || "An error occurred while fetching data.");
+      console.error(err);
+    }
   }, [param.id]);
+
+  useEffect(() => {
+    setLoading(true);
+    try {
+      fetchShopkeeperData();
+    } catch (err) {
+      setError(err.message || "An error occurred while fetching data.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, [param.id, fetchShopkeeperData]);
 
   const handleDeleteClick = (deliveryId) => {
     setDeleteDeliveryId(deliveryId);
     console.log(deliveryId)
     setShowDeleteConfirm(true);
-  };
-
-  const handleEditDelivery = (delivery) => {
-    setDeliveryDataToEdit(delivery);
-    setShowEditForm(true);
-    setShowForm(false);
-  };
-
-  const handleStatusEdit = (delivery) => {
-    setDeliveryDataToEdit(delivery);
-    setShowStatusForm(true);
-  };
-
-  const handleItemStatusEdit = (delivery) => {
-    setDeliveryDataToEdit(delivery);
-    setShowItemStatusForm(true);
   };
 
   if (loading) {
@@ -141,34 +124,7 @@ const Page = ({ params }) => {
             newData={newData}
             setNewData={setNewData}
             currentShopkeeper={currentShopkeeper}
-          />
-        )}
-
-        {showEditForm && deliveryDataToEdit && (
-          <EditOrderForm
-            setShowEditForm={setShowEditForm}
-            setDeliveriesData={setDeliveriesData}
-            id={param.id}
-            deliveryData={deliveryDataToEdit}
-            setShowForm={setShowForm}
-          />
-        )}
-
-        {showItemStatusForm && (
-          <EditItemStatusForm
-            setShowItemStatusForm={setShowItemStatusForm}
-            setDeliveriesData={setDeliveriesData}
-            id={param.id}
-            deliveryData={deliveryDataToEdit}
-          />
-        )}
-
-        {showStatusForm && (
-          <EditStatusForm
-            setShowStatusForm={setShowStatusForm}
-            setDeliveriesData={setDeliveriesData}
-            id={param.id}
-            deliveryData={deliveryDataToEdit}
+            fetchShopkeeperData={fetchShopkeeperData}
           />
         )}
 
@@ -182,10 +138,7 @@ const Page = ({ params }) => {
               <DataList
                 key={data._id} 
                 data={data}
-                handleEdit={handleEditDelivery}
                 handleDelete={handleDeleteClick}
-                handleStatusEdit={handleStatusEdit}
-                handleItemStatusEdit={handleItemStatusEdit}
               />
             ))}
         </div>
@@ -196,8 +149,8 @@ const Page = ({ params }) => {
             shopkeeperId={param.id} // Pass the shopkeeper ID!
             setShowDeleteConfirm={setShowDeleteConfirm}
             setDeliveriesData={setDeliveriesData}
-            setLoading={setLoading} // Pass setLoading
             setError={setError}     // Pass setError
+            fetchShopkeeperData={fetchShopkeeperData}
           />
         )}
 

@@ -4,14 +4,14 @@ import { XMarkIcon } from "@heroicons/react/24/outline";
 import { FaPlus, FaTruck, FaMoneyBillWave, FaClipboardCheck, FaFileInvoiceDollar, FaBoxOpen, FaCalendarAlt } from 'react-icons/fa';
 import axios from 'axios';
 
-const AddOrderForm = ({ setShowForm, newData, setNewData, setDeliveriesData, id, currentShopkeeper }) => {
+const AddOrderForm = ({ setShowForm, newData, setNewData, setDeliveriesData, id, currentShopkeeper, fetchShopkeeperData }) => {
 
     const [loading, setLoading] = useState(false);
 
     if (loading) {
         return (
-            <div className="flex justify-center items-center h-screen">
-                <div className="animate-spin rounded-full h-24 w-24 border-b-2 border-blue-500"></div>
+            <div className="flex justify-center items-center h-auto">
+                <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
             </div>
         );
     }
@@ -79,6 +79,7 @@ const AddOrderForm = ({ setShowForm, newData, setNewData, setDeliveriesData, id,
                 setDeliveriesData(response.data.shopkeeper.orders);
                 resetForm();
                 setShowForm(false);
+                fetchShopkeeperData();
             } else {
                 throw new Error("Failed to add order");
             }
