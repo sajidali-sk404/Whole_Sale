@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useContext, useEffect, use } from "react";
+import React, { useState, useCallback, useEffect, use } from "react";
 import { Bars3Icon } from "@heroicons/react/24/outline";
 import { FaMoneyBillWave, FaChartLine } from 'react-icons/fa'; // Icons
 import SideBar from "./components/SideBar";
@@ -37,23 +37,29 @@ const Page = ({ params }) => {
     }
   });
 
-  useEffect(() => {
-    const fetchShopkeeperData = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/shopkeeper/${param.id}`);
-        setCurrentShopkeeper(response.data);
-        setDeliveriesData(response.data.orders);
-      } catch (err) {
-        setError(err.message || "An error occurred while fetching data."); // Set error message
-        console.error(err);
-      } finally {
-        setLoading(false); // Stop loading
-      }
-    };
-    fetchShopkeeperData();
+  const fetchShopkeeperData = useCallback(async () => {
+    setError(null);
+    try {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/shopkeeper/${param.id}`);
+      setCurrentShopkeeper(response.data);
+      setDeliveriesData(response.data.orders);
+    } catch (err) {
+      setError(err.message || "An error occurred while fetching data.");
+      console.error(err);
+    }
   }, [param.id]);
+
+  useEffect(() => {
+    setLoading(true);
+    try {
+      fetchShopkeeperData();
+    } catch (err) {
+      setError(err.message || "An error occurred while fetching data.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, [param.id, fetchShopkeeperData]);
 
   const handleDeleteClick = (deliveryId) => {
     setDeleteDeliveryId(deliveryId);
@@ -141,6 +147,7 @@ const Page = ({ params }) => {
             newData={newData}
             setNewData={setNewData}
             currentShopkeeper={currentShopkeeper}
+            fetchShopkeeperData={fetchShopkeeperData}
           />
         )}
 
@@ -196,8 +203,8 @@ const Page = ({ params }) => {
             shopkeeperId={param.id} // Pass the shopkeeper ID!
             setShowDeleteConfirm={setShowDeleteConfirm}
             setDeliveriesData={setDeliveriesData}
-            setLoading={setLoading} // Pass setLoading
             setError={setError}     // Pass setError
+            fetchShopkeeperData={fetchShopkeeperData}
           />
         )}
 
