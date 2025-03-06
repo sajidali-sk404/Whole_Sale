@@ -4,7 +4,7 @@ import { PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { MdKeyboardDoubleArrowDown, MdKeyboardDoubleArrowUp } from "react-icons/md";
 import { FaTruck, FaMoneyBillWave, FaBoxOpen, FaFileInvoice, FaCalendarAlt } from 'react-icons/fa';
 
-const DataList = ({ data, handleEdit, handleDelete, handleStatusEdit, handleItemStatusEdit }) => {
+const DataList = ({ data, handleDelete }) => {
     const [showDetails, setShowDetails] = useState(false);
 
     const toggleDetails = () => {
@@ -15,15 +15,6 @@ const DataList = ({ data, handleEdit, handleDelete, handleStatusEdit, handleItem
         <div className="bg-white rounded-lg shadow-sm p-4">
             <div className="flex justify-between items-center">
                 <div className='flex items-center'>
-                    <span className={`px-3 py-1 rounded-full text-sm transition-colors duration-200 ${data.status === 'Delivered'
-                        ? 'bg-green-100 text-green-800 hover:bg-green-200'
-                        : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
-                        }`}
-                    >
-                        <button onClick={() => handleStatusEdit(data)}>
-                            {data.status}
-                        </button>
-                    </span>
                     <span className="text-sm text-gray-600 ml-2 flex items-center">
                          <FaCalendarAlt className="mr-1 text-gray-500" />
                         {new Date(data.date).toLocaleDateString()}
@@ -31,13 +22,6 @@ const DataList = ({ data, handleEdit, handleDelete, handleStatusEdit, handleItem
                 </div>
 
                 <div className="flex gap-2">
-                    <button
-                        className="text-blue-600 hover:text-blue-800 transition-colors duration-200"
-                        onClick={() => handleEdit(data)}
-                        title="Edit"
-                    >
-                        <PencilIcon className="w-5 h-5" />
-                    </button>
                     <button
                         onClick={() => handleDelete(data._id)}
                         className="text-red-600 hover:text-red-800 transition-colors duration-200"

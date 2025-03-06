@@ -5,20 +5,13 @@ import { FaMoneyBillWave, FaChartLine } from 'react-icons/fa'; // Icons
 import SideBar from "./components/SideBar";
 import AddOrderForm from "./components/AddOrderForm";
 import DataList from "./components/DataList";
-import EditOrderForm from "./components/EditOrderForm";
-import EditStatusForm from "./components/EditStatusForm";
-import EditItemStatusForm from "./components/EditItemStatusForm";
 import axios from "axios";
 import DeliveryDeleteConfirmation from "./components/DeliveryDeleteConfirmation";
 
 const Page = ({ params }) => {
   const param = use(params);
   const [currentShopkeeper, setCurrentShopkeeper] = useState(null);
-  const [showItemStatusForm, setShowItemStatusForm] = useState(false);
-  const [showStatusForm, setShowStatusForm] = useState(false);
   const [showForm, setShowForm] = useState(false);
-  const [showEditForm, setShowEditForm] = useState(false);
-  const [deliveryDataToEdit, setDeliveryDataToEdit] = useState(null);
   const [deliveriesData, setDeliveriesData] = useState([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [loading, setLoading] = useState(true);
@@ -65,22 +58,6 @@ const Page = ({ params }) => {
     setDeleteDeliveryId(deliveryId);
     console.log(deliveryId)
     setShowDeleteConfirm(true);
-  };
-
-  const handleEditDelivery = (delivery) => {
-    setDeliveryDataToEdit(delivery);
-    setShowEditForm(true);
-    setShowForm(false);
-  };
-
-  const handleStatusEdit = (delivery) => {
-    setDeliveryDataToEdit(delivery);
-    setShowStatusForm(true);
-  };
-
-  const handleItemStatusEdit = (delivery) => {
-    setDeliveryDataToEdit(delivery);
-    setShowItemStatusForm(true);
   };
 
   if (loading) {
@@ -151,34 +128,6 @@ const Page = ({ params }) => {
           />
         )}
 
-        {showEditForm && deliveryDataToEdit && (
-          <EditOrderForm
-            setShowEditForm={setShowEditForm}
-            setDeliveriesData={setDeliveriesData}
-            id={param.id}
-            deliveryData={deliveryDataToEdit}
-            setShowForm={setShowForm}
-          />
-        )}
-
-        {showItemStatusForm && (
-          <EditItemStatusForm
-            setShowItemStatusForm={setShowItemStatusForm}
-            setDeliveriesData={setDeliveriesData}
-            id={param.id}
-            deliveryData={deliveryDataToEdit}
-          />
-        )}
-
-        {showStatusForm && (
-          <EditStatusForm
-            setShowStatusForm={setShowStatusForm}
-            setDeliveriesData={setDeliveriesData}
-            id={param.id}
-            deliveryData={deliveryDataToEdit}
-          />
-        )}
-
         {/* Data List - Reverse the order here for display */}
         <div className="space-y-4">
           {deliveriesData
@@ -189,10 +138,7 @@ const Page = ({ params }) => {
               <DataList
                 key={data._id} 
                 data={data}
-                handleEdit={handleEditDelivery}
                 handleDelete={handleDeleteClick}
-                handleStatusEdit={handleStatusEdit}
-                handleItemStatusEdit={handleItemStatusEdit}
               />
             ))}
         </div>
