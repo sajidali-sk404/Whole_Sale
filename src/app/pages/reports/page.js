@@ -17,47 +17,50 @@ export default function Analytics() {
 
     useEffect(() => {
         // Daily Sales Calculation
-const calculateDailySales = (billsData, inventoryData) => { // Take billsData as input, and also inventoryData
-    if (!billsData || !inventoryData) {
-        console.warn("billsData or inventoryData is null or undefined in calculateDailySales");
-        return; // Exit the function if data is missing
-    }
-
-    const today = new Date();
-    const last7Days = Array.from({ length: 7 }, (_, i) => {
-        const date = new Date(today);
-        date.setDate(today.getDate() - i);
-        return date.toISOString().split('T')[0];
-    }).reverse();
-
-    const dailySalesData = last7Days.map(date => {
-        let dailyProfitForDate = 0; // Changed to profit
-
-        billsData?.forEach(bill => {
-            const billDateFormatted = new Date(bill.date).toISOString().split('T')[0];
-            if (billDateFormatted === date) {
-                bill.items?.forEach(item => { // Iterate through items in each bill
-                    const purchaseInfo = inventoryData[item.name]; // Look up the purchase price
-                        console.log("Purchase Info", purchaseInfo);
-                    if (purchaseInfo && purchaseInfo.purchasePrice !== undefined) {
-                        const profitPerItem = (item.salePrice * item.quantity) - (purchaseInfo.purchasePrice * item.quantity); // Calculate profit
-                        dailyProfitForDate += profitPerItem;
-                    } else {
-                        console.warn(`Purchase price not found for item: ${item.name}`);
-                        // Optionally, handle items with missing purchase prices (e.g., exclude from profit)
-                    }
-                });
+        const calculateDailySales = (billsData, inventoryData) => {
+            if (!billsData || !inventoryData) {
+              console.warn("billsData or inventoryData is null or undefined in calculateDailySales");
+              return;
             }
-        });
-
-        console.log("Daily Profit for", date, "is", dailyProfitForDate);
-
-        return { day: date.substring(0, 10), sales: Number(dailyProfitForDate) }; // Return profit
-    });
-
-    setDailySales(dailySalesData);
-    console.log("Daily Sales", dailySalesData);
-};
+          
+            const today = new Date();
+            const last7Days = Array.from({ length: 7 }, (_, i) => {
+              const date = new Date(today);
+              date.setDate(today.getDate() - i);
+              return date.toISOString().split('T')[0];
+            }).reverse();
+          
+            const dailySalesData = last7Days.map(date => {
+              let dailyTotalSales = 0;
+              let dailyTotalPurchaseCost = 0;
+          
+              billsData?.forEach(bill => {
+                const billDateFormatted = new Date(bill.date).toISOString().split('T')[0];
+                if (billDateFormatted === date) {
+                  bill.cart?.forEach(item => {
+                    dailyTotalSales += item.price * item.quantity;
+          
+                    const inventoryItem = inventoryData.find(invItem => invItem.itemName === item.name);
+                    if (inventoryItem && inventoryItem.purchasePrice !== undefined) {
+                      dailyTotalPurchaseCost += inventoryItem.purchasePrice * item.quantity;
+                      console.log("daily",dailyTotalPurchaseCost);
+                    } else {
+                      console.warn(`Purchase price not found for item: ${item.name}`);
+                      // Handle missing purchase price appropriately. Consider skipping this item or setting purchasePrice to 0
+                    }
+                  });
+                }
+              });
+          
+              const dailyProfit = dailyTotalSales - dailyTotalPurchaseCost;
+              console.log("Daily Profit sub", date, "is", dailyProfit);
+          
+              return { day: date.substring(0, 10), sales: Number(dailyProfit) };
+            });
+          
+            setDailySales(dailySalesData);
+            console.log("Daily Sales", dailySalesData);
+          };
           
         
        

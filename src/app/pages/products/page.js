@@ -28,7 +28,9 @@ export default function Inventory() {
                 // Optionally: Take the *last* value for properties like lastUpdated, or average them if it makes sense
                 consolidated[itemNameLower].lastUpdated = item.lastUpdated;
                 consolidated[itemNameLower]._id = item._id;
-                consolidated[itemNameLower.purchasePrice] = item.price;
+                consolidated[itemNameLower.purchasePrice] = item.purchasePrice;
+
+                console.log(item.purchasePrice);
                 
             } else {
                 // New item
@@ -38,7 +40,6 @@ export default function Inventory() {
 
         return Object.values(consolidated);  // Convert the object back to an array
     }, []);
-
     // Memoize the sorting function
     const sortInventoryData = useCallback((data, config) => {
         if (!data || data.length === 0 || !config.key) {
