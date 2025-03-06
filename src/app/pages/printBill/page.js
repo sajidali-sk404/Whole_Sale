@@ -176,10 +176,10 @@ const CustomerBilling = () => {
     }
     const item = inventoryData.find(item => item.itemName === newItem.name);
     if (item.quantity < newItem.quantity) {
-    alert("Quantity is greater than available stock")
-    return;
+      alert("Quantity is greater than available stock")
+      return;
     }
-      
+
     if (newItem.name && newItem.quantity && newItem.price) {
       setCart(prevCart => [...prevCart, { ...newItem, itemName: newItem.name, total: newItem.quantity * newItem.price }]);
       setNewItem({ name: "", quantity: "", price: "" });
@@ -218,7 +218,7 @@ const CustomerBilling = () => {
 
       }
     }
-   
+
 
     const updateQuantity = bill.cart.map(async (item) => {
       console.log("Processing cart item:", item.itemName, "Quantity:", item.quantity);
@@ -754,7 +754,7 @@ const CustomerBilling = () => {
               >
                 <option value="">Select Item</option>
                 {inventoryData.map((item, index) => (
-                  <option key={index} value={item.itemName}>{item.itemName} /{item.quantity}</option>
+                  <option key={index} value={item.itemName}>{item.itemName}: {item.quantity}</option>
                 ))}
               </select>
             </div>
@@ -905,16 +905,16 @@ const CustomerBilling = () => {
 
           <p className="text-lg font-semibold text-gray-700">Remaining: PKR {(((cart.reduce((acc, item) => acc + item.total, 0) - ((discountPercentage / 100) * cart.reduce((acc, item) => acc + item.total, 0))) + parseFloat(oldBalance || 0)) - parseFloat(customerGivenAmount || 0)).toFixed(2)}</p>
           <div className="flex justify-between">
-          <button
-            onClick={handleGenerateBill}
-            className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200 flex items-center"
-          >
-            <MdReceipt className="mr-2" />
-            Generate Bill
-          </button>
-          <div className="border bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200 flex items-center">
-          <Link href="/pages/getAllBills">All Bills</Link>
-          </div>
+            <button
+              onClick={handleGenerateBill}
+              className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200 flex items-center"
+            >
+              <MdReceipt className="mr-2" />
+              Generate Bill
+            </button>
+            <div className="border bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200 flex items-center">
+              <Link href="/pages/getAllBills">All Bills</Link>
+            </div>
           </div>
         </div>
 

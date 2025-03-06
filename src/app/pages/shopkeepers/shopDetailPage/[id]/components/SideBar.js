@@ -32,7 +32,7 @@ const SideBar = ({ setIsSidebarOpen, currentShopkeeper }) => {
                 <nav className="flex flex-col space-y-2">
                     {[
                         { href: '/', label: 'Home', icon: <FaHome /> },
-                        { href: '/pages/Shopkeepers', label: 'Shopkeepers', icon: <FaUsers /> },
+                        { href: '/pages/suppliers', label: 'Suppliers', icon: <FaUsers /> },
                         { href: '/pages/shopkeepers', label: 'Shopkeepers', icon: <FaUsersCog /> },
                         { href: '/pages/products', label: 'Inventory', icon: <FaBoxOpen /> },
                         { href: '/pages/transactions', label: 'Transactions', icon: <FaMoneyBillWave /> },
