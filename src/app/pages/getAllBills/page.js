@@ -24,7 +24,13 @@ function AllBills() {
 
     const handleDeleteBill = async (invoiceNo) => {
         try {
-          await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/bills/${invoiceNo}`);
+          const authToken = localStorage.getItem('authToken'); // Retrieve token from localStorage
+          await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/bills/${invoiceNo}`, { // Protected route
+            headers: {
+                'Authorization': `Bearer ${authToken}`, // Include token in Authorization header
+                'Content-Type': 'application/json', // Or any content type your API expects
+            },
+        });
           setBills((prevBills) => prevBills.filter((bill) => bill.invoiceNo !== invoiceNo));
         } catch (err) {
           console.error("Error deleting bill:", err);

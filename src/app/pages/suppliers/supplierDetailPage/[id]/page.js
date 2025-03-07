@@ -47,7 +47,13 @@ const Page = ({ params }) => {
       setLoading(true); // Start loading
       setError(null);    // Clear previous errors
       try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/supplier/${param.id}`);
+        const authToken = localStorage.getItem('authToken'); // Retrieve token from localStorage
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/supplier/${param.id}`, { // Protected route
+          headers: {
+              'Authorization': `Bearer ${authToken}`, // Include token in Authorization header
+              'Content-Type': 'application/json', // Or any content type your API expects
+          },
+      });
         setCurrentSupplier(response.data);
         setShipmentsData(response.data.shipments);
       } catch (err) {

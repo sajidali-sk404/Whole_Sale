@@ -23,7 +23,13 @@ const Expenses = () => {
         setLoading(true);
         setError(null);
         try {
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/expenses`);
+            const authToken = localStorage.getItem('authToken'); // Retrieve token from localStorage
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/expenses`, { // Protected route
+                headers: {
+                    'Authorization': `Bearer ${authToken}`, // Include token in Authorization header
+                    'Content-Type': 'application/json', // Or any content type your API expects
+                },
+            });
             setExpenses(response.data);
         } catch (err) {
             console.error("Error fetching expenses:", err);
@@ -52,9 +58,21 @@ const Expenses = () => {
 
         try {
             if (editExpenseId) {
-                await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/expenses/${editExpenseId}`, expenseData);
+                const authToken = localStorage.getItem('authToken'); // Retrieve token from localStorage
+                await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/expenses/${editExpenseId}`, expenseData, { // Protected route
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`, // Include token in Authorization header
+                        'Content-Type': 'application/json', // Or any content type your API expects
+                    },
+                });
             } else {
-                await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/expenses`, expenseData);
+                const authToken = localStorage.getItem('authToken'); // Retrieve token from localStorage
+                await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/expenses`, expenseData, { // Protected route
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`, // Include token in Authorization header
+                        'Content-Type': 'application/json', // Or any content type your API expects
+                    },
+                });
             }
             fetchExpenses();
             setDescription('');
@@ -74,7 +92,13 @@ const Expenses = () => {
         setLoading(true);
         setError(null);
         try {
-            await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/expenses/${id}`);
+            const authToken = localStorage.getItem('authToken'); // Retrieve token from localStorage
+            await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/expenses/${id}`, { // Protected route
+                headers: {
+                    'Authorization': `Bearer ${authToken}`, // Include token in Authorization header
+                    'Content-Type': 'application/json', // Or any content type your API expects
+                },
+            });
             fetchExpenses();
         } catch (err) {
             console.error("Error deleting expense:", err);

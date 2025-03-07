@@ -9,7 +9,13 @@ const ShipmentDeleteConfirmation = ({ shipmentId, supplierId, setShowDeleteConfi
     const confirmDelete = async () => {
         setLoading(true); // Set loading state *before* API call
         try {
-            const response = await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/supplier/${supplierId}/shipment/${shipmentId}`);
+            const authToken = localStorage.getItem('authToken'); // Retrieve token from localStorage
+            const response = await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/supplier/${supplierId}/shipment/${shipmentId}`, { // Protected route
+                headers: {
+                    'Authorization': `Bearer ${authToken}`, // Include token in Authorization header
+                    'Content-Type': 'application/json', // Or any content type your API expects
+                },
+            });
             if (response.status === 200) {
                 // Update shipments data *locally* for immediate feedback
                 setShipmentsData(prevShipments => prevShipments.filter(shipment => shipment._id !== shipmentId));

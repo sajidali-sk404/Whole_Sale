@@ -19,7 +19,13 @@ const DeliveryDeleteConfirmation = ({ deliveryId, shopkeeperId, setShowDeleteCon
     const confirmDelete = async () => {
         setLoading(true);
         try {
-            const response = await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/shopkeeper/${shopkeeperId}/delivery/${deliveryId}`);
+            const authToken = localStorage.getItem('authToken'); // Retrieve token from localStorage
+            const response = await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/shopkeeper/${shopkeeperId}/delivery/${deliveryId}`, { // Protected route
+                headers: {
+                    'Authorization': `Bearer ${authToken}`, // Include token in Authorization header
+                    'Content-Type': 'application/json', // Or any content type your API expects
+                },
+            });
             if (response.status === 200) {
                 setDeliveriesData(prevDeliveries => prevDeliveries.filter(delivery => delivery._id !== deliveryId));
                 setShowDeleteConfirm(false);

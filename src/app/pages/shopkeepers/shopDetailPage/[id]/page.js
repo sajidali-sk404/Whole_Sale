@@ -33,7 +33,13 @@ const Page = ({ params }) => {
   const fetchShopkeeperData = useCallback(async () => {
     setError(null);
     try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/shopkeeper/${param.id}`);
+      const authToken = localStorage.getItem('authToken'); // Retrieve token from localStorage
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/shopkeeper/${param.id}`, { // Protected route
+        headers: {
+            'Authorization': `Bearer ${authToken}`, // Include token in Authorization header
+            'Content-Type': 'application/json', // Or any content type your API expects
+        },
+    });
       setCurrentShopkeeper(response.data);
       setDeliveriesData(response.data.orders);
     } catch (err) {

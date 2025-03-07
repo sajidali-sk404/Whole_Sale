@@ -51,10 +51,15 @@ const AddShopkeeper = ({ setShowForm, refreshShopkeepers }) => {
     }
 
     try {
+      const authToken = localStorage.getItem('authToken'); // Retrieve token from localStorage
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/shopkeeper`,
-        formData
-      );
+        formData, { // Protected route
+          headers: {
+              'Authorization': `Bearer ${authToken}`, // Include token in Authorization header
+              'Content-Type': 'application/json', // Or any content type your API expects
+          },
+      });
       console.log("Shop added successfully", response.data);
       setSuccessMessage('Shopkeeper added successfully!'); // Set success message
 

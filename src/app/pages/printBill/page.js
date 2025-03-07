@@ -53,7 +53,13 @@ const CustomerBilling = () => {
       setLoading(true);
       setError(null);
       try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/billslatest`); // Make sure your backend is running on port 5000
+        const authToken = localStorage.getItem('authToken'); // Retrieve token from localStorage
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/billslatest`, { // Protected route
+          headers: {
+              'Authorization': `Bearer ${authToken}`, // Include token in Authorization header
+              'Content-Type': 'application/json', // Or any content type your API expects
+          },
+      }); // Make sure your backend is running on port 5000
         setBills(response.data);
         // Set initial invoiceNo based on existing bills
         if (response.data.length > 0) {
@@ -239,7 +245,13 @@ const CustomerBilling = () => {
         const newProduct = { ...product, quantity: newQuantity };
         console.log("Updating product:", newProduct.itemName, "New Quantity:", newQuantity, "Product ID:", newProduct._id);
         try {
-          const response = await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/inventory/${product._id}`, newProduct);
+          const authToken = localStorage.getItem('authToken'); // Retrieve token from localStorage
+          const response = await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/inventory/${product._id}`, newProduct, { // Protected route
+            headers: {
+                'Authorization': `Bearer ${authToken}`, // Include token in Authorization header
+                'Content-Type': 'application/json', // Or any content type your API expects
+            },
+        });
           console.log("Inventory update response:", response.status, response.data);
         } catch (error) {
           console.error("Error updating product quantity:", error);
@@ -248,7 +260,13 @@ const CustomerBilling = () => {
     })
 
     try {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/shopkeeper/${selectedShop._id}/delivery`, formData);
+      const authToken = localStorage.getItem('authToken'); // Retrieve token from localStorage
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/shopkeeper/${selectedShop._id}/delivery`, formData, { // Protected route
+        headers: {
+            'Authorization': `Bearer ${authToken}`, // Include token in Authorization header
+            'Content-Type': 'application/json', // Or any content type your API expects
+        },
+    });
       if (response.status === 201) {
         console.log("Order added successfully");
       } else {
@@ -298,7 +316,13 @@ const CustomerBilling = () => {
       };
 
       try {
-        const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/bills`, newBill); // Your API endpoint
+        const authToken = localStorage.getItem('authToken'); // Retrieve token from localStorage
+        const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/bills`, newBill, { // Protected route
+          headers: {
+              'Authorization': `Bearer ${authToken}`, // Include token in Authorization header
+              'Content-Type': 'application/json', // Or any content type your API expects
+          },
+      }); // Your API endpoint
 
         await handleAddData(newBill);
 

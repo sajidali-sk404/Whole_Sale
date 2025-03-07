@@ -52,9 +52,15 @@ const AddSupplier = ({ setShowForm, refreshSuppliers }) => { // Add refreshSuppl
     }
 
     try {
+      const authToken = localStorage.getItem('authToken'); // Retrieve token from localStorage
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/supplier`,
-        formData
+        formData, { // Protected route
+          headers: {
+              'Authorization': `Bearer ${authToken}`, // Include token in Authorization header
+              'Content-Type': 'application/json', // Or any content type your API expects
+          },
+      }
       );
       console.log("Company added successfully", response.data);
       setSuccessMessage('Supplier added successfully!'); // Set success message

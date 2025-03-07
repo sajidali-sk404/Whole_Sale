@@ -122,7 +122,13 @@ const EditOrderForm = ({ setShowEditForm, setShipmentsData, id, shipmentData, se
         }
 
         try {
-            const response = await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/supplier/${id}/shipment/${shipmentData._id}`, formData);
+            const authToken = localStorage.getItem('authToken'); // Retrieve token from localStorage
+            const response = await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/supplier/${id}/shipment/${shipmentData._id}`, formData, { // Protected route
+                headers: {
+                    'Authorization': `Bearer ${authToken}`, // Include token in Authorization header
+                    'Content-Type': 'application/json', // Or any content type your API expects
+                },
+            });
 
             if (response.status === 200) {
                 setLoading(false);

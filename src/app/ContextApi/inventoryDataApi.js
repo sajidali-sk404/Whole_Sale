@@ -11,7 +11,13 @@ export const InventoryProvider = ({ children }) => {
 
     const fetchInventoryData = useCallback(async () => {
         try {
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/inventory`);
+            const authToken = localStorage.getItem('authToken');
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/inventory`, {
+                headers: {
+                    'Authorization': `Bearer ${authToken}`,
+                    'Content-Type': 'application/json',
+                },
+            });
             setInventoryData(response.data);
             setTotalInventory(response.data.length);
         } catch (error) {

@@ -15,7 +15,13 @@ export const BillsProvider = ({ children }) => {
         const fetchBills = async () => {
             console.log("Fetching bills...", process.env.NEXT_PUBLIC_API_URL);
             try {
-                const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/bills`); // Make sure your backend is running on port 5000
+                const authToken = localStorage.getItem('authToken'); // Retrieve token from localStorage
+                const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/bills`, { // Protected route
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`, // Include token in Authorization header
+                        'Content-Type': 'application/json', // Or any content type your API expects
+                    },
+                }); // Make sure your backend is running on port 5000
                 setBills(response.data);
             } catch (err) {
                 console.error("Error fetching bills:", err);

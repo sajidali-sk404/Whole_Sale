@@ -7,7 +7,13 @@ import axios from 'axios';
 const DeleteConfirmation = ({ id, setShowDeleteConfirm, fetchShopkeepers, setShopkeepers }) => {
     const confirmDelete = async () => {
         try {
-            const response = await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/shopkeeper/${id}`);
+            const authToken = localStorage.getItem('authToken'); // Retrieve token from localStorage
+            const response = await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/shopkeeper/${id}`, { // Protected route
+                headers: {
+                    'Authorization': `Bearer ${authToken}`, // Include token in Authorization header
+                    'Content-Type': 'application/json', // Or any content type your API expects
+                },
+            });
             if (response.status === 200) {
                 setShopkeepers(prevShopkeepers => prevShopkeepers.filter(shop => shop._id !== id));
                 setShowDeleteConfirm(false);

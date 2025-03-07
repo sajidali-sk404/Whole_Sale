@@ -23,7 +23,13 @@ function SupplierManagement() {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/supplier`);
+      const authToken = localStorage.getItem('authToken'); // Retrieve token from localStorage
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/supplier`, { // Protected route
+        headers: {
+            'Authorization': `Bearer ${authToken}`, // Include token in Authorization header
+            'Content-Type': 'application/json', // Or any content type your API expects
+        },
+    });
       setSuppliers(response.data);
     } catch (error) {
       setError('Failed to fetch suppliers.');

@@ -10,7 +10,13 @@ export const SupplierProvider = ({ children }) => {
 
   const fetchSuppliers = useCallback(async () => {
     try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/supplier`)
+      const authToken = localStorage.getItem('authToken');
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/supplier`, { // Protected route
+        headers: {
+            'Authorization': `Bearer ${authToken}`, // Include token in Authorization header
+            'Content-Type': 'application/json', // Or any content type your API expects
+        },
+    })
       setSuppliers(response.data)
       setTotalSupplier(response.data.length)
 

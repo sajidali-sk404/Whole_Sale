@@ -105,7 +105,13 @@ const AddOrderForm = ({ setShowForm, newData, setNewData, setShipmentsData, id }
         formData.append('transactions[payments]', JSON.stringify(payments));
 
         try {
-            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/supplier/${id}/shipment`, formData);
+            const authToken = localStorage.getItem('authToken'); // Retrieve token from localStorage
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/supplier/${id}/shipment`, formData, { // Protected route
+                headers: {
+                    'Authorization': `Bearer ${authToken}`, // Include token in Authorization header
+                    'Content-Type': 'application/json', // Or any content type your API expects
+                },
+            });
 
             if (response.status === 201) {
                 setLoading(false);
