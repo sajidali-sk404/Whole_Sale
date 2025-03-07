@@ -92,7 +92,7 @@ const AddShopkeeper = ({ setShowForm, refreshShopkeepers }) => {
           setErrors({ api: 'No response received from the server. Please check your network connection.' });
 
       } else {
-        // Something happened in setting up the request that triggered an Error
+        // Something happened in setting up the request that triggered an Errorr
         console.log('Error', err.message);
            setErrors({ api: 'An unexpected error occurred.  Please try again.' });
       }
