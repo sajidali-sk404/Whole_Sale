@@ -41,7 +41,7 @@ const CustomerBilling = () => {
   const [filteredShops, setFilteredShops] = useState([]);
   const [selectedShop, setSelectedShop] = useState(null);
   const [showShopkeepers, setShowShopkeepers] = useState(false);
-  const [itemPrice, setItemPrice] = useState();
+
 
   const { inventoryData } = useContext(InventoryContext); // Access setInventoryData
   const { shops, setShops } = useContext(ShopContext);
@@ -83,7 +83,7 @@ const CustomerBilling = () => {
       setSelectedShop(null);
     }
   }, [customerName, shops]);
-  // console.log(shops);
+
 
   useEffect(() => {
     if (selectedShop) {
