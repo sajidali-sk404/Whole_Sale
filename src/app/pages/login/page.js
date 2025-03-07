@@ -42,7 +42,7 @@ const SignInPage = () => {
                 localStorage.setItem('userId', userId); // Store user ID if needed
 
                 console.log('Login successful:', data);
-                window.location.href = "http://localhost:3000/pages/dashboard"; // Redirect to dashboard
+                window.location.href = "/pages/dashboard"; // Redirect to dashboard
             } else {
                 const errorData = await response.json();
                 setError(errorData.message || 'Invalid email or password.');
