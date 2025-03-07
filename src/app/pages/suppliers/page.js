@@ -4,36 +4,51 @@ import AddSupplier from '@/app/components/AddSupplier';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import axios from 'axios';
-import { FaPlus, FaUser, FaBuilding } from 'react-icons/fa';
+import { FaPlus, FaUser, FaBuilding, FaSearch } from 'react-icons/fa'; // Added FaSearch
 import { TrashIcon } from "@heroicons/react/24/outline";
 import DeleteConfirmation from './component/DeleteConfirmation';
 
 function SupplierManagement() {
-  const [suppliers, setSuppliers] = useState([]); // Initialize as an empty array
+  const [suppliers, setSuppliers] = useState([]);
   const [showForm, setShowForm] = useState(false);
-  const [loading, setLoading] = useState(true); // Add loading state
-  const [error, setError] = useState(null); // Add error state
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredSuppliers, setFilteredSuppliers] = useState([]);
   const router = useRouter();
 
   const fetchSuppliers = useCallback(async () => {
-    setLoading(true); // Set loading to true before fetching
-    setError(null); // Clear any previous errors
+    setLoading(true);
+    setError(null);
     try {
       const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/supplier`);
       setSuppliers(response.data);
     } catch (error) {
-      setError('Failed to fetch suppliers.'); // Set a user-friendly error message
+      setError('Failed to fetch suppliers.');
       console.error(error);
     } finally {
-      setLoading(false); // Set loading to false after fetching (success or failure)
+      setLoading(false);
     }
   }, []);
 
   useEffect(() => {
     fetchSuppliers();
   }, [fetchSuppliers]);
+
+  useEffect(() => {
+    if (searchQuery) {
+      const filtered = suppliers.filter(supplier =>
+        supplier.companyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        supplier.owner.toLowerCase().includes(searchQuery.toLowerCase())
+        // Add other fields to search here
+      );
+      setFilteredSuppliers(filtered);
+    } else {
+      setFilteredSuppliers(suppliers);
+    }
+  }, [searchQuery, suppliers]);
 
   const handleAddSupplier = () => {
     setShowForm(true);
@@ -46,11 +61,11 @@ function SupplierManagement() {
   const handleSupplierClick = (supplierId) => {
     router.push(`/pages/suppliers/supplierDetailPage/${supplierId}`);
   };
-
   const handleDeleteClick = (id) => {
     setDeleteId(id);
     setShowDeleteConfirm(true);
   };
+
 
   if (loading) {
     return (
@@ -81,8 +96,20 @@ function SupplierManagement() {
       {/* Main Content Area */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-        {/* Add Supplier Button (with Icon) */}
-        <div className="mb-8 flex justify-start">
+        {/* Search Bar and Add Supplier Button */}
+        <div className="mb-8">
+          <div className="relative rounded-md shadow-sm w-full mb-4">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <FaSearch className="h-5 w-5 text-gray-400" aria-hidden="true" />
+            </div>
+            <input
+              type="text"
+              placeholder="Search suppliers..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-2"
+            />
+          </div>
           <button
             onClick={handleAddSupplier}
             className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200 flex items-center"
@@ -94,8 +121,8 @@ function SupplierManagement() {
 
         {/* Supplier Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {suppliers.length > 0 ? (
-            suppliers.map((supplier) => (
+          {filteredSuppliers.length > 0 ? (
+            filteredSuppliers.map((supplier) => (
               <motion.div
                 key={supplier._id}
                 whileHover={{ scale: 1.05, y: -5 }}
@@ -103,7 +130,7 @@ function SupplierManagement() {
                 onClick={() => handleSupplierClick(supplier._id)}
                 className="bg-white rounded-lg shadow-lg p-6 flex flex-col items-center text-center cursor-pointer transition-all duration-200 relative"
               >
-                <button
+                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     handleDeleteClick(supplier._id)
@@ -113,17 +140,14 @@ function SupplierManagement() {
                   <TrashIcon className="w-5 h-5" />
                 </button>
                 <div className="flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 text-blue-600 mb-4">
-                  {/* Use a building icon, or the first letter if you prefer */}
                   <FaBuilding className="text-2xl" />
-                  {/* {supplier.companyName.charAt(0)} */}
                 </div>
                 <h2 className="text-xl font-semibold text-gray-800">{supplier.companyName}</h2>
                 <p className="mt-1 text-gray-600">Owner: {supplier.owner}</p>
-                {/* You could add more details here, like contact info */}
               </motion.div>
             ))
           ) : (
-            <div className="col-span-full text-center text-gray-500">No suppliers found.</div>
+            <div className="col-span-full text-center text-gray-500">No suppliers found matching your search.</div>
           )}
         </div>
 
