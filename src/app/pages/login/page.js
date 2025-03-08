@@ -1,9 +1,11 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { FaUser, FaLock } from 'react-icons/fa';
 import Link from 'next/link';
+import { AuthContext } from '@/app/ContextApi/AuthContextApi';
 
 const SignInPage = () => {
+    const { login } = useContext(AuthContext)
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -36,10 +38,7 @@ const SignInPage = () => {
                 const role = data.role;      // Extract role from response
                 const userId = data.id;      // Extract user ID
 
-                // Store token and role in localStorage (or cookies/context - choose your method)
-                localStorage.setItem('authToken', token);
-                localStorage.setItem('userRole', role);
-                localStorage.setItem('userId', userId); // Store user ID if needed
+                await login(token, role, userId);
 
                 console.log('Login successful:', data);
                 window.location.href = "/pages/dashboard"; // Redirect to dashboard
