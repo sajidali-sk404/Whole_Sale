@@ -5,8 +5,11 @@ import { MdEmojiTransportation, MdOutlineInventory2, MdOutlinePeopleAlt } from "
 import { BiSolidReport } from "react-icons/bi";
 import Navbar from "@/app/components/Navbar";
 import { TypeAnimation } from 'react-type-animation';
+import { AuthContext } from "@/app/ContextApi/AuthContextApi";
+import { useContext } from "react";
 
 export default function Home() {
+  const {logout} = useContext(AuthContext);
   return (
     <>
       <Navbar />
@@ -38,6 +41,11 @@ export default function Home() {
 
               </span>
               <span className="block text-blue-600">Traders.</span>
+              <button 
+              className="text-sm bg-red-500 rounded-full p-2 hover:bg-red-600"
+              onClick={logout}>
+                Logout
+              </button>
             </h1>
           </div>
           {/* Feature Cards */}
