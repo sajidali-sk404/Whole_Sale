@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useContext } from 'react';
 import AddSupplier from '@/app/components/AddSupplier';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
@@ -7,8 +7,10 @@ import axios from 'axios';
 import { FaPlus, FaUser, FaBuilding, FaSearch } from 'react-icons/fa'; // Added FaSearch
 import { TrashIcon } from "@heroicons/react/24/outline";
 import DeleteConfirmation from './component/DeleteConfirmation';
+import { AuthContext } from '@/app/ContextApi/AuthContextApi';
 
 function SupplierManagement() {
+  const { isAuthenticated } = useContext(AuthContext);
   const [suppliers, setSuppliers] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -18,6 +20,13 @@ function SupplierManagement() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredSuppliers, setFilteredSuppliers] = useState([]);
   const router = useRouter();
+
+  if (!isAuthenticated) {
+    if (typeof window !== 'undefined') {
+      window.location.href = "/";
+    }
+    return null;
+  }
 
   const fetchSuppliers = useCallback(async () => {
     setLoading(true);

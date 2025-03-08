@@ -1,18 +1,18 @@
 'use client';
 import React, { useState, useRef, useEffect, useCallback, useContext } from "react";
 import { MdAddShoppingCart, MdReceipt } from "react-icons/md";
-import { FaUser, FaAddressCard, FaCalendarAlt, FaMoneyBillWave, FaTags, FaHandHoldingUsd,FaGift } from 'react-icons/fa';
+import { FaUser, FaAddressCard, FaCalendarAlt, FaMoneyBillWave, FaTags, FaHandHoldingUsd, FaGift } from 'react-icons/fa';
 import { InventoryContext } from "@/app/ContextApi/inventoryDataApi";
 import { ShopContext } from "@/app/ContextApi/shopkeepersDataApi";
 import axios from 'axios';
 import Link from "next/link";
+import { AuthContext } from "@/app/ContextApi/AuthContextApi";
 
 import FilteredShopsList from "./component/FilteredShopsList";
 import CartTable from "./component/CartTable";
 import BillDetails from "./component/BillDetails";
 
 const CustomerBilling = () => {
-
 
   const headerStyle = {
     backgroundImage: 'linear-gradient(to right, #6fa, #3b82f6)',
@@ -21,7 +21,9 @@ const CustomerBilling = () => {
     textAlign: 'center',
     marginBottom: '2rem',
     borderRadius: '0.75rem',
-};
+  };
+
+  const { isAuthenticated } = useContext(AuthContext);
   const [bills, setBills] = useState([]);
   const [invoiceNo, setInvoiceNo] = useState(1);
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
@@ -42,10 +44,16 @@ const CustomerBilling = () => {
   const [selectedShop, setSelectedShop] = useState(null);
   const [showShopkeepers, setShowShopkeepers] = useState(false);
 
-
   const { inventoryData } = useContext(InventoryContext); // Access setInventoryData
   const { shops, setShops } = useContext(ShopContext);
   const watermarkImageUrl = '/watermark_p.PNG';
+
+  if (!isAuthenticated) {
+    if (typeof window !== 'undefined') {
+      window.location.href = "/";
+    }
+    return null;
+  }
 
   // Fetch Bills from Backend (useEffect)
   useEffect(() => {
@@ -56,10 +64,10 @@ const CustomerBilling = () => {
         const authToken = localStorage.getItem('authToken'); // Retrieve token from localStorage
         const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/billslatest`, { // Protected route
           headers: {
-              'Authorization': `Bearer ${authToken}`, // Include token in Authorization header
-              'Content-Type': 'application/json', // Or any content type your API expects
+            'Authorization': `Bearer ${authToken}`, // Include token in Authorization header
+            'Content-Type': 'application/json', // Or any content type your API expects
           },
-      }); // Make sure your backend is running on port 5000
+        }); // Make sure your backend is running on port 5000
         setBills(response.data);
         // Set initial invoiceNo based on existing bills
         if (response.data.length > 0) {
@@ -248,10 +256,10 @@ const CustomerBilling = () => {
           const authToken = localStorage.getItem('authToken'); // Retrieve token from localStorage
           const response = await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/inventory/${product._id}`, newProduct, { // Protected route
             headers: {
-                'Authorization': `Bearer ${authToken}`, // Include token in Authorization header
-                'Content-Type': 'application/json', // Or any content type your API expects
+              'Authorization': `Bearer ${authToken}`, // Include token in Authorization header
+              'Content-Type': 'application/json', // Or any content type your API expects
             },
-        });
+          });
           console.log("Inventory update response:", response.status, response.data);
         } catch (error) {
           console.error("Error updating product quantity:", error);
@@ -263,10 +271,10 @@ const CustomerBilling = () => {
       const authToken = localStorage.getItem('authToken'); // Retrieve token from localStorage
       const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/shopkeeper/${selectedShop._id}/delivery`, formData, { // Protected route
         headers: {
-            'Authorization': `Bearer ${authToken}`, // Include token in Authorization header
-            'Content-Type': 'application/json', // Or any content type your API expects
+          'Authorization': `Bearer ${authToken}`, // Include token in Authorization header
+          'Content-Type': 'application/json', // Or any content type your API expects
         },
-    });
+      });
       if (response.status === 201) {
         console.log("Order added successfully");
       } else {
@@ -319,10 +327,10 @@ const CustomerBilling = () => {
         const authToken = localStorage.getItem('authToken'); // Retrieve token from localStorage
         const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/bills`, newBill, { // Protected route
           headers: {
-              'Authorization': `Bearer ${authToken}`, // Include token in Authorization header
-              'Content-Type': 'application/json', // Or any content type your API expects
+            'Authorization': `Bearer ${authToken}`, // Include token in Authorization header
+            'Content-Type': 'application/json', // Or any content type your API expects
           },
-      }); // Your API endpoint
+        }); // Your API endpoint
 
         await handleAddData(newBill);
 
@@ -774,327 +782,327 @@ const CustomerBilling = () => {
 
   return (
     <div className="bg-gray-50 min-h-screen py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-5xl mx-auto bg-white rounded-3xl shadow-2xl overflow-hidden">
+      <div className="max-w-5xl mx-auto bg-white rounded-3xl shadow-2xl overflow-hidden">
 
-            {/* Header Section */}
-            <header className="relative py-12" style={headerStyle}>
-                <div className="absolute inset-0 animate-pulse bg-gradient-to-r from-blue-400 via-purple-500 to-indigo-500 opacity-10"></div>
-                <div className="relative text-center">
-                    <h1 className="text-3xl font-extrabold">Customer Billing</h1>
-                    <p className="text-md mt-2 font-medium">Effortless billing for a better customer experience.</p>
-                </div>
-            </header>
+        {/* Header Section */}
+        <header className="relative py-12" style={headerStyle}>
+          <div className="absolute inset-0 animate-pulse bg-gradient-to-r from-blue-400 via-purple-500 to-indigo-500 opacity-10"></div>
+          <div className="relative text-center">
+            <h1 className="text-3xl font-extrabold">Customer Billing</h1>
+            <p className="text-md mt-2 font-medium">Effortless billing for a better customer experience.</p>
+          </div>
+        </header>
 
-            <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                {/* Left Column: Add Items and Customer Information */}
-                <div>
-                    {/* Add Items Section */}
-                    <section className="mb-6 p-6 bg-white rounded-2xl shadow-md border border-gray-100">
-                            <h2 className="text-xl font-semibold text-gray-800 mb-4">Add Items</h2>
-                            {errors.newItem && <p className="text-red-500 text-xs mt-1">{errors.newItem}</p>}
-                            <div className="grid grid-cols-1 gap-4">
-                                <div className="relative">
-                                    <label htmlFor="newItemName" className="block text-sm font-medium text-gray-700">
-                                        Select Item
-                                    </label>
-                                    <select
-                                        id="newItemName"
-                                        name="newItemName"
-                                        value={newItem.name}
-                                        onChange={handleInputChange}
-                                        className="mt-1 block w-full pl-3 pr-10 py-2 text-sm border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                                    >
-                                        <option value="">Choose an item</option>
-                                        {inventoryData.map((item, index) => (
-                                            <option key={index} value={item.itemName}>{item.itemName}: {item.itemName} ({item.quantity})</option>
-                                        ))}
-                                    </select>
-                                </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label htmlFor="newItemQuantity" className="block text-sm font-medium text-gray-700">Quantity</label>
-                                        <input
-                                            type="number"
-                                            name="newItemQuantity"
-                                            id="newItemQuantity"
-                                            placeholder="Enter quantity"
-                                            value={newItem.quantity}
-                                            onChange={handleInputChange}
-                                            className="mt-1 block w-full pl-3 pr-10 py-2 text-sm border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                                            min="1"
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label htmlFor="newItemPrice" className="block text-sm font-medium text-gray-700">Price</label>
-                                        <input
-                                            type="number"
-                                            name="newItemPrice"
-                                            id="newItemPrice"
-                                            placeholder="Enter price"
-                                            value={newItem.price}
-                                            onChange={handleInputChange}
-                                            className="mt-1 block w-full pl-3 pr-10 py-2 text-sm border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                                            min="0"
-                                            step="0.01"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="mt-6">
-                                <button
-                                    onClick={handleAddToCart}
-                                    className="w-full flex justify-center items-center px-4 py-3 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                                >
-                                    <MdAddShoppingCart className="mr-2" />
-                                    Add Item to Bill
-                                </button>
-                            </div>
-                        </section>
-
-                    {/* Current Bill Section */}
-                    <div className="mb-6 p-6 bg-white rounded-2xl shadow-md border border-gray-100">
-                        <h2 className="text-xl font-semibold text-gray-800 mb-4">Current Bill</h2>
-                        {errors.cart && <p className="text-red-500 text-xs mt-1">{errors.cart}</p>}
-                        <div className="overflow-x-auto">
-                            <table className="min-w-full divide-y divide-gray-200">
-                                <thead className="bg-gray-50">
-                                    <tr>
-                                        <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item Name</th>
-                                        <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
-                                        <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                                        <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-                                        <th scope="col" className="relative px-3 py-3">
-                                            <span className="sr-only">Remove</span>
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody className="bg-white divide-y divide-gray-200">
-                                    {cart.map((item, index) => (
-                                        <tr key={item.itemName} className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-gray-100 transition-colors duration-200`}>
-                                            <td className="px-3 py-2 whitespace-nowrap text-sm font-medium text-gray-900">{item.itemName}</td>
-                                            <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500">{item.quantity}</td>
-                                            <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500">PKR {item.price}</td>
-                                            <td className="px-3 py-2 whitespace-nowrap text-sm font-semibold text-gray-700">PKR {(item.price * item.quantity).toFixed(2)}</td>
-                                            <td className="px-3 py-2 whitespace-nowrap text-right text-sm font-medium">
-                                                <button
-                                                    onClick={() => handleRemoveItem(item.itemName)}
-                                                    className="text-red-600 hover:text-red-900 focus:outline-none"
-                                                >
-                                                    Remove
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+          {/* Left Column: Add Items and Customer Information */}
+          <div>
+            {/* Add Items Section */}
+            <section className="mb-6 p-6 bg-white rounded-2xl shadow-md border border-gray-100">
+              <h2 className="text-xl font-semibold text-gray-800 mb-4">Add Items</h2>
+              {errors.newItem && <p className="text-red-500 text-xs mt-1">{errors.newItem}</p>}
+              <div className="grid grid-cols-1 gap-4">
+                <div className="relative">
+                  <label htmlFor="newItemName" className="block text-sm font-medium text-gray-700">
+                    Select Item
+                  </label>
+                  <select
+                    id="newItemName"
+                    name="newItemName"
+                    value={newItem.name}
+                    onChange={handleInputChange}
+                    className="mt-1 block w-full pl-3 pr-10 py-2 text-sm border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                  >
+                    <option value="">Choose an item</option>
+                    {inventoryData.map((item, index) => (
+                      <option key={index} value={item.itemName}>{item.itemName}: {item.itemName} ({item.quantity})</option>
+                    ))}
+                  </select>
                 </div>
 
-                {/* Right Column: Customer Information and Bill Summary */}
-                <div>
-                    {/* Customer Information Section */}
-            
-                   <section className="mb-6 p-6 bg-white rounded-2xl shadow-md border border-gray-100">
-                            <h2 className="text-xl font-semibold text-gray-800 mb-4">Customer Information</h2>
-                            <div className="grid grid-cols-1 gap-y-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="newItemQuantity" className="block text-sm font-medium text-gray-700">Quantity</label>
+                    <input
+                      type="number"
+                      name="newItemQuantity"
+                      id="newItemQuantity"
+                      placeholder="Enter quantity"
+                      value={newItem.quantity}
+                      onChange={handleInputChange}
+                      className="mt-1 block w-full pl-3 pr-10 py-2 text-sm border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                      min="1"
+                    />
+                  </div>
 
-                                {/* Customer Name */}
-                                <div>
-                                    <label htmlFor="customerName" className="block text-sm font-medium text-gray-700 after:content-['*'] after:ml-0.5 after:text-red-500">
-                                        Customer Name
-                                    </label>
-                                    <div className="mt-1">
-                                        <input
-                                            type="text"
-                                            id="customerName"
-                                            name="customerName"
-                                            placeholder="Enter customer name"
-                                            value={customerName}
-                                            onChange={handleInputChange}
-                                            className={`shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 ${errors.customerName ? 'border-red-500' : ''}`}
-                                        />
-                                    </div>
-                                    {errors.customerName && <p className="text-red-500 text-xs mt-1">{errors.customerName}</p>}
-                                    {showShopkeepers && (
-                                        <FilteredShopsList filteredShops={filteredShops} handleShopSelect={handleShopSelect} />
-                                    )}
-                                </div>
-
-                                {/* Address and Date (Side-by-Side) */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-5">
-                                    <div>
-                                        <label htmlFor="address" className="block text-sm font-medium text-gray-700">Address</label>
-                                        <div className="mt-1">
-                                            <input
-                                                type="text"
-                                                id="address"
-                                                name="address"
-                                                placeholder="Enter address"
-                                                value={address}
-                                                onChange={handleInputChange}
-                                                className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <label htmlFor="date" className="block text-sm font-medium text-gray-700">Date</label>
-                                        <div className="mt-1">
-                                            <input
-                                                type="date"
-                                                id="date"
-                                                name="date"
-                                                value={date}
-                                                onChange={handleInputChange}
-                                                className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3"
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Old Balance and Discount Percentage (Side-by-Side) */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-5">
-                                    <div>
-                                        <label htmlFor="oldBalance" className="block text-sm font-medium text-gray-700">Old Balance</label>
-                                        <div className="mt-1 relative rounded-md shadow-sm">
-                                            <div className="pointer-events-none absolute inset-y-0 left-0 pl-3 flex items-center">
-                                                <span className="text-gray-500 sm:text-sm">PKR</span>
-                                            </div>
-                                            <input
-                                                type="number"
-                                                name="oldBalance"
-                                                id="oldBalance"
-                                                placeholder="Enter old balance"
-                                                value={oldBalance}
-                                                onChange={handleInputChange}
-                                                className="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-9 py-2 sm:text-sm border-gray-300 rounded-md ml-2"
-                                                step="0.01"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <label htmlFor="discountPercentage" className="block text-sm font-medium text-gray-700">Discount (%)</label>
-                                        <div className="mt-1 relative rounded-md shadow-sm">
-                                            <input
-                                                type="number"
-                                                name="discountPercentage"
-                                                id="discountPercentage"
-                                                placeholder="Enter discount percentage"
-                                                value={discountPercentage}
-                                                onChange={handleInputChange}
-                                                className="focus:ring-indigo-500 focus:border-indigo-500 block w-full pr-10 py-2 sm:text-sm border-gray-300 rounded-md "
-                                                min="0"
-                                                max="100"
-                                            />
-                                            <div className="pointer-events-none absolute inset-y-0 right-0 pr-3 flex items-center">
-                                                <span className="text-gray-500 sm:text-sm">%</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Given Amount */}
-                                <div>
-                                    <label htmlFor="customerGivenAmount" className="block text-sm font-medium text-gray-700">Given Amount</label>
-                                    <div className="mt-1 relative rounded-md shadow-sm">
-                                        <div className="pointer-events-none absolute inset-y-0 left-0 pl-3 flex items-center">
-                                            <span className="text-gray-500 sm:text-sm">PKR</span>
-                                        </div>
-                                        <input
-                                            type="number"
-                                            name="customerGivenAmount"
-                                            id="customerGivenAmount"
-                                            placeholder="Enter amount given by customer"
-                                            value={customerGivenAmount}
-                                            onChange={handleInputChange}
-                                            className="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-9 py-2 sm:text-sm border-gray-300 rounded-md ml-2"
-                                            step="0.01"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                        </section>
-
-                    {/* Bill Summary Section */}
-                    <section className="p-6 bg-gray-50 rounded-2xl shadow-md border border-gray-200">
-                            <h2 className="text-xl font-semibold text-gray-800 mb-4">Bill Summary</h2>
-                            <div className="space-y-3">
-                                <div className="flex justify-between items-center">
-                                    <span className="text-gray-700 font-medium">Total Amount:</span>
-                                    <span className="text-gray-900 font-semibold">PKR {cart.reduce((acc, item) => acc + (item.price * item.quantity), 0).toFixed(2)}</span>
-                                </div>
-
-                                <div className="flex justify-between items-center">
-                                    <span className="text-gray-700 font-medium">Discount:</span>
-                                    <span className="text-green-600 font-semibold">- PKR {((discountPercentage / 100) * cart.reduce((acc, item) => acc + (item.price * item.quantity), 0)).toFixed(2)}</span>
-                                </div>
-
-                                <div className="flex justify-between items-center">
-                                    <span className="text-gray-700 font-medium">Amount After Discount:</span>
-                                    <span className="text-gray-900 font-semibold">PKR {((cart.reduce((acc, item) => acc + (item.price * item.quantity), 0) * (1 - (discountPercentage / 100)))).toFixed(2)}</span>
-                                </div>
-
-                                <div className="flex justify-between items-center">
-                                    <span className="text-gray-700 font-medium">Old Balance:</span>
-                                    <span className="text-gray-900 font-semibold">PKR {oldBalance}</span>
-                                </div>
-
-                                <div className="flex justify-between items-center">
-                                    <span className="text-gray-700 font-medium">Given Amount:</span>
-                                    <span className="text-blue-600 font-semibold">- PKR {customerGivenAmount}</span>
-                                </div>
-
-                                <div className="flex justify-between items-center">
-                                    <span className="text-gray-700 font-bold text-lg">Net Amount:</span>
-                                    <span className="text-indigo-700 font-extrabold text-lg">PKR {(((cart.reduce((acc, item) => acc + (item.price * item.quantity), 0) * (1 - (discountPercentage / 100))) + parseFloat(oldBalance || 0)) - parseFloat(customerGivenAmount || 0)).toFixed(2)}</span>
-                                </div>
-                            </div>
-
-                            <div className="mt-6 flex justify-end">
-                                <button
-                                    onClick={handleGenerateBill}
-                                    className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
-                                >
-                                    <MdReceipt className="mr-2" />
-                                    Generate Bill
-                                </button>
-
-                                <Link href="/pages/getAllBills" legacyBehavior>
-                                    <a className="ml-3 inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200">
-                                        All Bills
-                                    </a>
-                                </Link>
-                            </div>
-                        </section>
+                  <div>
+                    <label htmlFor="newItemPrice" className="block text-sm font-medium text-gray-700">Price</label>
+                    <input
+                      type="number"
+                      name="newItemPrice"
+                      id="newItemPrice"
+                      placeholder="Enter price"
+                      value={newItem.price}
+                      onChange={handleInputChange}
+                      className="mt-1 block w-full pl-3 pr-10 py-2 text-sm border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
                 </div>
+              </div>
+              <div className="mt-6">
+                <button
+                  onClick={handleAddToCart}
+                  className="w-full flex justify-center items-center px-4 py-3 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                  <MdAddShoppingCart className="mr-2" />
+                  Add Item to Bill
+                </button>
+              </div>
+            </section>
+
+            {/* Current Bill Section */}
+            <div className="mb-6 p-6 bg-white rounded-2xl shadow-md border border-gray-100">
+              <h2 className="text-xl font-semibold text-gray-800 mb-4">Current Bill</h2>
+              {errors.cart && <p className="text-red-500 text-xs mt-1">{errors.cart}</p>}
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item Name</th>
+                      <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                      <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                      <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                      <th scope="col" className="relative px-3 py-3">
+                        <span className="sr-only">Remove</span>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {cart.map((item, index) => (
+                      <tr key={item.itemName} className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-gray-100 transition-colors duration-200`}>
+                        <td className="px-3 py-2 whitespace-nowrap text-sm font-medium text-gray-900">{item.itemName}</td>
+                        <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500">{item.quantity}</td>
+                        <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500">PKR {item.price}</td>
+                        <td className="px-3 py-2 whitespace-nowrap text-sm font-semibold text-gray-700">PKR {(item.price * item.quantity).toFixed(2)}</td>
+                        <td className="px-3 py-2 whitespace-nowrap text-right text-sm font-medium">
+                          <button
+                            onClick={() => handleRemoveItem(item.itemName)}
+                            className="text-red-600 hover:text-red-900 focus:outline-none"
+                          >
+                            Remove
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
+          </div>
 
-            {/* Bills List Section */}
-            <div className="p-8">
-                <section className="bg-white rounded-2xl shadow-md p-6">
-                    <h2 className="text-xl font-semibold text-gray-800 mb-4">Generated Bills</h2>
-                    <div className="overflow-x-auto">
-                        {bills.map((bill) => (
-                            <BillDetails
-                                key={bill.invoiceNo}
-                                bill={bill}
-                                showDetails={showDetails}
-                                toggleDetails={toggleDetails}
-                                handleDeleteBill={handleDeleteBill}
-                                handlePrint={handlePrint}
-                            />
-                        ))}
+          {/* Right Column: Customer Information and Bill Summary */}
+          <div>
+            {/* Customer Information Section */}
+
+            <section className="mb-6 p-6 bg-white rounded-2xl shadow-md border border-gray-100">
+              <h2 className="text-xl font-semibold text-gray-800 mb-4">Customer Information</h2>
+              <div className="grid grid-cols-1 gap-y-5">
+
+                {/* Customer Name */}
+                <div>
+                  <label htmlFor="customerName" className="block text-sm font-medium text-gray-700 after:content-['*'] after:ml-0.5 after:text-red-500">
+                    Customer Name
+                  </label>
+                  <div className="mt-1">
+                    <input
+                      type="text"
+                      id="customerName"
+                      name="customerName"
+                      placeholder="Enter customer name"
+                      value={customerName}
+                      onChange={handleInputChange}
+                      className={`shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 ${errors.customerName ? 'border-red-500' : ''}`}
+                    />
+                  </div>
+                  {errors.customerName && <p className="text-red-500 text-xs mt-1">{errors.customerName}</p>}
+                  {showShopkeepers && (
+                    <FilteredShopsList filteredShops={filteredShops} handleShopSelect={handleShopSelect} />
+                  )}
+                </div>
+
+                {/* Address and Date (Side-by-Side) */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-5">
+                  <div>
+                    <label htmlFor="address" className="block text-sm font-medium text-gray-700">Address</label>
+                    <div className="mt-1">
+                      <input
+                        type="text"
+                        id="address"
+                        name="address"
+                        placeholder="Enter address"
+                        value={address}
+                        onChange={handleInputChange}
+                        className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3"
+                      />
                     </div>
-                </section>
-            </div>
+                  </div>
+
+                  <div>
+                    <label htmlFor="date" className="block text-sm font-medium text-gray-700">Date</label>
+                    <div className="mt-1">
+                      <input
+                        type="date"
+                        id="date"
+                        name="date"
+                        value={date}
+                        onChange={handleInputChange}
+                        className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Old Balance and Discount Percentage (Side-by-Side) */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-5">
+                  <div>
+                    <label htmlFor="oldBalance" className="block text-sm font-medium text-gray-700">Old Balance</label>
+                    <div className="mt-1 relative rounded-md shadow-sm">
+                      <div className="pointer-events-none absolute inset-y-0 left-0 pl-3 flex items-center">
+                        <span className="text-gray-500 sm:text-sm">PKR</span>
+                      </div>
+                      <input
+                        type="number"
+                        name="oldBalance"
+                        id="oldBalance"
+                        placeholder="Enter old balance"
+                        value={oldBalance}
+                        onChange={handleInputChange}
+                        className="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-9 py-2 sm:text-sm border-gray-300 rounded-md ml-2"
+                        step="0.01"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label htmlFor="discountPercentage" className="block text-sm font-medium text-gray-700">Discount (%)</label>
+                    <div className="mt-1 relative rounded-md shadow-sm">
+                      <input
+                        type="number"
+                        name="discountPercentage"
+                        id="discountPercentage"
+                        placeholder="Enter discount percentage"
+                        value={discountPercentage}
+                        onChange={handleInputChange}
+                        className="focus:ring-indigo-500 focus:border-indigo-500 block w-full pr-10 py-2 sm:text-sm border-gray-300 rounded-md "
+                        min="0"
+                        max="100"
+                      />
+                      <div className="pointer-events-none absolute inset-y-0 right-0 pr-3 flex items-center">
+                        <span className="text-gray-500 sm:text-sm">%</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Given Amount */}
+                <div>
+                  <label htmlFor="customerGivenAmount" className="block text-sm font-medium text-gray-700">Given Amount</label>
+                  <div className="mt-1 relative rounded-md shadow-sm">
+                    <div className="pointer-events-none absolute inset-y-0 left-0 pl-3 flex items-center">
+                      <span className="text-gray-500 sm:text-sm">PKR</span>
+                    </div>
+                    <input
+                      type="number"
+                      name="customerGivenAmount"
+                      id="customerGivenAmount"
+                      placeholder="Enter amount given by customer"
+                      value={customerGivenAmount}
+                      onChange={handleInputChange}
+                      className="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-9 py-2 sm:text-sm border-gray-300 rounded-md ml-2"
+                      step="0.01"
+                    />
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Bill Summary Section */}
+            <section className="p-6 bg-gray-50 rounded-2xl shadow-md border border-gray-200">
+              <h2 className="text-xl font-semibold text-gray-800 mb-4">Bill Summary</h2>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-700 font-medium">Total Amount:</span>
+                  <span className="text-gray-900 font-semibold">PKR {cart.reduce((acc, item) => acc + (item.price * item.quantity), 0).toFixed(2)}</span>
+                </div>
+
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-700 font-medium">Discount:</span>
+                  <span className="text-green-600 font-semibold">- PKR {((discountPercentage / 100) * cart.reduce((acc, item) => acc + (item.price * item.quantity), 0)).toFixed(2)}</span>
+                </div>
+
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-700 font-medium">Amount After Discount:</span>
+                  <span className="text-gray-900 font-semibold">PKR {((cart.reduce((acc, item) => acc + (item.price * item.quantity), 0) * (1 - (discountPercentage / 100)))).toFixed(2)}</span>
+                </div>
+
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-700 font-medium">Old Balance:</span>
+                  <span className="text-gray-900 font-semibold">PKR {oldBalance}</span>
+                </div>
+
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-700 font-medium">Given Amount:</span>
+                  <span className="text-blue-600 font-semibold">- PKR {customerGivenAmount}</span>
+                </div>
+
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-700 font-bold text-lg">Net Amount:</span>
+                  <span className="text-indigo-700 font-extrabold text-lg">PKR {(((cart.reduce((acc, item) => acc + (item.price * item.quantity), 0) * (1 - (discountPercentage / 100))) + parseFloat(oldBalance || 0)) - parseFloat(customerGivenAmount || 0)).toFixed(2)}</span>
+                </div>
+              </div>
+
+              <div className="mt-6 flex justify-end">
+                <button
+                  onClick={handleGenerateBill}
+                  className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
+                >
+                  <MdReceipt className="mr-2" />
+                  Generate Bill
+                </button>
+
+                <Link href="/pages/getAllBills" legacyBehavior>
+                  <a className="ml-3 inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200">
+                    All Bills
+                  </a>
+                </Link>
+              </div>
+            </section>
+          </div>
         </div>
+
+        {/* Bills List Section */}
+        <div className="p-8">
+          <section className="bg-white rounded-2xl shadow-md p-6">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">Generated Bills</h2>
+            <div className="overflow-x-auto">
+              {bills.map((bill) => (
+                <BillDetails
+                  key={bill.invoiceNo}
+                  bill={bill}
+                  showDetails={showDetails}
+                  toggleDetails={toggleDetails}
+                  handleDeleteBill={handleDeleteBill}
+                  handlePrint={handlePrint}
+                />
+              ))}
+            </div>
+          </section>
+        </div>
+      </div>
     </div>
-);
+  );
 
 
 

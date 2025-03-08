@@ -5,15 +5,22 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, LineChart, Line } 
 import { FaChartBar, FaChartLine, FaTruck, FaStore } from 'react-icons/fa';
 import { BillContext } from "@/app/ContextApi/billsDataApi";      // Import BillContext
 import { InventoryContext } from "@/app/ContextApi/inventoryDataApi";
-// import { SupplierContext } from "@/app/ContextApi/SupplierDataApi";
+import { AuthContext } from "@/app/ContextApi/AuthContextApi";
 
 export default function Analytics() {
+    const { isAuthenticated } = useContext(AuthContext);
     const { Bills } = useContext(BillContext);  // Get Bills from BillContext
     const [dailySales, setDailySales] = useState([]);
     const [monthlySales, setMonthlySales] = useState([]);
     const [topShopkeepers, setTopShopkeepers] = useState([]);
     const { inventoryData } = useContext(InventoryContext);
- console.log("Inventory", inventoryData);
+
+    if (!isAuthenticated) {
+        if (typeof window !== 'undefined') {
+          window.location.href = "/";
+        }
+        return null;
+      }
 
     useEffect(() => {
         // Daily Sales Calculation

@@ -1,44 +1,52 @@
 "use client"
-import React,{useState, useEffect} from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 import axios from 'axios';
 import BillDetails from '../printBill/component/BillDetails';
 import SearchBar from './component/SearchBar';
-
+import { AuthContext } from '@/app/ContextApi/AuthContextApi';
 
 function AllBills() {
-    const [bills, setBills] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
-    const [invoiceNo, setInvoiceNo] = useState(0);
-    const [showDetails, setShowDetails] = useState({});
-    const watermarkImageUrl = '/watermark_p.PNG';
+  const { isAuthenticated } = useContext(AuthContext);
+  const [bills, setBills] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [invoiceNo, setInvoiceNo] = useState(0);
+  const [showDetails, setShowDetails] = useState({});
+  const watermarkImageUrl = '/watermark_p.PNG';
 
-    const toggleDetails = (invoiceNo) => {
-        setShowDetails((prevShowDetails) => ({
-          ...prevShowDetails,
-          [invoiceNo]: !prevShowDetails[invoiceNo],
-        }));
-      }
+  if (!isAuthenticated) {
+    if (typeof window !== 'undefined') {
+      window.location.href = "/";
+    }
+    return null;
+  }
 
-    
+  const toggleDetails = (invoiceNo) => {
+    setShowDetails((prevShowDetails) => ({
+      ...prevShowDetails,
+      [invoiceNo]: !prevShowDetails[invoiceNo],
+    }));
+  }
 
-    const handleDeleteBill = async (invoiceNo) => {
-        try {
-          const authToken = localStorage.getItem('authToken'); // Retrieve token from localStorage
-          await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/bills/${invoiceNo}`, { // Protected route
-            headers: {
-                'Authorization': `Bearer ${authToken}`, // Include token in Authorization header
-                'Content-Type': 'application/json', // Or any content type your API expects
-            },
-        });
-          setBills((prevBills) => prevBills.filter((bill) => bill.invoiceNo !== invoiceNo));
-        } catch (err) {
-          console.error("Error deleting bill:", err);
-        }
-      };
 
-      const handlePrint = (bills) => {
-        const printContent = `
+
+  const handleDeleteBill = async (invoiceNo) => {
+    try {
+      const authToken = localStorage.getItem('authToken'); // Retrieve token from localStorage
+      await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/bills/${invoiceNo}`, { // Protected route
+        headers: {
+          'Authorization': `Bearer ${authToken}`, // Include token in Authorization header
+          'Content-Type': 'application/json', // Or any content type your API expects
+        },
+      });
+      setBills((prevBills) => prevBills.filter((bill) => bill.invoiceNo !== invoiceNo));
+    } catch (err) {
+      console.error("Error deleting bill:", err);
+    }
+  };
+
+  const handlePrint = (bills) => {
+    const printContent = `
     <html lang="en">
       <head>
         <meta charset="UTF-8">
@@ -323,8 +331,8 @@ function AllBills() {
             </thead>
             <tbody>
               ${bills.cart
-            .map(
-              (item, index) => `
+        .map(
+          (item, index) => `
                             <tr key=${index}>
                                 <td>${item.quantity}</td>
                                 <td>${item.itemName}</td>
@@ -332,8 +340,8 @@ function AllBills() {
                                 <td>${item.total} PKR</td>
                             </tr>
                         `
-            )
-            .join('')}
+        )
+        .join('')}
             </tbody>
           </table>
           <table class="summary-table">
@@ -385,70 +393,70 @@ function AllBills() {
       </body>
     </html>
         `;
-    
-        const printWindow = window.open('', '', 'width=800,height=600');
-    
-        if (printWindow) {
-          printWindow.document.open();
-          printWindow.document.write(printContent);
-          printWindow.document.close();
-    
-          // Capture onafterprint inside the printWindow *before* calling print
-          printWindow.onafterprint = () => {
-            printWindow.close(); // Close the printWindow after printing
-          };
-    
-          printWindow.print();
-        } else {
-          alert('Failed to open print window. Please check your browser settings.');
-        }
+
+    const printWindow = window.open('', '', 'width=800,height=600');
+
+    if (printWindow) {
+      printWindow.document.open();
+      printWindow.document.write(printContent);
+      printWindow.document.close();
+
+      // Capture onafterprint inside the printWindow *before* calling print
+      printWindow.onafterprint = () => {
+        printWindow.close(); // Close the printWindow after printing
       };
 
+      printWindow.print();
+    } else {
+      alert('Failed to open print window. Please check your browser settings.');
+    }
+  };
 
-    useEffect(() => {
-        const fetchBills = async () => {
-          setLoading(true);
-          setError(null);
-          try {
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/bills`); // Make sure your backend is running on port 5000
-            setBills(response.data);
-            // Set initial invoiceNo based on existing bills
-            if (response.data.length > 0) {
-              setInvoiceNo(Math.max(...response.data.map(bills => bills.invoiceNo)) + 1);
-            } else {
-              setInvoiceNo(1); // Start with 1 if no bills exist
-            }
-          } catch (err) {
-            console.error("Error fetching bills:", err);
-            setError(err.message || "Failed to fetch bills");
-          } finally {
-            setLoading(false);
-          }
-        };
-    
-        fetchBills();
-      }, []);
+
+  useEffect(() => {
+    const fetchBills = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/bills`); // Make sure your backend is running on port 5000
+        setBills(response.data);
+        // Set initial invoiceNo based on existing bills
+        if (response.data.length > 0) {
+          setInvoiceNo(Math.max(...response.data.map(bills => bills.invoiceNo)) + 1);
+        } else {
+          setInvoiceNo(1); // Start with 1 if no bills exist
+        }
+      } catch (err) {
+        console.error("Error fetching bills:", err);
+        setError(err.message || "Failed to fetch bills");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBills();
+  }, []);
 
   return (
     <>
-    <div className='mb-5'><SearchBar /></div>
-    {/* Bills List */}
-        <div className='container mx-auto px-4 sm:px-8 max-w-4xl'>
-          <h2 className="text-xl font-semibold text-gray-700 mb-4">Generated Bills</h2>
-          <div className="overflow-x-auto">
-            {bills.map((bill) => (
-              <BillDetails
-                key={bill.invoiceNo}
-                bill={bill}
-                showDetails={showDetails}
-                toggleDetails={toggleDetails}
-                handleDeleteBill={handleDeleteBill}
-                handlePrint={handlePrint}
-              />
-            ))}
-          </div>
+      <div className='mb-5'><SearchBar /></div>
+      {/* Bills List */}
+      <div className='container mx-auto px-4 sm:px-8 max-w-4xl'>
+        <h2 className="text-xl font-semibold text-gray-700 mb-4">Generated Bills</h2>
+        <div className="overflow-x-auto">
+          {bills.map((bill) => (
+            <BillDetails
+              key={bill.invoiceNo}
+              bill={bill}
+              showDetails={showDetails}
+              toggleDetails={toggleDetails}
+              handleDeleteBill={handleDeleteBill}
+              handlePrint={handlePrint}
+            />
+          ))}
         </div>
-        </>
+      </div>
+    </>
   )
 }
 

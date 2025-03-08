@@ -1,10 +1,12 @@
 'use client'
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useContext } from 'react';
 import { FaEdit, FaTrash, FaChevronDown, FaChevronRight } from 'react-icons/fa';
 import axios from 'axios';
+import { AuthContext } from '@/app/ContextApi/AuthContextApi';
 
 const Expenses = () => {
+    const { isAuthenticated } = useContext(AuthContext);
     const [expenses, setExpenses] = useState([]);
     const [description, setDescription] = useState('');
     const [amount, setAmount] = useState('');
@@ -18,6 +20,13 @@ const Expenses = () => {
     useEffect(() => {
         fetchExpenses();
     }, []);
+
+    if (!isAuthenticated) {
+        if (typeof window !== 'undefined') {
+            window.location.href = "/";
+        }
+        return null;
+    }
 
     const fetchExpenses = async () => {
         setLoading(true);

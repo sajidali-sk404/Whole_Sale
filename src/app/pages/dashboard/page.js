@@ -9,7 +9,26 @@ import { AuthContext } from "@/app/ContextApi/AuthContextApi";
 import { useContext } from "react";
 
 export default function Home() {
-  const {logout} = useContext(AuthContext);
+  const { logout, isAuthenticated, loading } = useContext(AuthContext);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+          <p className="text-gray-600">Verifying authentication...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    if (typeof window !== 'undefined') {
+      window.location.href = "/";
+    }
+    return null;
+  }
+
   return (
     <>
       <Navbar />

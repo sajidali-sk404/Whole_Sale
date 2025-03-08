@@ -3,12 +3,21 @@ import React from "react";
 import { useContext, useState, useEffect } from "react";
 import { SupplierContext } from "@/app/ContextApi/SupplierDataApi";
 import { FaChevronDown, FaChevronRight, FaPlusCircle } from 'react-icons/fa'; // Example icons
+import { AuthContext } from "@/app/ContextApi/AuthContextApi";
 
 export default function FinancialTransactions() {
+  const { isAuthenticated } = useContext(AuthContext);
   const { suppliers, fetchSuppliers } = useContext(SupplierContext);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [expandedSuppliers, setExpandedSuppliers] = useState({});
+
+  if (!isAuthenticated) {
+    if (typeof window !== 'undefined') {
+      window.location.href = "/";
+    }
+    return null;
+  }
 
   useEffect(() => {
       if (fetchSuppliers) {
