@@ -56,14 +56,6 @@ export const BillsProvider = ({ children }) => {
 
     return (
         <BillContext.Provider value={contextValue}>
-            {loading && (
-                <div className="flex items-center justify-center p-4">
-                    <div className="text-center">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mb-2"></div>
-                        <p className="text-gray-600">Loading bills data...</p>
-                    </div>
-                </div>
-            )}
             {error && (
                 <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
                     <strong className="font-bold">Error: </strong>

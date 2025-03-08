@@ -10,7 +10,7 @@ import DeleteConfirmation from './component/DeleteConfirmation';
 import { AuthContext } from '@/app/ContextApi/AuthContextApi';
 
 function SupplierManagement() {
-  const { isAuthenticated } = useContext(AuthContext);
+  const { isAuthenticated, userRole } = useContext(AuthContext);
   const [suppliers, setSuppliers] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -28,6 +28,13 @@ function SupplierManagement() {
     return null;
   }
 
+  if (userRole === 'user') {
+    if (typeof window !== 'undefined') {
+      window.location.href = "/";
+    }
+    return null;
+  }
+
   const fetchSuppliers = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -35,10 +42,10 @@ function SupplierManagement() {
       const authToken = localStorage.getItem('authToken'); // Retrieve token from localStorage
       const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/supplier`, { // Protected route
         headers: {
-            'Authorization': `Bearer ${authToken}`, // Include token in Authorization header
-            'Content-Type': 'application/json', // Or any content type your API expects
+          'Authorization': `Bearer ${authToken}`, // Include token in Authorization header
+          'Content-Type': 'application/json', // Or any content type your API expects
         },
-    });
+      });
       setSuppliers(response.data);
     } catch (error) {
       setError('Failed to fetch suppliers.');
@@ -145,7 +152,7 @@ function SupplierManagement() {
                 onClick={() => handleSupplierClick(supplier._id)}
                 className="bg-white rounded-lg shadow-lg p-6 flex flex-col items-center text-center cursor-pointer transition-all duration-200 relative"
               >
-                 <button
+                <button
                   onClick={(e) => {
                     e.stopPropagation();
                     handleDeleteClick(supplier._id)

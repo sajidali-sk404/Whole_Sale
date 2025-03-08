@@ -6,7 +6,7 @@ import axios from 'axios';
 import { AuthContext } from '@/app/ContextApi/AuthContextApi';
 
 const Expenses = () => {
-    const { isAuthenticated } = useContext(AuthContext);
+    const { isAuthenticated, userRole } = useContext(AuthContext);
     const [expenses, setExpenses] = useState([]);
     const [description, setDescription] = useState('');
     const [amount, setAmount] = useState('');
@@ -22,6 +22,13 @@ const Expenses = () => {
     }, []);
 
     if (!isAuthenticated) {
+        if (typeof window !== 'undefined') {
+            window.location.href = "/";
+        }
+        return null;
+    }
+
+    if (userRole === 'user') {
         if (typeof window !== 'undefined') {
             window.location.href = "/";
         }

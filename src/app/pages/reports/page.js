@@ -8,7 +8,7 @@ import { InventoryContext } from "@/app/ContextApi/inventoryDataApi";
 import { AuthContext } from "@/app/ContextApi/AuthContextApi";
 
 export default function Analytics() {
-    const { isAuthenticated } = useContext(AuthContext);
+    const { isAuthenticated, userRole } = useContext(AuthContext);
     const { Bills } = useContext(BillContext);  // Get Bills from BillContext
     const [dailySales, setDailySales] = useState([]);
     const [monthlySales, setMonthlySales] = useState([]);
@@ -17,66 +17,73 @@ export default function Analytics() {
 
     if (!isAuthenticated) {
         if (typeof window !== 'undefined') {
-          window.location.href = "/";
+            window.location.href = "/";
         }
         return null;
-      }
+    }
+
+    if (userRole === 'user') {
+        if (typeof window !== 'undefined') {
+            window.location.href = "/";
+        }
+        return null;
+    }
 
     useEffect(() => {
         // Daily Sales Calculation
         const calculateDailySales = (billsData, inventoryData) => {
             if (!billsData || !inventoryData) {
-              console.warn("billsData or inventoryData is null or undefined in calculateDailySales");
-              return;
+                console.warn("billsData or inventoryData is null or undefined in calculateDailySales");
+                return;
             }
-          
+
             const today = new Date();
             const last7Days = Array.from({ length: 7 }, (_, i) => {
-              const date = new Date(today);
-              date.setDate(today.getDate() - i);
-              return date.toISOString().split('T')[0];
+                const date = new Date(today);
+                date.setDate(today.getDate() - i);
+                return date.toISOString().split('T')[0];
             }).reverse();
-          
+
             const dailySalesData = last7Days.map(date => {
-              let dailyTotalSales = 0;
-              let dailyTotalPurchaseCost = 0;
-          
-              billsData?.forEach(bill => {
-                const billDateFormatted = new Date(bill.date).toISOString().split('T')[0];
-                if (billDateFormatted === date) {
-                  bill.cart?.forEach(item => {
-                    dailyTotalSales += item.price * item.quantity;
-          
-                    const inventoryItem = inventoryData.find(invItem => invItem.itemName === item.name);
-                    if (inventoryItem && inventoryItem.purchasePrice !== undefined) {
-                      dailyTotalPurchaseCost += inventoryItem.purchasePrice * item.quantity;
-                      console.log("daily",dailyTotalPurchaseCost);
-                    } else {
-                      console.warn(`Purchase price not found for item: ${item.name}`);
-                      // Handle missing purchase price appropriately. Consider skipping this item or setting purchasePrice to 0
+                let dailyTotalSales = 0;
+                let dailyTotalPurchaseCost = 0;
+
+                billsData?.forEach(bill => {
+                    const billDateFormatted = new Date(bill.date).toISOString().split('T')[0];
+                    if (billDateFormatted === date) {
+                        bill.cart?.forEach(item => {
+                            dailyTotalSales += item.price * item.quantity;
+
+                            const inventoryItem = inventoryData.find(invItem => invItem.itemName === item.name);
+                            if (inventoryItem && inventoryItem.purchasePrice !== undefined) {
+                                dailyTotalPurchaseCost += inventoryItem.purchasePrice * item.quantity;
+                                console.log("daily", dailyTotalPurchaseCost);
+                            } else {
+                                console.warn(`Purchase price not found for item: ${item.name}`);
+                                // Handle missing purchase price appropriately. Consider skipping this item or setting purchasePrice to 0
+                            }
+                        });
                     }
-                  });
-                }
-              });
-          
-              const dailyProfit = dailyTotalSales - dailyTotalPurchaseCost;
-              console.log("Daily Profit sub", date, "is", dailyProfit);
-          
-              return { day: date.substring(0, 10), sales: Number(dailyProfit) };
+                });
+
+                const dailyProfit = dailyTotalSales - dailyTotalPurchaseCost;
+                console.log("Daily Profit sub", date, "is", dailyProfit);
+
+                return { day: date.substring(0, 10), sales: Number(dailyProfit) };
             });
-          
+
             setDailySales(dailySalesData);
             console.log("Daily Sales", dailySalesData);
-          };
-          
-        
-       
+        };
+
+
+
         // Monthly Revenue Calculation
         const calculateMonthlyRevenue = (billsData) => { // Take billsData as input
             if (!billsData) {
                 console.warn("billsData is null or undefined in calculateMonthlyRevenue");
                 return; // Exit the function if billsData is missing
-              }
+            }
             const currentYear = new Date().getFullYear();
             const months = Array.from({ length: 12 }, (_, i) => {
                 return new Date(currentYear, i, 1).toLocaleString('default', { month: 'short' });
@@ -115,49 +122,49 @@ export default function Analytics() {
 
         // Check if Bills is defined before running calculations
         if (Bills && inventoryData) {
-            calculateDailySales(Bills,inventoryData);  // Run calculations
+            calculateDailySales(Bills, inventoryData);  // Run calculations
             calculateMonthlyRevenue(Bills);
             calculateTopShopkeepers(Bills);
         } else {
             console.warn("Bills data is not available yet.");
         }
 
-        
-        
+
+
     }, [Bills]); // Dependency on Bills and BillsData
-    
 
-    
- 
-// const { suppliers } = useContext(SupplierContext);
-//     const [topSuppliers, setTopSuppliers] = useState([]);
 
-//     const calculateTopSuppliers = (suppliersArray) => {
-//         const supplierTransactions = {};
 
-//         suppliersArray?.forEach(supplier => {
-//             if (supplier.CompanyNmae) {
-//                 supplierTransactions[supplier.CompanyNmae] = (supplierTransactions[supplier.shipments.transactions] || 0) + 1;
-//             }
-//         });
 
-//         const sortedSuppliers = Object.entries(supplierTransactions)
-//             .sort(([, a], [, b]) => b - a)
-//             .slice(0, 5)
-//             .map(([CompanyNmae, transactions]) => ({ CompanyNmae, transactions }));
+    // const { suppliers } = useContext(SupplierContext);
+    //     const [topSuppliers, setTopSuppliers] = useState([]);
 
-//         setTopSuppliers(sortedSuppliers);
-//     };
+    //     const calculateTopSuppliers = (suppliersArray) => {
+    //         const supplierTransactions = {};
 
-//     console.log("Top Suppliers", topSuppliers);
+    //         suppliersArray?.forEach(supplier => {
+    //             if (supplier.CompanyNmae) {
+    //                 supplierTransactions[supplier.CompanyNmae] = (supplierTransactions[supplier.shipments.transactions] || 0) + 1;
+    //             }
+    //         });
 
-//     useEffect(() => {
-//         if (suppliers) {
-//             calculateTopSuppliers(suppliers);
-//         } else {
-//             console.warn("Suppliers data is not available yet.");
-//         }
-//     }, [suppliers]); // useEffect dependency on suppliers
+    //         const sortedSuppliers = Object.entries(supplierTransactions)
+    //             .sort(([, a], [, b]) => b - a)
+    //             .slice(0, 5)
+    //             .map(([CompanyNmae, transactions]) => ({ CompanyNmae, transactions }));
+
+    //         setTopSuppliers(sortedSuppliers);
+    //     };
+
+    //     console.log("Top Suppliers", topSuppliers);
+
+    //     useEffect(() => {
+    //         if (suppliers) {
+    //             calculateTopSuppliers(suppliers);
+    //         } else {
+    //             console.warn("Suppliers data is not available yet.");
+    //         }
+    //     }, [suppliers]); // useEffect dependency on suppliers
 
 
     // Colors for the charts
@@ -179,18 +186,18 @@ export default function Analytics() {
                         </h2>
 
                         {dailySales.length === 0 ? (
-                    <p>Loading chart...</p>
-                    ) : (
-                        <div className="max-lg:overflow-x-auto">
-                    <BarChart width={575} height={300} data={dailySales} margin={{ top: 20, right: 40, left: 20, bottom: 5 }}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="day" tick={{ fill: '#6B7280' }} />
-                        <YAxis tick={{ fill: '#6B7280' }} />
-                        <Tooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #ddd' }} />
-                        <Bar dataKey="sales" fill="#8884d8" />
-                    </BarChart>
-                    </div>
-                )}
+                            <p>Loading chart...</p>
+                        ) : (
+                            <div className="max-lg:overflow-x-auto">
+                                <BarChart width={575} height={300} data={dailySales} margin={{ top: 20, right: 40, left: 20, bottom: 5 }}>
+                                    <CartesianGrid strokeDasharray="3 3" />
+                                    <XAxis dataKey="day" tick={{ fill: '#6B7280' }} />
+                                    <YAxis tick={{ fill: '#6B7280' }} />
+                                    <Tooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #ddd' }} />
+                                    <Bar dataKey="sales" fill="#8884d8" />
+                                </BarChart>
+                            </div>
+                        )}
                     </div>
 
                     {/* Monthly Revenue Chart */}
@@ -201,18 +208,18 @@ export default function Analytics() {
                         </h2>
 
                         {monthlySales.length === 0 ? (
-                    <p>Loading chart...</p>
-                    ) : (
-                        <div className="max-lg:overflow-x-auto">
-                        <LineChart width={575} height={300}  data={monthlySales} margin={{ top: 20, right: 40, left: 20, bottom: 5 }}>
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="month" tick={{ fill: '#6B7280' }} />
-                            <YAxis tick={{ fill: '#6B7280' }} />
-                            <Tooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #ddd' }} />
-                            <Line type="monotone" dataKey="revenue" stroke="#82ca9d" strokeWidth={2} />
-                        </LineChart>
-                        </div>
-                    )}
+                            <p>Loading chart...</p>
+                        ) : (
+                            <div className="max-lg:overflow-x-auto">
+                                <LineChart width={575} height={300} data={monthlySales} margin={{ top: 20, right: 40, left: 20, bottom: 5 }}>
+                                    <CartesianGrid strokeDasharray="3 3" />
+                                    <XAxis dataKey="month" tick={{ fill: '#6B7280' }} />
+                                    <YAxis tick={{ fill: '#6B7280' }} />
+                                    <Tooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #ddd' }} />
+                                    <Line type="monotone" dataKey="revenue" stroke="#82ca9d" strokeWidth={2} />
+                                </LineChart>
+                            </div>
+                        )}
                     </div>
 
                     {/* Top Suppliers

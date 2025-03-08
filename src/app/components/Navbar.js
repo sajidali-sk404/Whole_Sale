@@ -7,6 +7,7 @@ import { BillContext } from "../ContextApi/billsDataApi";
 import { FaShoppingCart, FaChartLine, FaBuilding, FaUserFriends } from 'react-icons/fa';
 import Link from "next/link";
 import { TypeAnimation } from 'react-type-animation';
+import { AuthContext } from "../ContextApi/AuthContextApi";
 
 const LoadingSpinner = ({ text }) => (
   <div className="flex items-center space-x-2">
@@ -24,6 +25,7 @@ const Card = ({ title, value, icon: Icon }) => (
 );
 
 const Navbar = () => {
+  const {userRole}=useContext(AuthContext);
   const { totalInventory, inventoryData } = useContext(InventoryContext);
   const { totalSupplier } = useContext(SupplierContext);
   const { totalShop } = useContext(ShopContext);
@@ -135,6 +137,7 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {handleError()}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+
           <Link href="/pages/products">
             <div className="p-6 bg-white flex flex-col items-center h-full rounded-lg shadow-xl transition-all duration-300 hover:shadow-2xl hover:scale-105 cursor-pointer">
               <FaShoppingCart className="text-4xl text-blue-600 mb-4" />
@@ -159,6 +162,7 @@ const Navbar = () => {
             </div>
           </Link>
 
+          {userRole === "admin" && 
           <Link href="/pages/reports">
             <div className="p-6 bg-white flex flex-col items-center h-full rounded-lg shadow-xl transition-all duration-300 hover:shadow-2xl hover:scale-105 cursor-pointer">
               <FaChartLine className="text-4xl text-blue-600 mb-4" />
@@ -173,15 +177,17 @@ const Navbar = () => {
                 </div>
               </div>
             </div>
-          </Link>
+          </Link>}
 
+          {userRole === "admin" && 
           <Link href="/pages/suppliers">
             <Card
               title="Total Suppliers"
               value={loading ? <LoadingSpinner text="Loading suppliers..." /> : supplierValue}
               icon={FaBuilding}
             />
-          </Link>
+          </Link>}
+
           <Link href="/pages/shopkeepers">
             <Card
               title="Local Customers"
@@ -189,6 +195,7 @@ const Navbar = () => {
               icon={FaUserFriends}
             />
           </Link>
+
         </div>
       </div>
     </nav>
