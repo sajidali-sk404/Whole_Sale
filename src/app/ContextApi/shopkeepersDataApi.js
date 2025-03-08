@@ -1,61 +1,69 @@
 'use client'
-import { createContext, useState, useCallback, useEffect } from 'react'
+import { createContext, useState, useCallback, useEffect, useContext, useMemo } from 'react'
 import axios from 'axios'
+import { AuthContext } from './AuthContextApi'
 
-export const ShopContext = createContext()
+export const ShopContext = createContext({
+  shops: [],
+  totalShop: 0,
+  loading: false,
+  error: null,
+  setShops: () => {},
+  fetchShops: () => {},
+});
 
 export const ShopProvider = ({ children }) => {
-  const [shops, setShops] = useState([])
-  const [totalShop, setTotalShop] = useState();
+  const { isAuthenticated, token } = useContext(AuthContext);
+  const [shops, setShops] = useState([]);
+  const [totalShop, setTotalShop] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const fetchShops = useCallback(async () => {
+    if (!isAuthenticated) return;
+
     try {
-      const authToken = localStorage.getItem('authToken'); // Retrieve token from localStorage
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/shopkeeper`, { // Protected route
+      setLoading(true);
+      setError(null);
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/shopkeeper`, {
         headers: {
-            'Authorization': `Bearer ${authToken}`, // Include token in Authorization header
-            'Content-Type': 'application/json', // Or any content type your API expects
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
         },
-    })
-      setShops(response.data)
-      setTotalShop(response.data.length)
+      });
+      setShops(response.data);
+      setTotalShop(response.data.length);
     } catch (error) {
-      console.error(error)
+      setError(error.response?.data?.message || 'Failed to fetch shop data');
+      console.error('Shop fetch error:', error);
+    } finally {
+      setLoading(false);
     }
-  }, [shops])
+  }, [token, isAuthenticated]);
 
   useEffect(() => {
-    fetchShops();
-  }, [fetchShops])
+    if (isAuthenticated) {
+      fetchShops();
+    }
+  }, [fetchShops, isAuthenticated]);
 
-  const AddShop = useCallback((shopId) => {
-    if (!shopId) return
-    setShops(prev => {
-      if (prev.includes(shopId)) return prev
-      return [...prev, shopId]
-    })
-  }, [])
-
-  const removeShop = useCallback((shopId) => {
-    if (!shopId) return
-    setShops(prev => prev.filter(id => id !== shopId))
-  }, [])
-
-  const isShop = useCallback((shopId) => {
-    if (!shopId) return false
-    return shops.includes(shopId)
-  }, [shops])
-
-  const value = {
+  const contextValue = useMemo(() => ({
     shops,
     setShops,
-    fetchShops,
     totalShop,
-    
-  }
+    loading,
+    error,
+    fetchShops
+  }), [shops, totalShop, loading, error, fetchShops]);
 
   return (
-    <ShopContext.Provider async value={value}>
+    <ShopContext.Provider value={contextValue}>
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+          <strong className="font-bold">Error: </strong>
+          <span className="block sm:inline">{error}</span>
+        </div>
+      )}
       {children}
     </ShopContext.Provider>
   )

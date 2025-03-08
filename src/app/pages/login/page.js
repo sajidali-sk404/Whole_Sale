@@ -1,9 +1,11 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { FaUser, FaLock } from 'react-icons/fa';
 import Link from 'next/link';
+import { AuthContext } from '@/app/ContextApi/AuthContextApi';
 
 const SignInPage = () => {
+    const { login } = useContext(AuthContext)
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');

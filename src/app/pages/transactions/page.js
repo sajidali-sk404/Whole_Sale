@@ -3,29 +3,45 @@ import React from "react";
 import { useContext, useState, useEffect } from "react";
 import { SupplierContext } from "@/app/ContextApi/SupplierDataApi";
 import { FaChevronDown, FaChevronRight, FaPlusCircle } from 'react-icons/fa'; // Example icons
+import { AuthContext } from "@/app/ContextApi/AuthContextApi";
 
 export default function FinancialTransactions() {
+  const { isAuthenticated, userRole } = useContext(AuthContext);
   const { suppliers, fetchSuppliers } = useContext(SupplierContext);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [expandedSuppliers, setExpandedSuppliers] = useState({});
 
+  if (!isAuthenticated) {
+    if (typeof window !== 'undefined') {
+      window.location.href = "/";
+    }
+    return null;
+  }
+
+  if (userRole === 'user') {
+    if (typeof window !== 'undefined') {
+      window.location.href = "/";
+    }
+    return null;
+  }
+
   useEffect(() => {
-      if (fetchSuppliers) {
-          const fetchData = async () => {
-              try {
-                  await fetchSuppliers();
-                  setLoading(false);
-              } catch (err) {
-                  setError(err.message || "An error occurred while fetching data.");
-                  setLoading(false);
-              }
-          };
-          fetchData();
-      } else {
+    if (fetchSuppliers) {
+      const fetchData = async () => {
+        try {
+          await fetchSuppliers();
           setLoading(false);
-          setError("fetchSuppliers function is not available.");
-      }
+        } catch (err) {
+          setError(err.message || "An error occurred while fetching data.");
+          setLoading(false);
+        }
+      };
+      fetchData();
+    } else {
+      setLoading(false);
+      setError("fetchSuppliers function is not available.");
+    }
   }, [fetchSuppliers]);
 
   const toggleExpanded = (supplierId) => {
@@ -114,11 +130,10 @@ export default function FinancialTransactions() {
                             </td>
                             <td className="py-4 px-6 whitespace-nowrap">
                               <span
-                                className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                  shipment.status === "Delivered"
+                                className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${shipment.status === "Delivered"
                                     ? "bg-green-100 text-green-800"
                                     : "bg-red-100 text-red-800"
-                                }`}
+                                  }`}
                               >
                                 {shipment.status}
                               </span>
@@ -127,7 +142,7 @@ export default function FinancialTransactions() {
                         );
                       });
                     }
-                      return rows; // Return the array of rows
+                    return rows; // Return the array of rows
 
                   })
                 ) : (

@@ -4,14 +4,23 @@ import { InventoryContext } from '@/app/ContextApi/inventoryDataApi';
 import { FaBoxOpen, FaSort } from 'react-icons/fa';
 import SideBar from './component/sidebar';
 import { Bars3Icon } from "@heroicons/react/24/outline";
+import { AuthContext } from '@/app/ContextApi/AuthContextApi';
 
 export default function Inventory() {
+    const { isAuthenticated } = useContext(AuthContext);
     const { inventoryData } = useContext(InventoryContext);
     const [loading, setLoading] = useState(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [error, setError] = useState(null);
     const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
     const [sortedInventory, setSortedInventory] = useState([]);
+
+    if (!isAuthenticated) {
+        if (typeof window !== 'undefined') {
+          window.location.href = "/";
+        }
+        return null;
+      }
 
     // Consolidate items with case-insensitive matching and take the last value for other properties
     const consolidateInventory = useCallback((data) => {

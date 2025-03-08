@@ -4,6 +4,7 @@ import { SupplierProvider } from "./ContextApi/SupplierDataApi";
 import { ShopProvider } from "./ContextApi/shopkeepersDataApi";
 import { InventoryProvider } from "./ContextApi/inventoryDataApi";
 import { BillsProvider } from "./ContextApi/billsDataApi";
+import { AuthProvider } from "./ContextApi/AuthContextApi";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,15 +27,17 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <BillsProvider>
-        <ShopProvider>
-          <SupplierProvider>
-            <InventoryProvider>
-              {children}
-            </InventoryProvider>
-          </SupplierProvider>
-        </ShopProvider>
-        </BillsProvider>
+        <AuthProvider>
+          <BillsProvider>
+            <ShopProvider>
+              <SupplierProvider>
+                <InventoryProvider>
+                  {children}
+                </InventoryProvider>
+              </SupplierProvider>
+            </ShopProvider>
+          </BillsProvider>
+        </AuthProvider>
       </body>
     </html>
   );

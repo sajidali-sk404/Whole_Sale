@@ -5,8 +5,30 @@ import { MdEmojiTransportation, MdOutlineInventory2, MdOutlinePeopleAlt } from "
 import { BiSolidReport } from "react-icons/bi";
 import Navbar from "@/app/components/Navbar";
 import { TypeAnimation } from 'react-type-animation';
+import { AuthContext } from "@/app/ContextApi/AuthContextApi";
+import { useContext } from "react";
 
 export default function Home() {
+  const { logout, isAuthenticated, loading, userRole } = useContext(AuthContext);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+          <p className="text-gray-600">Verifying authentication...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    if (typeof window !== 'undefined') {
+      window.location.href = "/";
+    }
+    return null;
+  }
+
   return (
     <>
       <Navbar />
@@ -38,6 +60,11 @@ export default function Home() {
 
               </span>
               <span className="block text-blue-600">Traders.</span>
+              <button 
+              className="text-sm bg-red-500 rounded-full p-2 hover:bg-red-600"
+              onClick={logout}>
+                Logout
+              </button>
             </h1>
           </div>
           {/* Feature Cards */}
@@ -66,6 +93,7 @@ export default function Home() {
             </Link>
 
             {/* Card 3: Suppliers */}
+            {userRole === "admin" && 
             <Link href="/pages/suppliers" className="group">
               <div className="p-6 bg-white rounded-lg shadow-xl transition-all duration-300 hover:shadow-2xl hover:scale-105 cursor-pointer">
                 <div className="flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
@@ -74,9 +102,10 @@ export default function Home() {
                 <h2 className="mt-4 text-xl font-semibold text-gray-900 group-hover:text-blue-600 transition-colors duration-300">Suppliers Management</h2>
                 <p className="mt-2 text-gray-500">Efficiently manage your supplier information and interactions.</p>
               </div>
-            </Link>
+            </Link>}
 
              {/* Card 4: Expenses */}
+             {userRole === "admin" && 
              <Link href="/pages/expenses" className="group">
               <div className="p-6 bg-white h-full rounded-lg shadow-xl transition-all duration-300 hover:shadow-2xl hover:scale-105 cursor-pointer">
                 <div className="flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
@@ -85,7 +114,7 @@ export default function Home() {
                 <h2 className="mt-4 text-xl font-semibold text-gray-900 group-hover:text-blue-600 transition-colors duration-300">Expenses</h2>
                 <p className="mt-2 text-gray-500">Track day to day Expenses</p>
               </div>
-            </Link>
+            </Link>}
 
             {/* Card 5: Inventory */}
             <Link href="/pages/products" className="group">
@@ -111,6 +140,7 @@ export default function Home() {
 
 
             {/* Card 7: Transactions */}
+            {userRole === "admin" && 
             <Link href="/pages/transactions" className="group">
               <div className="p-6 bg-white rounded-lg shadow-xl transition-all duration-300 hover:shadow-2xl hover:scale-105 cursor-pointer">
                 <div className="flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
@@ -119,9 +149,10 @@ export default function Home() {
                 <h2 className="mt-4 text-xl font-semibold text-gray-900 group-hover:text-blue-600 transition-colors duration-300">Transaction and Ledger</h2>
                 <p className="mt-2 text-gray-500">Record and manage all your financial transactions and ledgers.</p>
               </div>
-            </Link>
+            </Link>}
 
             {/* Card 8: Reports */}
+            {userRole === "admin" && 
             <Link href="/pages/reports" className="group">
               <div className="p-6 bg-white rounded-lg shadow-xl transition-all duration-300 hover:shadow-2xl hover:scale-105 cursor-pointer">
                 <div className="flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
@@ -130,25 +161,10 @@ export default function Home() {
                 <h2 className="mt-4 text-xl font-semibold text-gray-900 group-hover:text-blue-600 transition-colors duration-300">Analytics and Reports</h2>
                 <p className="mt-2 text-gray-500">Generate insightful reports and analyze your business data.</p>
               </div>
-            </Link>
-
-           
-           
-
-           
+            </Link>}
 
           </div>
 
-          {/* Optional:  Image Section */}
-          {/* <div className="mt-16">
-            <Image
-              src="/your-image.jpg" // Replace with your image path
-              alt="Descriptive alt text"
-              width={1200} // Set appropriate dimensions
-              height={600}
-              className="rounded-lg shadow-lg"
-            />
-          </div> */}
         </div>
       </div>
     </>

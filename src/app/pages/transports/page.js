@@ -2,13 +2,22 @@
 import { useContext, useState, useEffect } from "react";
 import { FaChevronDown, FaChevronRight } from 'react-icons/fa'; // Import icons
 import { SupplierContext } from "@/app/ContextApi/SupplierDataApi";
+import { AuthContext } from "@/app/ContextApi/AuthContextApi";
 
 export default function TransportationManagement() {
 
+  const { isAuthenticated } = useContext(AuthContext);
   const { suppliers, fetchSuppliers } = useContext(SupplierContext);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [expandedSuppliers, setExpandedSuppliers] = useState({});
+
+  if (!isAuthenticated) {
+    if (typeof window !== 'undefined') {
+      window.location.href = "/";
+    }
+    return null;
+  }
 
   useEffect(() => {
     if (fetchSuppliers) {
