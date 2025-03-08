@@ -36,7 +36,7 @@ const SignInPage = () => {
                 const role = data.role;      // Extract role from response
                 const userId = data.id;      // Extract user ID
 
-                // Store token and role in localStorage (or cookies/context - choose your method)
+                // Store token and role in localStorage (or cookies/context - choose your method))
                 localStorage.setItem('authToken', token);
                 localStorage.setItem('userRole', role);
                 localStorage.setItem('userId', userId); // Store user ID if needed
