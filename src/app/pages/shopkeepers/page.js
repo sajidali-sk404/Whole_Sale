@@ -10,7 +10,7 @@ import DeleteConfirmation from './component/DeleteConfirmation';
 import { AuthContext } from '@/app/ContextApi/AuthContextApi';
 
 function ShopkeeperManagement() {
-    const { isAuthenticated } = useContext(AuthContext);
+    const { isAuthenticated, userRole } = useContext(AuthContext);
     const [shopkeepers, setShopkeepers] = useState([]);
     const [showForm, setShowForm] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -150,6 +150,7 @@ function ShopkeeperManagement() {
                                 onClick={() => handleShopkeeperClick(Shopkeeper._id)}
                                 className="bg-white relative rounded-lg shadow-lg p-6 flex flex-col items-center text-center cursor-pointer transition-all duration-200"
                             >
+                                {userRole === 'admin' && 
                                  <button
                                     onClick={(e) => {
                                         e.stopPropagation();
@@ -158,7 +159,8 @@ function ShopkeeperManagement() {
                                     className="text-red-600 hover:text-red-800 transition-colors duration-200 absolute top-2 right-2"
                                 >
                                     <TrashIcon className="w-5 h-5" />
-                                </button>
+                                </button>}
+
                                 <div className="flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 text-blue-600 mb-4">
                                     <FaBuilding className="text-2xl" />
                                 </div>

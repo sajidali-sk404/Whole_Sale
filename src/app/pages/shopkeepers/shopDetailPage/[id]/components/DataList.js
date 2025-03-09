@@ -1,10 +1,12 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useState, useContext } from 'react'
 import { PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { MdKeyboardDoubleArrowDown, MdKeyboardDoubleArrowUp } from "react-icons/md";
 import { FaTruck, FaMoneyBillWave, FaBoxOpen, FaFileInvoice, FaCalendarAlt } from 'react-icons/fa';
+import { AuthContext } from '@/app/ContextApi/AuthContextApi';
 
 const DataList = ({ data, handleDelete }) => {
+    const {userRole} = useContext(AuthContext);
     const [showDetails, setShowDetails] = useState(false);
 
     const toggleDetails = () => {
@@ -22,13 +24,16 @@ const DataList = ({ data, handleDelete }) => {
                 </div>
 
                 <div className="flex gap-2">
+
+                {userRole === 'admin' && 
                     <button
                         onClick={() => handleDelete(data._id)}
                         className="text-red-600 hover:text-red-800 transition-colors duration-200"
                         title="Delete"
                     >
                         <TrashIcon className="w-5 h-5" />
-                    </button>
+                    </button>}
+
                     <button
                         onClick={toggleDetails}
                         className="text-gray-600 hover:text-gray-800 transition-colors duration-200"

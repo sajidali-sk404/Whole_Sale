@@ -1,26 +1,12 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useContext } from 'react';
 import { TrashIcon } from "@heroicons/react/24/outline";
 import { MdKeyboardDoubleArrowDown, MdKeyboardDoubleArrowUp, MdPrint } from "react-icons/md";
 import { formatCurrency, formatDate } from './utils'; // Import utility functions
-
-// Utility functions (separate file: utils.js)
-// export const formatCurrency = (amount, currency = 'PKR') => {
-//   return new Intl.NumberFormat('en-PK', {
-//     style: 'currency',
-//     currency: currency,
-//   }).format(amount);
-// };
-
-// export const formatDate = (date) => {
-//   return new Date(date).toLocaleDateString(undefined, {
-//     year: 'numeric',
-//     month: 'long',
-//     day: 'numeric',
-//   });
-// };
+import { AuthContext } from '@/app/ContextApi/AuthContextApi';
 
 const BillDetails = React.memo(({ bill, handleDeleteBill, handlePrint }) => {  // Use React.memo for performance optimization
   const [showDetails, setShowDetails] = useState(false);
+  const {userRole} = useContext(AuthContext);
 
   // Use useCallback to memoize the toggleDetails function
   const toggleDetails = useCallback(() => {
@@ -70,13 +56,14 @@ const BillDetails = React.memo(({ bill, handleDeleteBill, handlePrint }) => {  /
 
         {/* Action Buttons */}
         <div className="flex items-center space-x-3">
+        {userRole === 'admin' && 
           <button
             onClick={handleDelete}
             className="text-red-500 hover:text-red-700 focus:outline-none transition-colors duration-200"
             aria-label="Delete Invoice"
           >
             <TrashIcon className="w-5 h-5" />
-          </button>
+          </button>}
           <button
             onClick={handlePrintBill}
             className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md focus:outline-none transition-colors duration-200 flex items-center"
@@ -173,5 +160,7 @@ const BillDetails = React.memo(({ bill, handleDeleteBill, handlePrint }) => {  /
     </div>
   );
 });
+
+BillDetails.displayName = 'BillDetails';
 
 export default BillDetails;
