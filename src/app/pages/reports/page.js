@@ -9,11 +9,20 @@ import { AuthContext } from "@/app/ContextApi/AuthContextApi";
 
 export default function Analytics() {
     const { isAuthenticated, userRole } = useContext(AuthContext);
-    const { Bills } = useContext(BillContext);  // Get Bills from BillContext
+    const { bills, loading, error } = useContext(BillContext);
+    console.log("Bills from context:", bills);
+    console.log("Loading state:", loading);
+    console.log("Error state:", error);
+    
     const [dailySales, setDailySales] = useState([]);
     const [monthlySales, setMonthlySales] = useState([]);
     const [topShopkeepers, setTopShopkeepers] = useState([]);
-    const { inventoryData } = useContext(InventoryContext);
+    
+    const inventoryContext = useContext(InventoryContext);
+    console.log("Full Inventory Context:", inventoryContext);
+    
+    const { inventoryData } = inventoryContext || {};  // Safely destructure inventoryData
+    console.log("Destructured inventoryData:", inventoryData);
 
     useEffect(() => {
         if (!isAuthenticated || userRole === 'user') {
@@ -24,12 +33,37 @@ export default function Analytics() {
     }, [isAuthenticated, userRole]);
 
     useEffect(() => {
+        if (loading) {
+            console.log("Bills are still loading...");
+            return;
+        }
+
+        if (error) {
+            console.error("Error loading bills:", error);
+            return;
+        }
+
+        console.log("Bills:", bills?.length ? `${bills.length} bills loaded` : "No bills");
+        console.log("inventoryData:", inventoryData?.length ? `${inventoryData.length} items loaded` : "No inventory");
+
+        // Check if data is loaded
+        if (!Array.isArray(bills) || bills.length === 0) {
+            console.warn("No bills data available");
+            return;
+        }
+
+        if (!Array.isArray(inventoryData) || inventoryData.length === 0) {
+            console.warn("No inventory data available");
+            return;
+        }
+
         // Daily Sales Calculation
         const calculateDailySales = (billsData, inventoryData) => {
             if (!billsData || !inventoryData) {
                 console.warn("billsData or inventoryData is null or undefined in calculateDailySales");
                 return;
             }
+            console.log("Starting daily sales calculation...");
 
             const today = new Date();
             const last7Days = Array.from({ length: 7 }, (_, i) => {
@@ -63,11 +97,22 @@ export default function Analytics() {
                 const dailyProfit = dailyTotalSales - dailyTotalPurchaseCost;
                 console.log("Daily Profit sub", date, "is", dailyProfit);
 
-                return { day: date.substring(0, 10), sales: Number(dailyProfit) };
+                // Format date to be more readable (e.g., "Mar 9")
+                const formattedDate = new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                return {
+                    day: formattedDate,
+                    profit: Number(dailyProfit),
+                    sales: Number(dailyTotalSales),
+                    cost: Number(dailyTotalPurchaseCost)
+                };
             });
 
+            console.log("Setting daily sales data:", dailySalesData);
+            if (dailySalesData.length === 0) {
+                console.warn("No daily sales data calculated");
+                return;
+            }
             setDailySales(dailySalesData);
-            console.log("Daily Sales", dailySalesData);
         };
 
 
@@ -83,17 +128,41 @@ export default function Analytics() {
                 return new Date(currentYear, i, 1).toLocaleString('default', { month: 'short' });
             });
 
+            console.log("Calculating monthly revenue data...");
             const monthlyRevenueData = months.map((month, index) => {
-                const monthlyRevenueForMonth = billsData?.reduce((total, bill) => { // Use billsData here
+            let monthlyTotalSales = 0;
+            let monthlyTotalPurchaseCost = 0;
+
+            billsData?.forEach(bill => {
+                console.log("Processing bill:", bill);
                     const billMonth = new Date(bill.date).getMonth();
                     if (billMonth === index) {
-                        return total + bill.totalAmount;   // Sum totalAmount of Bills for that month
+                        bill.cart?.forEach(item => {
+                            monthlyTotalSales += item.price * item.quantity;
+
+                            const inventoryItem = inventoryData.find(invItem => invItem.itemName === item.name);
+                            if (inventoryItem && inventoryItem.purchasePrice !== undefined) {
+                                monthlyTotalPurchaseCost += inventoryItem.purchasePrice * item.quantity;
+                            }
+                        });
                     }
-                    return total;
-                }, 0);
-                return { month: month, revenue: Number(monthlyRevenueForMonth) };
+                });
+
+                const monthlyProfit = monthlyTotalSales - monthlyTotalPurchaseCost;
+                return {
+                    month: month,
+                    profit: Number(monthlyProfit),
+                    sales: Number(monthlyTotalSales),
+                    cost: Number(monthlyTotalPurchaseCost)
+                };
             });
+            console.log("Setting monthly revenue data:", monthlyRevenueData);
+            if (monthlyRevenueData.length === 0) {
+                console.warn("No monthly revenue data calculated");
+                return;
+            }
             setMonthlySales(monthlyRevenueData);
+            console.log("Monthly sales state updated");
         };
 
         // Top Shopkeepers Calculation (adapt based on how your data is structured)
@@ -114,18 +183,18 @@ export default function Analytics() {
             setTopShopkeepers(sortedShopkeepers);
         };
 
-        // Check if Bills is defined before running calculations
-        if (Bills && inventoryData) {
-            calculateDailySales(Bills, inventoryData);  // Run calculations
-            calculateMonthlyRevenue(Bills);
-            calculateTopShopkeepers(Bills);
+        // Run calculations if we have both bills and inventory data
+        if (bills && inventoryData) {
+            calculateDailySales(bills, inventoryData);  // Run calculations
+            calculateMonthlyRevenue(bills);
+            calculateTopShopkeepers(bills);
         } else {
             console.warn("Bills data is not available yet.");
         }
 
 
 
-    }, [Bills, inventoryData]); // Dependency on Bills and BillsData
+    }, [bills, inventoryData, loading, error]); // Dependencies for data loading and state
 
 
 
@@ -181,8 +250,14 @@ export default function Analytics() {
                             Daily Sales Overview
                         </h2>
 
-                        {dailySales.length === 0 ? (
-                            <p>Loading chart...</p>
+                        {loading ? (
+                            <p>Loading bills data...</p>
+                        ) : error ? (
+                            <p className="text-red-500">Error loading data: {error}</p>
+                        ) : !Array.isArray(inventoryData) ? (
+                            <p>Loading inventory data...</p>
+                        ) : dailySales.length === 0 ? (
+                            <p>Processing sales data...</p>
                         ) : (
                             <div className="max-lg:overflow-x-auto">
                                 <BarChart width={575} height={300} data={dailySales} margin={{ top: 20, right: 40, left: 20, bottom: 5 }}>
@@ -190,7 +265,9 @@ export default function Analytics() {
                                     <XAxis dataKey="day" tick={{ fill: '#6B7280' }} />
                                     <YAxis tick={{ fill: '#6B7280' }} />
                                     <Tooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #ddd' }} />
-                                    <Bar dataKey="sales" fill="#8884d8" />
+                                    <Bar dataKey="sales" fill="#82ca9d" name="Sales" stackId="a" />
+                                    <Bar dataKey="cost" fill="#ff8042" name="Cost" stackId="a" />
+                                    <Bar dataKey="profit" fill="#8884d8" name="Profit" />
                                 </BarChart>
                             </div>
                         )}
@@ -203,8 +280,14 @@ export default function Analytics() {
                             Monthly Revenue
                         </h2>
 
-                        {monthlySales.length === 0 ? (
-                            <p>Loading chart...</p>
+                        {loading ? (
+                            <p>Loading bills data...</p>
+                        ) : error ? (
+                            <p className="text-red-500">Error loading data: {error}</p>
+                        ) : !Array.isArray(inventoryData) ? (
+                            <p>Loading inventory data...</p>
+                        ) : monthlySales.length === 0 ? (
+                            <p>Processing monthly data...</p>
                         ) : (
                             <div className="max-lg:overflow-x-auto">
                                 <LineChart width={575} height={300} data={monthlySales} margin={{ top: 20, right: 40, left: 20, bottom: 5 }}>
@@ -212,7 +295,9 @@ export default function Analytics() {
                                     <XAxis dataKey="month" tick={{ fill: '#6B7280' }} />
                                     <YAxis tick={{ fill: '#6B7280' }} />
                                     <Tooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #ddd' }} />
-                                    <Line type="monotone" dataKey="revenue" stroke="#82ca9d" strokeWidth={2} />
+                                    <Line type="monotone" dataKey="sales" stroke="#82ca9d" strokeWidth={2} name="Sales" />
+                                    <Line type="monotone" dataKey="cost" stroke="#ff8042" strokeWidth={2} name="Cost" />
+                                    <Line type="monotone" dataKey="profit" stroke="#8884d8" strokeWidth={2} name="Profit" />
                                 </LineChart>
                             </div>
                         )}
