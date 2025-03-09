@@ -60,12 +60,6 @@ const SignInPage = () => {
                 <h2 className="mt-6 text-center text-3xl font-extrabold text-blue-600">
                     Sign in to your account
                 </h2>
-                <p className="mt-2 text-center text-sm text-gray-600">
-                    Or{' '}
-                    <Link href="/register" className="font-medium text-blue-600 hover:text-blue-500">
-                        start your 14-day free trial
-                    </Link>
-                </p>
             </div>
 
             <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
@@ -73,7 +67,7 @@ const SignInPage = () => {
                     <form className="space-y-6" onSubmit={handleSubmit}>
                         <div>
                             <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                                email
+                                Email
                             </label>
                             <div className="mt-1 relative rounded-md shadow-sm">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
