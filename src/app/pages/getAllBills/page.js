@@ -6,7 +6,7 @@ import SearchBar from './component/SearchBar';
 import { AuthContext } from '@/app/ContextApi/AuthContextApi';
 
 function AllBills() {
-  const { isAuthenticated } = useContext(AuthContext);
+  const { isAuthenticated, token } = useContext(AuthContext);
   const [bills, setBills] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -419,7 +419,12 @@ function AllBills() {
       setLoading(true);
       setError(null);
       try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/bills`); // Make sure your backend is running on port 5000
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/bills`, { // Protected route
+          headers: {
+            'Authorization': `Bearer ${token}`, // Include token in Authorization header
+            'Content-Type': 'application/json', // Or any content type your API expects
+          },
+        }); // Make sure your backend is running on port 5000
         setBills(response.data);
         // Set initial invoiceNo based on existing bills
         if (response.data.length > 0) {
@@ -436,7 +441,7 @@ function AllBills() {
     };
 
     fetchBills();
-  }, []);
+  }, [token]);
 
   if (!isAuthenticated) return null;
 

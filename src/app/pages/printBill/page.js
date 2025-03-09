@@ -23,7 +23,7 @@ const CustomerBilling = () => {
     borderRadius: '0.75rem',
   };
 
-  const { isAuthenticated } = useContext(AuthContext);
+  const { isAuthenticated, token } = useContext(AuthContext);
   const [bills, setBills] = useState([]);
   const [invoiceNo, setInvoiceNo] = useState(1);
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
@@ -62,7 +62,7 @@ const CustomerBilling = () => {
       setLoading(true);
       setError(null);
       try {
-        const authToken = localStorage.getItem('authToken'); // Retrieve token from localStorage
+        const authToken = token;
         const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/billslatest`, { // Protected route
           headers: {
             'Authorization': `Bearer ${authToken}`, // Include token in Authorization header
@@ -85,7 +85,7 @@ const CustomerBilling = () => {
     };
 
     fetchBills();
-  }, []);
+  }, [token]);
 
   useEffect(() => {
     if (customerName) {
@@ -269,7 +269,7 @@ const CustomerBilling = () => {
     })
 
     try {
-      const authToken = localStorage.getItem('authToken'); // Retrieve token from localStorage
+      const authToken = token // Retrieve token from localStorage
       const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/shopkeeper/${selectedShop._id}/delivery`, formData, { // Protected route
         headers: {
           'Authorization': `Bearer ${authToken}`, // Include token in Authorization header
@@ -325,7 +325,7 @@ const CustomerBilling = () => {
       };
 
       try {
-        const authToken = localStorage.getItem('authToken'); // Retrieve token from localStorage
+        const authToken = token; // Retrieve token from localStorage
         const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/bills`, newBill, { // Protected route
           headers: {
             'Authorization': `Bearer ${authToken}`, // Include token in Authorization header
@@ -752,7 +752,12 @@ const CustomerBilling = () => {
     setLoading(true);
     setError(null);
     try {
-      await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/bills/${invoiceNo}`);
+      await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/bills/${invoiceNo}`, { // Protected route
+        headers: {
+          'Authorization': `Bearer ${token}`, // Include token in Authorization header
+          'Content-Type': 'application/json', // Or any content type your API expects
+        },
+      });
       setBills(prevBills => prevBills.filter(bills => bills.invoiceNo !== invoiceNo));
     } catch (err) {
       console.error("Error deleting bills:", err);
@@ -760,7 +765,7 @@ const CustomerBilling = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [token]);
 
   if (loading) {
     return (
