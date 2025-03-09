@@ -14,12 +14,13 @@ function AllBills() {
   const [showDetails, setShowDetails] = useState({});
   const watermarkImageUrl = '/watermark_p.PNG';
 
-  if (!isAuthenticated) {
-    if (typeof window !== 'undefined') {
-      window.location.href = "/";
+  useEffect(() => {
+    if (!isAuthenticated) {
+      if (typeof window !== 'undefined') {
+        window.location.href = "/";
+      }
     }
-    return null;
-  }
+  }, [isAuthenticated]);
 
   const toggleDetails = (invoiceNo) => {
     setShowDetails((prevShowDetails) => ({
@@ -436,6 +437,8 @@ function AllBills() {
 
     fetchBills();
   }, []);
+
+  if (!isAuthenticated) return null;
 
   return (
     <>

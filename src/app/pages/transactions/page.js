@@ -12,19 +12,13 @@ export default function FinancialTransactions() {
   const [error, setError] = useState(null);
   const [expandedSuppliers, setExpandedSuppliers] = useState({});
 
-  if (!isAuthenticated) {
-    if (typeof window !== 'undefined') {
-      window.location.href = "/";
+  useEffect(() => {
+    if (!isAuthenticated || userRole === 'user') {
+        if (typeof window !== 'undefined') {
+            window.location.href = "/";
+        }
     }
-    return null;
-  }
-
-  if (userRole === 'user') {
-    if (typeof window !== 'undefined') {
-      window.location.href = "/";
-    }
-    return null;
-  }
+}, [isAuthenticated, userRole]);
 
   useEffect(() => {
     if (fetchSuppliers) {
@@ -66,6 +60,8 @@ export default function FinancialTransactions() {
       </div>
     );
   }
+
+  if (!isAuthenticated || userRole === 'user') return null;
 
   return (
     <div className="bg-gray-100 min-h-screen p-8">

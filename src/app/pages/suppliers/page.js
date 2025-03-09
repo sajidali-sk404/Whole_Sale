@@ -21,19 +21,13 @@ function SupplierManagement() {
   const [filteredSuppliers, setFilteredSuppliers] = useState([]);
   const router = useRouter();
 
-  if (!isAuthenticated) {
-    if (typeof window !== 'undefined') {
-      window.location.href = "/";
+  useEffect(() => {
+    if (!isAuthenticated || userRole === 'user') {
+        if (typeof window !== 'undefined') {
+            window.location.href = "/";
+        }
     }
-    return null;
-  }
-
-  if (userRole === 'user') {
-    if (typeof window !== 'undefined') {
-      window.location.href = "/";
-    }
-    return null;
-  }
+}, [isAuthenticated, userRole]);
 
   const fetchSuppliers = useCallback(async () => {
     setLoading(true);
@@ -104,6 +98,8 @@ function SupplierManagement() {
       </div>
     );
   }
+
+  if (!isAuthenticated || userRole === 'user') return null;
 
   return (
     <div className="min-h-screen bg-gray-100">

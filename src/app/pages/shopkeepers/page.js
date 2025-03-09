@@ -21,12 +21,13 @@ function ShopkeeperManagement() {
     const [filteredShopkeepers, setFilteredShopkeepers] = useState([]); // Add filtered shopkeepers state
     const router = useRouter();
 
-    if (!isAuthenticated) {
-        if (typeof window !== 'undefined') {
-          window.location.href = "/";
+    useEffect(() => {
+        if (!isAuthenticated) {
+            if (typeof window !== 'undefined') {
+                window.location.href = "/";
+            }
         }
-        return null;
-      }
+    }, [isAuthenticated]);
 
     const fetchShopkeepers = useCallback(async () => {
         setLoading(true);
@@ -97,6 +98,8 @@ function ShopkeeperManagement() {
             </div>
         );
     }
+
+    if (!isAuthenticated) return null;
 
     return (
         <div className="min-h-screen bg-gray-100">

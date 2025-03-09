@@ -18,22 +18,16 @@ const Expenses = () => {
     const [expandedDates, setExpandedDates] = useState({}); // Tracks which dates are expanded
 
     useEffect(() => {
+        if (!isAuthenticated || userRole === 'user') {
+            if (typeof window !== 'undefined') {
+                window.location.href = "/";
+            }
+        }
+    }, [isAuthenticated, userRole]);
+
+    useEffect(() => {
         fetchExpenses();
     }, []);
-
-    if (!isAuthenticated) {
-        if (typeof window !== 'undefined') {
-            window.location.href = "/";
-        }
-        return null;
-    }
-
-    if (userRole === 'user') {
-        if (typeof window !== 'undefined') {
-            window.location.href = "/";
-        }
-        return null;
-    }
 
     const fetchExpenses = async () => {
         setLoading(true);
@@ -102,7 +96,7 @@ const Expenses = () => {
         } finally {
             setLoading(false);
         }
-    }, [editExpenseId, setExpenses, setDescription, setAmount, setDate, setCategory, description, amount, date, category]);
+    }, [editExpenseId, setDescription, setAmount, setDate, setCategory, description, amount, date, category]);
 
     const handleDelete = useCallback(async (id) => {
         setLoading(true);
@@ -122,7 +116,7 @@ const Expenses = () => {
         } finally {
             setLoading(false);
         }
-    }, [setExpenses]);
+    }, []);
 
     const handleEdit = useCallback(async (id) => {
         const expenseToEdit = expenses.find(expense => expense._id === id);
@@ -177,6 +171,8 @@ const Expenses = () => {
             </div>
         );
     }
+
+    if (!isAuthenticated || userRole === 'user') return null;
 
     return (
 

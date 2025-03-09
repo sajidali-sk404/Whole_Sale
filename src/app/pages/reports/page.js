@@ -15,19 +15,13 @@ export default function Analytics() {
     const [topShopkeepers, setTopShopkeepers] = useState([]);
     const { inventoryData } = useContext(InventoryContext);
 
-    if (!isAuthenticated) {
-        if (typeof window !== 'undefined') {
-            window.location.href = "/";
+    useEffect(() => {
+        if (!isAuthenticated || userRole === 'user') {
+            if (typeof window !== 'undefined') {
+                window.location.href = "/";
+            }
         }
-        return null;
-    }
-
-    if (userRole === 'user') {
-        if (typeof window !== 'undefined') {
-            window.location.href = "/";
-        }
-        return null;
-    }
+    }, [isAuthenticated, userRole]);
 
     useEffect(() => {
         // Daily Sales Calculation
@@ -131,7 +125,7 @@ export default function Analytics() {
 
 
 
-    }, [Bills]); // Dependency on Bills and BillsData
+    }, [Bills, inventoryData]); // Dependency on Bills and BillsData
 
 
 
@@ -169,6 +163,8 @@ export default function Analytics() {
 
     // Colors for the charts
     const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#AF19FF'];
+
+    if (!isAuthenticated || userRole === 'user') return null;
 
     return (
         <div className="bg-gray-100 min-h-screen py-12 px-4 sm:px-6 lg:px-8">

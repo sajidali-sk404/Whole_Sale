@@ -48,12 +48,13 @@ const CustomerBilling = () => {
   const { shops, setShops } = useContext(ShopContext);
   const watermarkImageUrl = '/watermark_p.PNG';
 
-  if (!isAuthenticated) {
-    if (typeof window !== 'undefined') {
-      window.location.href = "/";
+  useEffect(() => {
+    if (!isAuthenticated) {
+      if (typeof window !== 'undefined') {
+        window.location.href = "/";
+      }
     }
-    return null;
-  }
+  }, [isAuthenticated]);
 
   // Fetch Bills from Backend (useEffect)
   useEffect(() => {
@@ -777,8 +778,7 @@ const CustomerBilling = () => {
     );
   }
 
-
-
+  if (!isAuthenticated) return null;
 
   return (
     <div className="bg-gray-50 min-h-screen py-12 px-4 sm:px-6 lg:px-8">

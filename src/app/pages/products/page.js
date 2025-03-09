@@ -15,12 +15,13 @@ export default function Inventory() {
     const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
     const [sortedInventory, setSortedInventory] = useState([]);
 
-    if (!isAuthenticated) {
-        if (typeof window !== 'undefined') {
-          window.location.href = "/";
+    useEffect(() => {
+        if (!isAuthenticated) {
+            if (typeof window !== 'undefined') {
+                window.location.href = "/";
+            }
         }
-        return null;
-      }
+    }, [isAuthenticated]);
 
     // Consolidate items with case-insensitive matching and take the last value for other properties
     const consolidateInventory = useCallback((data) => {
@@ -108,6 +109,8 @@ export default function Inventory() {
             </div>
         );
     }
+
+    if (!isAuthenticated) return null;
 
     return (
         <>

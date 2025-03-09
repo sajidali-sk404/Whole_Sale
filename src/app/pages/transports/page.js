@@ -12,12 +12,13 @@ export default function TransportationManagement() {
   const [error, setError] = useState(null);
   const [expandedSuppliers, setExpandedSuppliers] = useState({});
 
-  if (!isAuthenticated) {
-    if (typeof window !== 'undefined') {
-      window.location.href = "/";
+  useEffect(() => {
+    if (!isAuthenticated) {
+        if (typeof window !== 'undefined') {
+            window.location.href = "/";
+        }
     }
-    return null;
-  }
+}, [isAuthenticated]);
 
   useEffect(() => {
     if (fetchSuppliers) {
@@ -60,8 +61,7 @@ export default function TransportationManagement() {
     );
   }
 
-
-  
+  if (!isAuthenticated) return null;
 
   return (
     <div className="bg-gray-100 min-h-screen p-8">
