@@ -63,7 +63,7 @@ export default function Home() {
             </h1>
             {/* Improved Logout Button - positioned top right */}
             <button
-              className="absolute top-0 right-0 mt-2 max-md:-mt-10 mr-2 px-4 py-2 bg-slate-700 hover:bg-slate-800 text-white font-semibold rounded-md shadow-md transition duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-opacity-50 text-sm sm:text-base flex items-center" // Added flex and items-center
+              className="absolute top-0 right-0 mt-2 max-md:-mt-10 mr-2 px-4 py-2 bg-slate-500 hover:bg-slate-700 text-white font-semibold rounded-md shadow-md transition duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-opacity-50 text-sm sm:text-base flex items-center" // Added flex and items-center
               onClick={logout}
             >
               <BiLogOut className="mr-2" /> {/* Added the icon and some margin */}
