@@ -16,6 +16,7 @@ Check out the live version here: [whole-sale-five.vercel.app](https://whole-sale
 
 ## 📁 Project Structure
 
+```
 Whole_Sale/
 ├── .vscode/
 ├── public/
@@ -30,7 +31,7 @@ Whole_Sale/
 ├── package.json
 ├── postcss.config.mjs
 └── tailwind.config.mjs
-
+```
 
 ## 📦 Getting Started
 
@@ -39,13 +40,11 @@ Whole_Sale/
    ```bash
    git clone https://github.com/sajidali-sk404/Whole_Sale.git
    cd Whole_Sale
-Install dependencies:
+   
+- `npm install` - Install dependencies
 
-npm install
+- `pnpm run dev` - Start development server
 
-Run the development server:
-
-npm run dev
 Open http://localhost:3000 to view it in the browser.
 
 📄 License
