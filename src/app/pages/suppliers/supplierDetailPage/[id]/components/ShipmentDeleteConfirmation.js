@@ -10,7 +10,7 @@ const ShipmentDeleteConfirmation = ({ shipmentId, supplierId, setShowDeleteConfi
         setLoading(true); // Set loading state *before* API call
         try {
             const authToken = localStorage.getItem('authToken'); // Retrieve token from localStorage
-            const response = await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/supplier/${supplierId}/shipment/${shipmentId}`, { // Protected route
+            const response = await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/api/supplier/${supplierId}/shipment/${shipmentId}`, { // Protected route
                 headers: {
                     'Authorization': `Bearer ${authToken}`, // Include token in Authorization header
                     'Content-Type': 'application/json', // Or any content type your API expects

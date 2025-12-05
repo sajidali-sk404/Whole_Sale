@@ -24,7 +24,7 @@ const SignInPage = () => {
         }
 
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/sign-in`, { // Your login endpoint
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/sign-in`, { // Your login endpoint
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

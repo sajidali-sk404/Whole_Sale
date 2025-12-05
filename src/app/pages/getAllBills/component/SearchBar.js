@@ -17,7 +17,7 @@ function BillSearch() {
       const params = { searchTerm }; // Send the search term as a single parameter
       console.log(params);
 
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/bills/search`, { params }, { // Protected route
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/bills/search`, { params }, { // Protected route
         headers: {
             'Authorization': `Bearer ${authToken}`, // Include token in Authorization header
             'Content-Type': 'application/json', // Or any content type your API expects

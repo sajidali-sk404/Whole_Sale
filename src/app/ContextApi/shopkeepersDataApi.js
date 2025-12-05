@@ -25,7 +25,7 @@ export const ShopProvider = ({ children }) => {
     try {
       setLoading(true);
       setError(null);
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/shopkeeper`, {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/shopkeeper`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',

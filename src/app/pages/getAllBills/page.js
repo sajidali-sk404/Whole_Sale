@@ -34,7 +34,7 @@ function AllBills() {
   const handleDeleteBill = async (invoiceNo) => {
     try {
       const authToken = localStorage.getItem('authToken'); // Retrieve token from localStorage
-      await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/bills/${invoiceNo}`, { // Protected route
+      await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/api/bills/${invoiceNo}`, { // Protected route
         headers: {
           'Authorization': `Bearer ${authToken}`, // Include token in Authorization header
           'Content-Type': 'application/json', // Or any content type your API expects
@@ -419,7 +419,7 @@ function AllBills() {
       setLoading(true);
       setError(null);
       try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/bills`, { // Protected route
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/bills`, { // Protected route
           headers: {
             'Authorization': `Bearer ${token}`, // Include token in Authorization header
             'Content-Type': 'application/json', // Or any content type your API expects

@@ -84,7 +84,7 @@ const EditStatusForm = ({ setShowStatusForm, setShipmentsData, id, shipmentData 
 
         try {
             const authToken = localStorage.getItem('authToken'); // Retrieve token from localStorage
-            const response = await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/supplier/${id}/shipment/${shipmentData._id}/status`, updatedData, { // Protected route
+            const response = await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/api/supplier/${id}/shipment/${shipmentData._id}/status`, updatedData, { // Protected route
                 headers: {
                     'Authorization': `Bearer ${authToken}`, // Include token in Authorization header
                     'Content-Type': 'application/json', // Or any content type your API expects

@@ -54,7 +54,7 @@ const AddSupplier = ({ setShowForm, refreshSuppliers }) => { // Add refreshSuppl
     try {
       const authToken = localStorage.getItem('authToken'); // Retrieve token from localStorage
       const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/supplier`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/supplier`,
         formData, { // Protected route
           headers: {
               'Authorization': `Bearer ${authToken}`, // Include token in Authorization header

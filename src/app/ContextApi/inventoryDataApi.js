@@ -24,7 +24,7 @@ export const InventoryProvider = ({ children }) => {
         try {
             setLoading(true);
             setError(null);
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/inventory`, {
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/inventory`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json',

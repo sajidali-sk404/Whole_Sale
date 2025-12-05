@@ -63,7 +63,7 @@ const CustomerBilling = () => {
       setError(null);
       try {
         const authToken = token;
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/billslatest`, { // Protected route
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/billslatest`, { // Protected route
           headers: {
             'Authorization': `Bearer ${authToken}`, // Include token in Authorization header
             'Content-Type': 'application/json', // Or any content type your API expects
@@ -255,7 +255,7 @@ const CustomerBilling = () => {
         console.log("Updating product:", newProduct.itemName, "New Quantity:", newQuantity, "Product ID:", newProduct._id);
         try {
           const authToken = localStorage.getItem('authToken'); // Retrieve token from localStorage
-          const response = await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/inventory/${product._id}`, newProduct, { // Protected route
+          const response = await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/api/inventory/${product._id}`, newProduct, { // Protected route
             headers: {
               'Authorization': `Bearer ${authToken}`, // Include token in Authorization header
               'Content-Type': 'application/json', // Or any content type your API expects
@@ -270,7 +270,7 @@ const CustomerBilling = () => {
 
     try {
       const authToken = token // Retrieve token from localStorage
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/shopkeeper/${selectedShop._id}/delivery`, formData, { // Protected route
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/shopkeeper/${selectedShop._id}/delivery`, formData, { // Protected route
         headers: {
           'Authorization': `Bearer ${authToken}`, // Include token in Authorization header
           'Content-Type': 'application/json', // Or any content type your API expects
@@ -326,7 +326,7 @@ const CustomerBilling = () => {
 
       try {
         const authToken = token; // Retrieve token from localStorage
-        const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/bills`, newBill, { // Protected route
+        const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/bills`, newBill, { // Protected route
           headers: {
             'Authorization': `Bearer ${authToken}`, // Include token in Authorization header
             'Content-Type': 'application/json', // Or any content type your API expects
@@ -752,7 +752,7 @@ const CustomerBilling = () => {
     setLoading(true);
     setError(null);
     try {
-      await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/bills/${invoiceNo}`, { // Protected route
+      await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/api/bills/${invoiceNo}`, { // Protected route
         headers: {
           'Authorization': `Bearer ${token}`, // Include token in Authorization header
           'Content-Type': 'application/json', // Or any content type your API expects

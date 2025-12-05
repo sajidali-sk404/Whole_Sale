@@ -25,7 +25,7 @@ export const SupplierProvider = ({ children }) => {
     try {
       setLoading(true);
       setError(null);
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/supplier`, {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/supplier`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',

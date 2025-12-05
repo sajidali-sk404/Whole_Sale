@@ -34,7 +34,7 @@ function ShopkeeperManagement() {
         setError(null);
         try {
             const authToken = localStorage.getItem('authToken'); // Retrieve token from localStorage
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/shopkeeper`, { // Protected route
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/shopkeeper`, { // Protected route
                 headers: {
                     'Authorization': `Bearer ${authToken}`, // Include token in Authorization header
                     'Content-Type': 'application/json', // Or any content type your API expects

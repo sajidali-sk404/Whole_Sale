@@ -99,7 +99,7 @@ const DataList = ({ data, handleEdit, handleDelete, handleStatusEdit, handleItem
                                     <p className="text-sm text-gray-600 flex items-center">
                                         <FaFileInvoice className="mr-1 text-blue-600" />
                                         <a
-                                            href={`${process.env.NEXT_PUBLIC_API_URL}/uploads/${payment.invoice}`}
+                                            href={`${process.env.NEXT_PUBLIC_API_URL}/api/uploads/${payment.invoice}`}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="text-blue-600 hover:text-blue-800 transition-colors duration-200"

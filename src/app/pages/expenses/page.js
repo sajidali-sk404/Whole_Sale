@@ -34,7 +34,7 @@ const Expenses = () => {
         setError(null);
         try {
             const authToken = localStorage.getItem('authToken'); // Retrieve token from localStorage
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/expenses`, { // Protected route
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/expenses`, { // Protected route
                 headers: {
                     'Authorization': `Bearer ${authToken}`, // Include token in Authorization header
                     'Content-Type': 'application/json', // Or any content type your API expects
@@ -69,7 +69,7 @@ const Expenses = () => {
         try {
             if (editExpenseId) {
                 const authToken = localStorage.getItem('authToken'); // Retrieve token from localStorage
-                await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/expenses/${editExpenseId}`, expenseData, { // Protected route
+                await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/api/expenses/${editExpenseId}`, expenseData, { // Protected route
                     headers: {
                         'Authorization': `Bearer ${authToken}`, // Include token in Authorization header
                         'Content-Type': 'application/json', // Or any content type your API expects
@@ -77,7 +77,7 @@ const Expenses = () => {
                 });
             } else {
                 const authToken = localStorage.getItem('authToken'); // Retrieve token from localStorage
-                await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/expenses`, expenseData, { // Protected route
+                await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/expenses`, expenseData, { // Protected route
                     headers: {
                         'Authorization': `Bearer ${authToken}`, // Include token in Authorization header
                         'Content-Type': 'application/json', // Or any content type your API expects
@@ -103,7 +103,7 @@ const Expenses = () => {
         setError(null);
         try {
             const authToken = localStorage.getItem('authToken'); // Retrieve token from localStorage
-            await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/expenses/${id}`, { // Protected route
+            await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/api/expenses/${id}`, { // Protected route
                 headers: {
                     'Authorization': `Bearer ${authToken}`, // Include token in Authorization header
                     'Content-Type': 'application/json', // Or any content type your API expects

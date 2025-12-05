@@ -24,7 +24,7 @@ export const BillsProvider = ({ children }) => {
         try {
             setLoading(true);
             setError(null);
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/bills`, {
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/bills`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json',

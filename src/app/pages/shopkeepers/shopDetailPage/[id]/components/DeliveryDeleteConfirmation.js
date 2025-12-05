@@ -20,7 +20,7 @@ const DeliveryDeleteConfirmation = ({ deliveryId, shopkeeperId, setShowDeleteCon
         setLoading(true);
         try {
             const authToken = localStorage.getItem('authToken'); // Retrieve token from localStorage
-            const response = await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/shopkeeper/${shopkeeperId}/delivery/${deliveryId}`, { // Protected route
+            const response = await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/api/shopkeeper/${shopkeeperId}/delivery/${deliveryId}`, { // Protected route
                 headers: {
                     'Authorization': `Bearer ${authToken}`, // Include token in Authorization header
                     'Content-Type': 'application/json', // Or any content type your API expects

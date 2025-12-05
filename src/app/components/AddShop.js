@@ -53,7 +53,7 @@ const AddShopkeeper = ({ setShowForm, refreshShopkeepers }) => {
     try {
       const authToken = localStorage.getItem('authToken'); // Retrieve token from localStorage
       const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/shopkeeper`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/shopkeeper`,
         formData, { // Protected route
           headers: {
               'Authorization': `Bearer ${authToken}`, // Include token in Authorization header
